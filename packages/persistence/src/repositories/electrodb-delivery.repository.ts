@@ -11,13 +11,9 @@ function mapPersistenceError(error: unknown): PersistenceError {
 export class ElectroDbDeliveryRepository implements DeliveryRepositoryPort {
   constructor(private readonly entities: CheckoutEntities) {}
 
-  async getById(
-    id: string,
-  ): Promise<Result<DeliveryRecord, PersistenceError>> {
+  async getById(id: string): Promise<Result<DeliveryRecord, PersistenceError>> {
     try {
-      const result = await this.entities.deliveries
-        .get({ deliveryId: id })
-        .go();
+      const result = await this.entities.deliveries.get({ deliveryId: id }).go();
       if (!result.data) {
         return err({ type: 'NOT_FOUND', entity: 'delivery', id });
       }
@@ -36,9 +32,7 @@ export class ElectroDbDeliveryRepository implements DeliveryRepositoryPort {
     }
   }
 
-  async put(
-    delivery: DeliveryRecord,
-  ): Promise<Result<DeliveryRecord, PersistenceError>> {
+  async put(delivery: DeliveryRecord): Promise<Result<DeliveryRecord, PersistenceError>> {
     try {
       await this.entities.deliveries
         .put({

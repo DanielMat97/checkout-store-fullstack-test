@@ -13,9 +13,10 @@
 | Persistencia + seed | `persistence-seed/` | **done** | Base #4 prereq; brief seed |
 | APIs 4 dominios | `api-domains/` | **done** | Base #4 (20) |
 | Pasarela sandbox | `payment-gateway/` | **done** | Base #3 pasos 5.1–5.3 |
-| FE live (off mock) | `frontend-live-wiring/` | **ready** | Base #3 completo |
-| Cobertura Jest | `testing-coverage/` | **ready** | Base #5 (30) |
-| Deploy AWS | `cloud-deploy/` | **ready** | Base #6 (20) |
+| FE live (off mock) | `frontend-live-wiring/` | **done** | Base #3 completo |
+| Cobertura Jest | `testing-coverage/` | **done** | Base #5 (30) |
+| Deploy AWS | `cloud-deploy/` | **in_progress** (Actions+Amplify listos; URLs públicas pendientes) | Base #6 (20) |
+| Secrets Vault | `secrets-vault/` | **ready** → implementando | B1 secrecy + cloud-deploy |
 | README entregable | `readme-deliverables/` | **ready** | Base #1 (5) |
 | Seguridad OWASP/HTTPS | `security-hardening/` | **ready** | Bonus #1 (5) |
 | Hexagonal + ROP real | `architecture-hex-rop/` | **done** | Bonus #5–6 (20) |
@@ -32,6 +33,7 @@
 6. frontend-live-wiring
 7. testing-coverage
 8. security-hardening     (headers ya parcial; HTTPS en deploy)
+8b. secrets-vault          (Vault KV + AppRole para CI/local)
 9. cloud-deploy
 10. readme-deliverables
 11. ux-quality-bar        (evidencia Lighthouse/browsers; polish)
@@ -49,7 +51,7 @@
 | 4 | API funcionando | 20 | `api-domains` + `persistence-seed` |
 | 5 | Tests >80% FE+BE | 30 | `testing-coverage` |
 | 6 | Deploy cloud | 20 | `cloud-deploy` |
-| B1 | OWASP/HTTPS | 5 | `security-hardening` |
+| B1 | OWASP/HTTPS | 5 | `security-hardening` + `secrets-vault` |
 | B2 | Responsive multi-browser | 5 | `ux-quality-bar` |
 | B3 | CSS | 10 | `checkout-ui-mock` + `ux-quality-bar` |
 | B4 | Código limpio | 10 | `architecture-hex-rop` + `ux-quality-bar` |

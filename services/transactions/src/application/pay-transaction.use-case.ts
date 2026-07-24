@@ -3,15 +3,9 @@ import { err, ok, type Result } from 'neverthrow';
 import type { TransactionRepositoryPort } from '@app/persistence';
 import type { Transaction } from '../domain/transaction';
 import { assertPending, type DomainError } from '../domain/errors';
-import type {
-  CustomerReaderPort,
-  DeliveryWriterPort,
-} from '../ports/cross-domain.ports';
+import type { CustomerReaderPort, DeliveryWriterPort } from '../ports/cross-domain.ports';
 import type { ProductReaderPort } from '../ports/product-reader.port';
-import type {
-  CardChargeInput,
-  PaymentGatewayPort,
-} from '../ports/payment-gateway.port';
+import type { CardChargeInput, PaymentGatewayPort } from '../ports/payment-gateway.port';
 import {
   CUSTOMER_READER,
   DELIVERY_WRITER,
@@ -93,11 +87,7 @@ export class PayTransactionUseCase {
     const outcome = charge.value.status;
 
     if (outcome === 'APPROVED') {
-      return this.onApproved(
-        loaded.value,
-        input.deliveryId,
-        charge.value.providerRef,
-      );
+      return this.onApproved(loaded.value, input.deliveryId, charge.value.providerRef);
     }
 
     if (outcome === 'DECLINED') {

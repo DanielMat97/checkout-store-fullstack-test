@@ -1,0 +1,41 @@
+# Vault path map & key bundles
+
+Used by seed/export scripts and GitHub Actions.
+
+## Stages
+
+| Stage arg | KV prefix |
+|---|---|
+| `prod` | `checkout/prod` |
+| `dev` | `checkout/dev` |
+| `feature` | `checkout/feature` |
+| any `fb-*` slug | `checkout/feature` (shared feature bundle) |
+
+## Bundles (KV v2 mount `secret`)
+
+### `payment`
+
+| Field | Env |
+|---|---|
+| `api_url` | `PAYMENT_API_URL` |
+| `public_key` | `PAYMENT_PUBLIC_KEY` |
+| `private_key` | `PAYMENT_PRIVATE_KEY` |
+| `integrity_key` | `PAYMENT_INTEGRITY_KEY` |
+| `events_key` | `PAYMENT_EVENTS_KEY` |
+| `currency` | `PAYMENT_CURRENCY` |
+
+### `aws` (optional — CI may still use GH secrets / OIDC)
+
+| Field | Env |
+|---|---|
+| `access_key_id` | `AWS_ACCESS_KEY_ID` |
+| `secret_access_key` | `AWS_SECRET_ACCESS_KEY` |
+
+### `app`
+
+| Field | Env |
+|---|---|
+| `payment_gateway_mode` | `PAYMENT_GATEWAY_MODE` |
+| `cors_origin` | `CORS_ORIGIN` |
+| `base_fee` | `BASE_FEE` |
+| `delivery_fee` | `DELIVERY_FEE` |

@@ -25,6 +25,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Hex + ROP** (`architecture-hex-rop`): ADR 0009 (`neverthrow`); `CreateTransaction` / `PayTransaction` use-cases with port fakes (DECLINED no decrementa stock); thin HTTP controllers; minimal use-cases in products/customers/deliveries; OpenAPI paths updated. Payment still `FakePaymentGateway` until `payment-gateway`.
 - **Payment sandbox adapter** (`payment-gateway`): `SandboxPaymentGateway` (acceptance → tokenize → create tx → poll), integrity SHA-256, env-only keys, Nest wiring (`PAYMENT_GATEWAY_MODE=sandbox|fake`). Docs: `docs/payment-adapter.md`. Zero provider brand in public source.
 - **API domains**: DTOs + global `ValidationPipe` (stable 400 body), `GET /products/:id/stock`, `POST /deliveries`, 201 on creates, OpenAPI 0.3 with schemas/examples, smoke guide `docs/api/smoke.md`, `useDotenv: true` in `serverless.ts`.
+- **FE live wiring**: `apps/web/src/api/*` + `checkoutApi.executePay` (customer → PENDING tx → pay → refresh stock); `cardSession` ephemeral PAN/CVV; catalog/product load from API when `VITE_MOCK_MODE=false`; Status ERROR + Retry.
+- **Testing coverage** (`testing-coverage`): Jest thresholds >80% lines FE+BE; `npm run test:cov` green; figures in README + `docs/coverage.md`. Fixed shared instrumentation (stray `.js` next to `.ts`).
+- **Cloud deploy automation** (`cloud-deploy`): GitHub Actions CI (validate/prettier/lint/audit/test/coverage), selective Lambda deploy on `main`, feature stacks for `fb-*` + Amplify branch job. Runbook: `docs/deploy.md`. Public URLs still pending (scorecard #6 = 0).
 
 ### Changed
 

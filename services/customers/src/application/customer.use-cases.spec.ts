@@ -4,17 +4,12 @@ import type {
   CustomerRepositoryPort,
   PersistenceError,
 } from '@app/persistence';
-import {
-  CreateCustomerUseCase,
-  GetCustomerUseCase,
-} from './customer.use-cases';
+import { CreateCustomerUseCase, GetCustomerUseCase } from './customer.use-cases';
 
 class MemoryCustomers implements CustomerRepositoryPort {
   private readonly items = new Map<string, CustomerRecord>();
 
-  async getById(
-    id: string,
-  ): Promise<Result<CustomerRecord, PersistenceError>> {
+  async getById(id: string): Promise<Result<CustomerRecord, PersistenceError>> {
     const item = this.items.get(id);
     if (!item) {
       return err({ type: 'NOT_FOUND', entity: 'customer', id });
@@ -22,9 +17,7 @@ class MemoryCustomers implements CustomerRepositoryPort {
     return ok({ ...item });
   }
 
-  async put(
-    customer: CustomerRecord,
-  ): Promise<Result<CustomerRecord, PersistenceError>> {
+  async put(customer: CustomerRecord): Promise<Result<CustomerRecord, PersistenceError>> {
     this.items.set(customer.id, { ...customer });
     return ok({ ...customer });
   }
@@ -58,5 +51,34 @@ describe('Customer use-cases (ROP)', () => {
     if (result.isErr()) {
       expect(result.error.type).toBe('VALIDATION');
     }
+  });
+
+  it('maps persistence errors on create and get', async () => {
+    const failing: CustomerRepositoryPort = {
+      getById: async () => err({ type: 'PERSISTENCE_ERROR', message: 'down' }),
+      put: async () => err({ type: 'PERSISTENCE_ERROR', message: 'down' }),
+    };
+    const createFail = new CreateCustomerUseCase(failing);
+    const getFail = new GetCustomerUseCase(failing);
+    expect(
+      (
+        await createFail.execute({
+          fullName: 'Ada',
+          email: 'a@b.co',
+          phone: '300',
+        })
+      )._unsafeUnwrapErr().type,
+    ).toBe('PERSISTENCE_ERROR');
+    expect((await getFail.execute('x'))._unsafeUnwrapErr().type).toBe(
+      'PERSISTENCE_ERROR',
+    );
+
+    const missing: CustomerRepositoryPort = {
+      getById: async () => err({ type: 'NOT_FOUND', entity: 'customer', id: 'x' }),
+      put: async (c) => ok(c),
+    };
+    expect(
+      (await new GetCustomerUseCase(missing).execute('x'))._unsafeUnwrapErr().type,
+    ).toBe('NOT_FOUND');
   });
 });

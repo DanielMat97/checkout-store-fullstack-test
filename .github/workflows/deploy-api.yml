@@ -1,0 +1,158 @@
+name: Deploy API (prod)
+
+# Deploys only changed Lambdas on main/master. Full stack when shared/serverless change.
+# Frontend production is owned by AWS Amplify (configure the Amplify app separately).
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'services/**'
+      - 'packages/**'
+      - 'serverless.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/deploy-api.yml'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'full | functions | auto'
+        required: true
+        default: auto
+        type: choice
+        options: [auto, full, functions]
+      functions:
+        description: 'Comma list when mode=functions (e.g. products,transactions)'
+        required: false
+        default: ''
+
+concurrency:
+  group: deploy-api-prod
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  STAGE: ${{ vars.SERVERLESS_STAGE || 'prod' }}
+  AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+jobs:
+  quality:
+    name: Quality gate
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  detect:
+    name: Detect changed services
+    runs-on: ubuntu-latest
+    needs: quality
+    outputs:
+      mode: ${{ steps.detect.outputs.mode }}
+      functions: ${{ steps.detect.outputs.functions }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - id: detect
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.mode }}" != "auto" ]; then
+            MODE="${{ inputs.mode }}"
+            if [ "$MODE" = "functions" ] && [ -n "${{ inputs.functions }}" ]; then
+              FUNCS='${{ inputs.functions }}'
+              # JSON array from comma list
+              JSON=$(node -e "const a=process.argv[1].split(',').map(s=>s.trim()).filter(Boolean); console.log(JSON.stringify(a))" "$FUNCS")
+            else
+              JSON='["products","customers","deliveries","transactions"]'
+            fi
+          else
+            BEFORE="${{ github.event.before }}"
+# Fix empty before SHA on first push / force-push
+            if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+              BEFORE="HEAD~1"
+            fi
+            RESULT=$(node scripts/ci/detect-changed-services.cjs "$BEFORE" HEAD)
+            echo "detect=$RESULT"
+            MODE=$(echo "$RESULT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).mode))")
+            JSON=$(echo "$RESULT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.stringify(JSON.parse(d).functions)))")
+          fi
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          echo "functions=$JSON" >> "$GITHUB_OUTPUT"
+          echo "Deploy mode=$MODE functions=$JSON"
+
+  deploy:
+    name: Deploy Serverless
+    runs-on: ubuntu-latest
+    needs: detect
+    if: needs.detect.outputs.mode != 'none'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:api
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          # Prefer OIDC when role is configured:
+          # role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+
+      - name: Export payment / CORS env for Serverless
+        env:
+          PAYMENT_API_URL: ${{ secrets.PAYMENT_API_URL }}
+          PAYMENT_PUBLIC_KEY: ${{ secrets.PAYMENT_PUBLIC_KEY }}
+          PAYMENT_PRIVATE_KEY: ${{ secrets.PAYMENT_PRIVATE_KEY }}
+          PAYMENT_INTEGRITY_KEY: ${{ secrets.PAYMENT_INTEGRITY_KEY }}
+          PAYMENT_GATEWAY_MODE: ${{ vars.PAYMENT_GATEWAY_MODE || 'sandbox' }}
+          CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
+        run: |
+          {
+            echo "PAYMENT_API_URL=$PAYMENT_API_URL"
+            echo "PAYMENT_PUBLIC_KEY=$PAYMENT_PUBLIC_KEY"
+            echo "PAYMENT_PRIVATE_KEY=$PAYMENT_PRIVATE_KEY"
+            echo "PAYMENT_INTEGRITY_KEY=$PAYMENT_INTEGRITY_KEY"
+            echo "PAYMENT_GATEWAY_MODE=$PAYMENT_GATEWAY_MODE"
+            echo "CORS_ORIGIN=${CORS_ORIGIN}"
+            echo "DYNAMODB_ENDPOINT="
+          } >> "$GITHUB_ENV"
+
+      - name: Full stack deploy
+        if: needs.detect.outputs.mode == 'full'
+        run: npx serverless deploy --stage "$STAGE" --verbose
+
+      - name: Function-only deploy
+        if: needs.detect.outputs.mode == 'functions'
+        run: |
+          FUNCS=$(echo '${{ needs.detect.outputs.functions }}' | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>JSON.parse(d).forEach(f=>console.log(f)))")
+          for fn in $FUNCS; do
+            echo "Deploying function: $fn"
+            npx serverless deploy function --function "$fn" --stage "$STAGE" --verbose
+          done
+
+      - name: Resolve API URL
+        id: url
+        run: |
+          URL=$(node scripts/ci/print-api-url.cjs "$STAGE")
+          echo "api_url=$URL" >> "$GITHUB_OUTPUT"
+          echo "### API ($STAGE)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- URL: \`$URL\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Mode: \`${{ needs.detect.outputs.mode }}\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Seed catalog (full deploy only)
+        if: needs.detect.outputs.mode == 'full'
+        env:
+          DYNAMODB_TABLE_NAME: checkout-store-${{ env.STAGE }}
+          DYNAMODB_ENDPOINT: ''
+          AWS_REGION: ${{ env.AWS_REGION }}
+        run: |
+          npm run seed || echo "Seed skipped/failed — run manually if table already seeded"

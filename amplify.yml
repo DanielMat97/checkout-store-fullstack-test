@@ -1,0 +1,24 @@
+version: 1
+# Connect this repo in AWS Amplify Console (you own the Amplify app).
+# Production branch: main (or master). Feature branches: fb-*/*
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci
+        - npm run build:shared
+    build:
+      commands:
+        - npm run build -w @app/web
+  artifacts:
+    baseDirectory: apps/web/dist
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+# Set per-branch env in Amplify Console (or via deploy-feature workflow):
+#   VITE_MOCK_MODE=false
+#   VITE_API_BASE_URL=https://xxxx.execute-api.region.amazonaws.com
+#   VITE_BASE_FEE=1500
+#   VITE_DELIVERY_FEE=5000

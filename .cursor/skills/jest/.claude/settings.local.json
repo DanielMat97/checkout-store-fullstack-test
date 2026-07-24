@@ -1,7 +1,5 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(fd .:*)"
-    ]
+    "allow": ["Bash(fd .:*)"]
   }
 }

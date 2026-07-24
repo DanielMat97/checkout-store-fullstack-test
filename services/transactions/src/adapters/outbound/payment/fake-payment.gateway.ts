@@ -15,9 +15,7 @@ export type FakeGatewayMode = 'APPROVED' | 'DECLINED' | 'ERROR';
 export class FakePaymentGateway implements PaymentGatewayPort {
   constructor(private readonly mode: FakeGatewayMode = 'APPROVED') {}
 
-  async charge(
-    input: CardChargeInput,
-  ): Promise<Result<ChargeOutcome, DomainError>> {
+  async charge(input: CardChargeInput): Promise<Result<ChargeOutcome, DomainError>> {
     if (!input.reference || input.amountMinor <= 0) {
       return err({
         type: 'VALIDATION',

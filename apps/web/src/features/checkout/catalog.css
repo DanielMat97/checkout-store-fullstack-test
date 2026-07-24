@@ -163,6 +163,16 @@
   opacity: 0.8;
 }
 
+.nora-catalog__state {
+  margin: var(--nora-space-6) var(--nora-shell-pad-x) 0;
+  font-size: var(--nora-fs-sm);
+  color: var(--nora-ink-muted, #6b6560);
+}
+
+.nora-catalog__state--error {
+  color: var(--nora-danger, #a33b2c);
+}
+
 .nora-catalog__edit {
   width: min(100%, var(--nora-max-store));
   margin: 0 auto;

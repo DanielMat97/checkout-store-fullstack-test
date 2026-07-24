@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Backdrop,
@@ -8,11 +8,15 @@ import {
   FeeList,
   withViewTransition,
 } from '../../design-system';
-import { getProductById } from '../../mocks/catalog';
-import { getMockFees, isMockMode, mockPay } from '../../mocks/checkoutService';
+import { isMockMode } from '../../mocks/checkoutService';
+import { takePendingCard } from './cardSession';
+import { executePay, getFees, loadProduct, type Product } from './checkoutApi';
+import { ApiError } from '../../api/types';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
+  setPaymentError,
   setPaymentStatus,
+  setProductStock,
   setSimulateDecline,
   setStep,
   setStocks,
@@ -28,37 +32,85 @@ export function SummaryPage() {
   const productId = useAppSelector((s) => s.checkout.productId);
   const simulateDecline = useAppSelector((s) => s.checkout.simulateDecline);
   const paymentStatus = useAppSelector((s) => s.checkout.paymentStatus);
-  const product = productId ? getProductById(productId) : undefined;
-  const fees = getMockFees();
+  const [product, setProduct] = useState<Product | null>(null);
 
   useEffect(() => {
-    if (!delivery || !cardMeta || !product) {
+    if (!delivery || !cardMeta) {
       navigate(productId ? `/product/${productId}/checkout` : '/', {
         replace: true,
       });
+      return;
     }
-  }, [delivery, cardMeta, product, productId, navigate]);
+    let cancelled = false;
+    (async () => {
+      if (!productId) {
+        navigate('/', { replace: true });
+        return;
+      }
+      const loaded = await loadProduct(productId);
+      if (cancelled) return;
+      if (!loaded) {
+        navigate('/', { replace: true });
+        return;
+      }
+      setProduct(loaded);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [delivery, cardMeta, productId, navigate]);
 
   if (!delivery || !cardMeta || !product) return null;
 
+  const fees = getFees();
   const total = product.priceMinor + fees.baseFee + fees.deliveryFee;
   const paying = paymentStatus === 'PENDING';
 
   const onPay = async () => {
-    dispatch(setPaymentStatus('PENDING'));
-    withViewTransition(() => navigate('/status'));
-    if (!isMockMode()) {
+    const card = takePendingCard();
+    if (!isMockMode() && !card) {
+      dispatch(setPaymentError('Card details expired. Please re-enter your card.'));
       dispatch(setPaymentStatus('ERROR'));
+      withViewTransition(() => navigate('/status'));
       return;
     }
-    const result = await mockPay({
-      productId: product.id,
-      simulateDecline,
-    });
-    dispatch(setTransactionId(result.transactionId));
-    dispatch(setPaymentStatus(result.status));
-    dispatch(setStocks(result.stocks));
-    dispatch(setStep('status'));
+
+    dispatch(setPaymentError(null));
+    dispatch(setPaymentStatus('PENDING'));
+    withViewTransition(() => navigate('/status'));
+
+    try {
+      const result = await executePay({
+        product,
+        delivery,
+        card: card ?? {
+          number: '4242424242424242',
+          cvc: '123',
+          expMonth: '12',
+          expYear: '30',
+          cardHolder: cardMeta.holderName,
+        },
+        simulateDecline,
+      });
+      dispatch(setTransactionId(result.transactionId));
+      dispatch(setPaymentStatus(result.status));
+      if (result.stocks) {
+        dispatch(setStocks(result.stocks));
+      } else {
+        dispatch(setProductStock({ productId: product.id, stock: result.stock }));
+      }
+      dispatch(setStep('status'));
+    } catch (e) {
+      const message =
+        e instanceof ApiError
+          ? e.message
+          : e instanceof Error
+            ? e.message
+            : 'Payment failed';
+      dispatch(setPaymentError(message));
+      dispatch(setPaymentStatus('ERROR'));
+      dispatch(setStep('status'));
+    }
   };
 
   return (
@@ -79,10 +131,7 @@ export function SummaryPage() {
           <Button fullWidth onClick={onPay} disabled={paying}>
             {paying ? 'Processing…' : 'Pay now'}
           </Button>
-          <Link
-            className="nora-summary__back"
-            to={`/product/${product.id}/checkout`}
-          >
+          <Link className="nora-summary__back" to={`/product/${product.id}/checkout`}>
             Edit details
           </Link>
         </>

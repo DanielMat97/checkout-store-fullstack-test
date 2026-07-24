@@ -5,6 +5,8 @@ module.exports = {
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts',
+    '!src/**/*.spec.ts',
+    '!src/index.ts',
     '!src/seed/run-seed.ts',
     '!src/seed/ensure-table.ts',
   ],

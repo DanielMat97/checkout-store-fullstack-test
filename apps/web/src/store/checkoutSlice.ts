@@ -2,12 +2,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { CardBrand } from '../features/checkout/card';
 import { initialStockMap } from '../mocks/catalog';
 
-export type CheckoutStep =
-  | 'catalog'
-  | 'product'
-  | 'card-delivery'
-  | 'summary'
-  | 'status';
+export type CheckoutStep = 'catalog' | 'product' | 'card-delivery' | 'summary' | 'status';
 
 export interface DeliveryInfo {
   fullName: string;
@@ -32,7 +27,9 @@ export interface CheckoutState {
   cardMeta: CardMeta | null;
   transactionId: string | null;
   paymentStatus: 'idle' | 'PENDING' | 'APPROVED' | 'DECLINED' | 'ERROR';
-  /** Per-product mock stock (synced with mock service on pay). */
+  /** Last pay/network error message (not persisted secrets). */
+  paymentError: string | null;
+  /** Per-product stock (mock service or API refresh). */
   stocks: Record<string, number>;
   simulateDecline: boolean;
 }
@@ -44,6 +41,7 @@ const initialState: CheckoutState = {
   cardMeta: null,
   transactionId: null,
   paymentStatus: 'idle',
+  paymentError: null,
   stocks: initialStockMap(),
   simulateDecline: false,
 };
@@ -72,19 +70,19 @@ const checkoutSlice = createSlice({
     setTransactionId(state, action: PayloadAction<string>) {
       state.transactionId = action.payload;
     },
-    setPaymentStatus(
-      state,
-      action: PayloadAction<CheckoutState['paymentStatus']>,
-    ) {
+    setPaymentStatus(state, action: PayloadAction<CheckoutState['paymentStatus']>) {
       state.paymentStatus = action.payload;
+      if (action.payload !== 'ERROR') {
+        state.paymentError = null;
+      }
+    },
+    setPaymentError(state, action: PayloadAction<string | null>) {
+      state.paymentError = action.payload;
     },
     setStocks(state, action: PayloadAction<Record<string, number>>) {
       state.stocks = action.payload;
     },
-    setProductStock(
-      state,
-      action: PayloadAction<{ productId: string; stock: number }>,
-    ) {
+    setProductStock(state, action: PayloadAction<{ productId: string; stock: number }>) {
       state.stocks[action.payload.productId] = action.payload.stock;
     },
     setSimulateDecline(state, action: PayloadAction<boolean>) {
@@ -96,6 +94,7 @@ const checkoutSlice = createSlice({
       state.cardMeta = null;
       state.transactionId = null;
       state.paymentStatus = 'idle';
+      state.paymentError = null;
       state.simulateDecline = false;
     },
   },
@@ -109,6 +108,7 @@ export const {
   setCardMeta,
   setTransactionId,
   setPaymentStatus,
+  setPaymentError,
   setStocks,
   setProductStock,
   setSimulateDecline,

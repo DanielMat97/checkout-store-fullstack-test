@@ -1,8 +1,4 @@
-export {
-  createDynamoClient,
-  createRawDynamoClient,
-  getTableName,
-} from './client';
+export { createDynamoClient, createRawDynamoClient, getTableName } from './client';
 export { buildCheckoutTableInput } from './table';
 export { createCheckoutEntities } from './entities';
 export { createPersistence } from './create-persistence';

@@ -1,5 +1,5 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useEffect, type MouseEvent } from 'react';
+import { useEffect, useState, type MouseEvent } from 'react';
 import {
   AppShell,
   ShellHeader,
@@ -8,41 +8,53 @@ import {
   StockBadge,
   withViewTransition,
 } from '../../design-system';
-import { getProductById } from '../../mocks/catalog';
 import { isMockMode } from '../../mocks/checkoutService';
+import { loadProduct, type Product } from './checkoutApi';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import {
-  selectProduct,
-  setPaymentStatus,
-  setStep,
-} from '../../store/checkoutSlice';
+import { selectProduct, setPaymentStatus, setStep } from '../../store/checkoutSlice';
 import './product.css';
 
-export function ProductPage({
-  embed = false,
-}: {
-  /** Under checkout embed (legacy): hide dock and mock banner */
-  embed?: boolean;
-}) {
+export function ProductPage({ embed = false }: { embed?: boolean }) {
   const { productId = '' } = useParams();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const product = getProductById(productId);
   const stocks = useAppSelector((s) => s.checkout.stocks);
   const lastStatus = useAppSelector((s) => s.checkout.paymentStatus);
   const selectedId = useAppSelector((s) => s.checkout.productId);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!product) {
-      navigate('/', { replace: true });
-      return;
-    }
-    if (selectedId !== product.id) {
-      dispatch(selectProduct(product.id));
-    }
-  }, [product, selectedId, dispatch, navigate]);
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const loaded = await loadProduct(productId);
+      if (cancelled) return;
+      if (!loaded) {
+        navigate('/', { replace: true });
+        return;
+      }
+      setProduct(loaded);
+      if (selectedId !== loaded.id) {
+        dispatch(selectProduct(loaded.id));
+      }
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [productId, selectedId, dispatch, navigate]);
 
-  if (!product) return null;
+  if (loading || !product) {
+    return (
+      <AppShell layout="store" mockBanner={isMockMode() && !embed}>
+        <ShellHeader home />
+        <main className="nora-product">
+          <p className="nora-product__lede">Loading…</p>
+        </main>
+      </AppShell>
+    );
+  }
 
   const units = stocks[product.id] ?? product.stock;
 

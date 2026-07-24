@@ -34,6 +34,7 @@ import {
 import { ColombiaFlag } from './ColombiaFlag';
 import { getProductById } from '../../mocks/catalog';
 import { isMockMode } from '../../mocks/checkoutService';
+import { setPendingCard, splitExpiry } from './cardSession';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setCardMeta, setDelivery, setStep } from '../../store/checkoutSlice';
 import './checkout-flow.css';
@@ -73,9 +74,9 @@ export function CheckoutPage() {
   const [card, setCard] = useState<CardFormValues>(emptyCard);
   const [delivery, setDeliveryForm] = useState<DeliveryFormValues>(emptyDelivery);
   const [cardErrors, setCardErrors] = useState<FormErrors<CardFormValues>>({});
-  const [deliveryErrors, setDeliveryErrors] = useState<
-    FormErrors<DeliveryFormValues>
-  >({});
+  const [deliveryErrors, setDeliveryErrors] = useState<FormErrors<DeliveryFormValues>>(
+    {},
+  );
   const [touchedEmail, setTouchedEmail] = useState(false);
   const [showCvv, setShowCvv] = useState(false);
 
@@ -133,6 +134,14 @@ export function CheckoutPage() {
         holderName: card.holder.trim(),
       }),
     );
+    const { expMonth, expYear } = splitExpiry(card.expiry);
+    setPendingCard({
+      number: card.number.replace(/\D/g, ''),
+      cvc: card.cvv,
+      expMonth,
+      expYear,
+      cardHolder: card.holder.trim(),
+    });
     dispatch(
       setDelivery({
         ...delivery,
@@ -148,8 +157,7 @@ export function CheckoutPage() {
   };
 
   const emailFieldError =
-    deliveryErrors.email ??
-    (touchedEmail ? emailError(delivery.email) : undefined);
+    deliveryErrors.email ?? (touchedEmail ? emailError(delivery.email) : undefined);
 
   return (
     <AppShell layout="flow" mockBanner={isMockMode()}>
@@ -208,8 +216,7 @@ export function CheckoutPage() {
           >
             {isMockMode() ? (
               <p className="nora-checkout__tip">
-                Test card{' '}
-                <code>4111&nbsp;1111&nbsp;1111&nbsp;1111</code>
+                Test card <code>4111&nbsp;1111&nbsp;1111&nbsp;1111</code>
                 <span className="nora-checkout__tip-meta">
                   Future expiry · CVV 123 · Phone e.g. 300 123 4567
                 </span>
@@ -294,7 +301,12 @@ export function CheckoutPage() {
                         onClick={() => setShowCvv((v) => !v)}
                       >
                         {showCvv ? (
-                          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                          <svg
+                            viewBox="0 0 24 24"
+                            width="20"
+                            height="20"
+                            aria-hidden="true"
+                          >
                             <path
                               fill="currentColor"
                               d="M12 6c-5 0-9.3 3.1-11 7.5 1.7 4.4 6 7.5 11 7.5s9.3-3.1 11-7.5C21.3 9.1 17 6 12 6zm0 12.5A5 5 0 1 1 12 8.5a5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"
@@ -305,7 +317,12 @@ export function CheckoutPage() {
                             />
                           </svg>
                         ) : (
-                          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                          <svg
+                            viewBox="0 0 24 24"
+                            width="20"
+                            height="20"
+                            aria-hidden="true"
+                          >
                             <path
                               fill="currentColor"
                               d="M12 6c-5 0-9.3 3.1-11 7.5C2.7 17.9 7 21 12 21s9.3-3.1 11-7.5C21.3 9.1 17 6 12 6zm0 12.5A5 5 0 1 1 12 8.5a5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"
@@ -422,7 +439,9 @@ export function CheckoutPage() {
                   value={delivery.city}
                   options={BOGOTA_AREA_CITIES}
                   error={deliveryErrors.city}
-                  hint={!deliveryErrors.city ? 'Bogotá localities & nearby cities' : undefined}
+                  hint={
+                    !deliveryErrors.city ? 'Bogotá localities & nearby cities' : undefined
+                  }
                   onChange={(value) => {
                     clearDeliveryError('city');
                     setDeliveryForm((d) => ({

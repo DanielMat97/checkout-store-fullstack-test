@@ -1,6 +1,6 @@
 # Current state
 
-> Last updated: 2026-07-24
+> Last updated: 2026-07-24 (post `cloud-deploy` automation)
 
 ## Score (rúbrica brief — modo evaluador estricto)
 
@@ -8,14 +8,12 @@ Ver **`docs/scorecard.md`**.
 
 | | Estricto |
 |---|---|
-| Base | **29 / 100** |
-| Bonus | **29 / 50** |
-| **Total** | **58 / 150** |
-| Aprueba (≥100 base) | **No — REJECT** |
+| Base | **60 / 100** |
+| Bonus | **30 / 50** |
+| **Total** | **90 / 150** |
+| Aprueba (≥100 base) | **No — REJECT** (#6 deploy URL = 0) |
 
 ## Specs (path to 100%)
-
-Índice canónico: **`specs/INDEX.md`**.
 
 | Feature | Status |
 |---|---|
@@ -24,25 +22,27 @@ Ver **`docs/scorecard.md`**.
 | `architecture-hex-rop` | **done** |
 | `payment-gateway` | **done** |
 | `api-domains` | **done** |
-| `checkout-payment` | ready (BE listo; falta FE) |
-| `frontend-live-wiring` | ready (**next**) |
-| `testing-coverage` | ready |
-| `cloud-deploy` | ready |
-| `readme-deliverables` | ready |
+| `frontend-live-wiring` | **done** |
+| `testing-coverage` | **done** |
+| `cloud-deploy` | **in_progress** (Actions+Amplify; falta URL pública verificada) |
+| `checkout-payment` | ready (cerrar smoke E2E live) |
+| `readme-deliverables` | ready (**next** para URLs/runbook completo) |
 | `security-hardening` | ready |
 | `ux-quality-bar` | ready |
 
-## What exists (código)
+## Deploy automation
 
-| Area | Status |
-|---|---|
-| 4 domain HTTP APIs + DTOs + ValidationPipe | **Done** |
-| OpenAPI + `docs/api/smoke.md` | **Done** |
-| Sandbox/fake payment + Dynamo seed | **Done** |
-| FE live (off mock) | **Not started** |
-| Coverage 80% / deploy / README | **Not started** |
+- CI: `.github/workflows/ci.yml`
+- Prod API (changed services): `.github/workflows/deploy-api.yml`
+- Feature `fb-*`: `.github/workflows/deploy-feature.yml` + Amplify branch
+- Guide: [`docs/deploy.md`](deploy.md) · FE build: `amplify.yml`
+
+## Coverage
+
+`npm run test:cov` verde. Detalle: [`docs/coverage.md`](coverage.md).
 
 ## Next
 
-1. `frontend-live-wiring` — `VITE_MOCK_MODE=false`, client API, Redux live.
-2. Luego coverage → deploy → README.
+1. Configurar secrets/vars GH + Amplify App ID → primer deploy prod → pegar URLs.
+2. `readme-deliverables` + smoke live.
+3. `security-hardening` / `ux-quality-bar`.

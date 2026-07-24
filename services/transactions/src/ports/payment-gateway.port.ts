@@ -19,7 +19,5 @@ export type ChargeOutcome = {
 };
 
 export interface PaymentGatewayPort {
-  charge(
-    input: CardChargeInput,
-  ): Promise<Result<ChargeOutcome, DomainError>>;
+  charge(input: CardChargeInput): Promise<Result<ChargeOutcome, DomainError>>;
 }

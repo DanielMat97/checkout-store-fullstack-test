@@ -1,8 +1,4 @@
-import checkoutReducer, {
-  selectProduct,
-  setStep,
-  setStocks,
-} from './checkoutSlice';
+import checkoutReducer, { selectProduct, setStep, setStocks } from './checkoutSlice';
 import { MOCK_PRODUCTS } from '../mocks/catalog';
 
 describe('checkoutSlice', () => {

@@ -34,18 +34,12 @@ function toRecord(data: {
   };
 }
 
-export class ElectroDbTransactionRepository
-  implements TransactionRepositoryPort
-{
+export class ElectroDbTransactionRepository implements TransactionRepositoryPort {
   constructor(private readonly entities: CheckoutEntities) {}
 
-  async getById(
-    id: string,
-  ): Promise<Result<TransactionRecord, PersistenceError>> {
+  async getById(id: string): Promise<Result<TransactionRecord, PersistenceError>> {
     try {
-      const result = await this.entities.transactions
-        .get({ transactionId: id })
-        .go();
+      const result = await this.entities.transactions.get({ transactionId: id }).go();
       if (!result.data) {
         return err({ type: 'NOT_FOUND', entity: 'transaction', id });
       }
@@ -55,9 +49,7 @@ export class ElectroDbTransactionRepository
     }
   }
 
-  async put(
-    tx: TransactionRecord,
-  ): Promise<Result<TransactionRecord, PersistenceError>> {
+  async put(tx: TransactionRecord): Promise<Result<TransactionRecord, PersistenceError>> {
     try {
       await this.entities.transactions
         .put({

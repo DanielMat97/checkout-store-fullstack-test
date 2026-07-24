@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type KeyboardEvent,
-} from 'react';
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
 import './text-field.css';
 import './suggest-field.css';
 
@@ -116,9 +110,7 @@ export function SuggestField({
           aria-expanded={open && filtered.length > 0}
           aria-controls={listId}
           aria-autocomplete="list"
-          aria-activedescendant={
-            active >= 0 ? `${listId}-opt-${active}` : undefined
-          }
+          aria-activedescendant={active >= 0 ? `${listId}-opt-${active}` : undefined}
           aria-invalid={Boolean(error) || undefined}
           aria-describedby={describedBy}
           name={name ?? `nora-${fieldId}`}

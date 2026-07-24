@@ -21,18 +21,9 @@ function persistence() {
 function createPaymentGateway(): PaymentGatewayPort {
   const mode = (process.env.PAYMENT_GATEWAY_MODE ?? 'sandbox').toLowerCase();
 
-  if (
-    mode === 'fake' ||
-    mode === 'approved' ||
-    mode === 'declined' ||
-    mode === 'error'
-  ) {
+  if (mode === 'fake' || mode === 'approved' || mode === 'declined' || mode === 'error') {
     const fakeMode =
-      mode === 'declined'
-        ? 'DECLINED'
-        : mode === 'error'
-          ? 'ERROR'
-          : 'APPROVED';
+      mode === 'declined' ? 'DECLINED' : mode === 'error' ? 'ERROR' : 'APPROVED';
     return new FakePaymentGateway(fakeMode);
   }
 

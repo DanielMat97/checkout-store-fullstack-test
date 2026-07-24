@@ -1,8 +1,5 @@
 import { Module } from '@nestjs/common';
-import {
-  createPersistence,
-  type CustomerRepositoryPort,
-} from '@app/persistence';
+import { createPersistence, type CustomerRepositoryPort } from '@app/persistence';
 import {
   CreateCustomerUseCase,
   GetCustomerUseCase,

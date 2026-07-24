@@ -1,6 +1,6 @@
 ---
 feature: testing-coverage
-status: ready
+status: done
 owner: fullstack
 rubric: [5]
 ---

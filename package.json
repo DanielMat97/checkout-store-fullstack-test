@@ -10,13 +10,24 @@
     "build": "npm run build -w @app/shared && npm run build -w @app/persistence && npm run build --workspaces --if-present",
     "build:shared": "npm run build -w @app/shared && npm run build -w @app/persistence",
     "build:api": "npm run build:shared && npm run build -w @app/products && npm run build -w @app/customers && npm run build -w @app/deliveries && npm run build -w @app/transactions",
+    "validate": "npm run build:api && npm run build -w @app/web",
+    "format": "prettier --write \"**/*.{ts,tsx,js,cjs,mjs,json,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,cjs,mjs,json,yml,yaml}\"",
+    "lint": "oxlint packages services apps/web/src serverless.ts",
+    "audit": "node scripts/ci/audit-gate.cjs",
+    "audit:raw": "npm audit --audit-level=high --omit=dev",
+    "audit:all": "npm audit --audit-level=high",
     "test": "npm run test --workspaces --if-present",
     "test:cov": "npm run test:cov --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present",
     "dev": "concurrently -n api,web -c green,cyan \"npm:dev:api\" \"npm:dev:web\"",
     "dev:api": "npm run build:api && serverless offline start",
     "dev:web": "npm run dev -w @app/web",
     "deploy:api": "npm run build:api && serverless deploy",
+    "deploy:function": "npm run build:api && serverless deploy function",
+    "remove:api": "serverless remove",
+    "ci:changed": "node scripts/ci/detect-changed-services.cjs",
+    "ci:stage": "node scripts/ci/stage-from-ref.cjs",
+    "ci:api-url": "node scripts/ci/print-api-url.cjs",
     "dynamodb:up": "docker compose up -d dynamodb",
     "ensure-table": "npm run ensure-table -w @app/persistence",
     "seed": "npm run seed -w @app/persistence"
@@ -24,8 +35,17 @@
   "devDependencies": {
     "@serverless/typescript": "^3.38.0",
     "concurrently": "^9.1.2",
+    "oxlint": "^1.71.0",
+    "prettier": "^3.5.3",
     "serverless": "^4.7.0",
     "serverless-offline": "^14.4.0"
+  },
+  "overrides": {
+    "js-yaml": "4.1.1",
+    "path-to-regexp": "0.1.13",
+    "express": {
+      "path-to-regexp": "0.1.13"
+    }
   },
   "engines": {
     "node": ">=20"

@@ -13,7 +13,9 @@ export function FeeList({ lines }: { lines: FeeLine[] }) {
       {lines.map((line) => (
         <li
           key={line.label}
-          className={line.emphasis ? 'nora-fees__item nora-fees__item--total' : 'nora-fees__item'}
+          className={
+            line.emphasis ? 'nora-fees__item nora-fees__item--total' : 'nora-fees__item'
+          }
         >
           <span>{line.label}</span>
           <span>{formatMoney(line.amountMinor)}</span>

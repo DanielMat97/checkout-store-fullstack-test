@@ -1,4 +1,5 @@
 import { InMemoryProductRepository, SEED_PRODUCTS } from '@app/persistence';
+import { err } from 'neverthrow';
 import { GetProductUseCase, ListProductsUseCase } from './product.use-cases';
 
 describe('Product use-cases (ROP)', () => {
@@ -32,5 +33,30 @@ describe('Product use-cases (ROP)', () => {
     if (result.isErr()) {
       expect(result.error.type).toBe('NOT_FOUND');
     }
+  });
+
+  it('maps empty id and persistence failures', async () => {
+    expect((await getProduct.execute(''))._unsafeUnwrapErr().type).toBe('NOT_FOUND');
+
+    const failing = {
+      getById: async () => err({ type: 'PERSISTENCE_ERROR' as const, message: 'down' }),
+      listAll: async () =>
+        err({
+          type: 'INSUFFICIENT_STOCK' as const,
+          productId: 'p',
+          stock: 0,
+          requested: 1,
+        }),
+      put: async () => err({ type: 'PERSISTENCE_ERROR' as const, message: 'x' }),
+      updateStock: async () => err({ type: 'PERSISTENCE_ERROR' as const, message: 'x' }),
+      decrementStock: async () =>
+        err({ type: 'PERSISTENCE_ERROR' as const, message: 'x' }),
+    };
+    const getFail = new GetProductUseCase(failing as never);
+    const listFail = new ListProductsUseCase(failing as never);
+    expect((await getFail.execute('p'))._unsafeUnwrapErr().type).toBe(
+      'PERSISTENCE_ERROR',
+    );
+    expect((await listFail.execute())._unsafeUnwrapErr().type).toBe('PERSISTENCE_ERROR');
   });
 });

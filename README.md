@@ -11,7 +11,7 @@ Mobile-first SPA to purchase a product with card checkout, delivery data, paymen
 | HTTP entry | **Serverless Framework 4** HTTP API (one API Gateway) |
 | Architecture | Hexagonal + Railway Oriented Programming |
 | DB | DynamoDB + ElectroDB |
-| Tests | Jest (>80% FE and BE) |
+| Tests | Jest (>80% FE and BE) — see [Coverage](#coverage) |
 
 ## Monorepo
 
@@ -43,11 +43,34 @@ Test card: `4111 1111 1111 1111`, future `MM/YY`, CVV `123`. Toggle “Simulate 
 
 Design system: [`docs/design-system.md`](docs/design-system.md) · Spec: [`specs/checkout-ui-mock/spec.md`](specs/checkout-ui-mock/spec.md)
 
-Deploy API: `npm run deploy:api`
+Deploy API: `npm run deploy:api` · Guide: [`docs/deploy.md`](docs/deploy.md)
+
+### GitHub Actions
+
+| Workflow | When | What |
+|---|---|---|
+| `CI` | PR / `main` | validate → prettier → lint → audit → test → coverage |
+| `Deploy API (prod)` | API changes on `main` | Deploys **only changed** Lambdas (or full stack) |
+| `Deploy feature (fb-*)` | branch/tag `fb-*` | Isolated API stack + Amplify feature branch |
+
+Frontend production hosting: **AWS Amplify** (connect the repo; use root `amplify.yml`).
+
+## Coverage
+
+Enforced per workspace at **>80% lines**. Snapshot **2026-07-24** (`npm run test:cov`):
+
+| Area | Workspace | Lines |
+|---|---|---:|
+| Frontend | `@app/web` | **99.65%** |
+| Backend | `@app/products` / `customers` / `deliveries` / `transactions` | **84.97–100%** |
+| Shared | `@app/shared` / `@app/persistence` | **96.9–97.5%** |
+
+Full table and caveats: [`docs/coverage.md`](docs/coverage.md).
 
 ## Docs
 
 - Agent workflow: `AGENTS.md`
 - Current status: `docs/current-state.md` (keep in sync while building)
+- Deploy runbook: `docs/deploy.md`
 - Changelog: `CHANGELOG.md` (update every meaningful change)
 - OpenAPI: `docs/api/openapi.json` (Apidog)

@@ -105,6 +105,13 @@
   }
 }
 
+.nora-status__actions {
+  display: grid;
+  gap: var(--nora-space-3);
+  width: min(100%, 20rem);
+  margin-top: var(--nora-space-2);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .nora-status,
   .nora-status__icon,

@@ -19,9 +19,7 @@ export function totalOf(money: MoneyInput): number {
   return money.productAmount + money.baseFee + money.deliveryFee;
 }
 
-export function assertPending(
-  tx: Transaction,
-): DomainError | null {
+export function assertPending(tx: Transaction): DomainError | null {
   if (tx.status !== 'PENDING') {
     return {
       type: 'INVALID_STATE',

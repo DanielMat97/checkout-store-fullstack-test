@@ -87,11 +87,7 @@ export const COLOMBIA_DEPARTMENTS: string[] = [
   'Vichada',
 ];
 
-export function filterSuggestions(
-  options: string[],
-  query: string,
-  limit = 8,
-): string[] {
+export function filterSuggestions(options: string[], query: string, limit = 8): string[] {
   const q = query.trim().toLocaleLowerCase('es-CO');
   if (!q) return options.slice(0, limit);
   const starts: string[] = [];

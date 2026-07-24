@@ -27,7 +27,9 @@ export function TextField({
   return (
     <label className={`nora-field ${className}`.trim()} htmlFor={fieldId}>
       <span className="nora-field__label">{label}</span>
-      <span className={`nora-field__control${error ? ' nora-field__control--error' : ''}`}>
+      <span
+        className={`nora-field__control${error ? ' nora-field__control--error' : ''}`}
+      >
         {leading ? <span className="nora-field__leading">{leading}</span> : null}
         <input
           id={fieldId}

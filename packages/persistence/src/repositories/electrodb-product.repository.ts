@@ -33,9 +33,7 @@ function toRecord(item: {
 export class ElectroDbProductRepository implements ProductRepositoryPort {
   constructor(private readonly entities: CheckoutEntities) {}
 
-  async getById(
-    id: string,
-  ): Promise<Result<ProductRecord, PersistenceError>> {
+  async getById(id: string): Promise<Result<ProductRecord, PersistenceError>> {
     try {
       const result = await this.entities.products.get({ productId: id }).go();
       if (!result.data) {
@@ -56,9 +54,7 @@ export class ElectroDbProductRepository implements ProductRepositoryPort {
     }
   }
 
-  async put(
-    product: ProductRecord,
-  ): Promise<Result<ProductRecord, PersistenceError>> {
+  async put(product: ProductRecord): Promise<Result<ProductRecord, PersistenceError>> {
     try {
       const result = await this.entities.products
         .put({

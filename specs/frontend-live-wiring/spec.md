@@ -1,6 +1,6 @@
 ---
 feature: frontend-live-wiring
-status: ready
+status: done
 owner: frontend
 rubric: [3]
 ---

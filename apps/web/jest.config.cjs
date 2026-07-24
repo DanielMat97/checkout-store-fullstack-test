@@ -5,5 +5,28 @@ module.exports = {
   moduleNameMapper: {
     '\\.(css|scss)$': 'identity-obj-proxy',
   },
-  collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/main.tsx', '!src/vite-env.d.ts'],
+  transform: {
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        tsconfig: {
+          jsx: 'react-jsx',
+          esModuleInterop: true,
+        },
+      },
+    ],
+  },
+  collectCoverageFrom: [
+    'src/api/**/*.ts',
+    'src/features/checkout/**/*.ts',
+    'src/mocks/**/*.ts',
+    'src/store/checkoutSlice.ts',
+    'src/design-system/format.ts',
+    'src/design-system/withViewTransition.ts',
+    'src/publicEnv.ts',
+    '!src/**/*.spec.ts',
+  ],
+  coverageThreshold: {
+    global: { branches: 70, functions: 80, lines: 80, statements: 80 },
+  },
 };

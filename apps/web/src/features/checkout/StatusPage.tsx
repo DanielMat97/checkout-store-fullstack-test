@@ -10,21 +10,28 @@ export function StatusPage() {
   const status = useAppSelector((s) => s.checkout.paymentStatus);
   const transactionId = useAppSelector((s) => s.checkout.transactionId);
   const productId = useAppSelector((s) => s.checkout.productId);
+  const paymentError = useAppSelector((s) => s.checkout.paymentError);
 
   const approved = status === 'APPROVED';
   const pending = status === 'PENDING';
+  const errored = status === 'ERROR';
 
   const title = pending
     ? 'Confirming'
     : approved
       ? 'Approved'
-      : 'Declined';
+      : errored
+        ? 'Something went wrong'
+        : 'Declined';
 
   const body = pending
     ? 'A quiet moment while we speak with the payment provider.'
     : approved
       ? 'Your order is reserved. Delivery details are ready for fulfillment.'
-      : 'No charge was taken and stock stays as it was. You can try another card.';
+      : errored
+        ? (paymentError ??
+          'We could not reach the payment service. Check your connection and try again.')
+        : 'No charge was taken and stock stays as it was. You can try another card.';
 
   const onContinue = () => {
     const target = productId ? `/product/${productId}` : '/';
@@ -33,6 +40,12 @@ export function StatusPage() {
     } else {
       dispatch(setStep('product'));
     }
+    withViewTransition(() => navigate(target));
+  };
+
+  const onRetry = () => {
+    dispatch(resetCheckout());
+    const target = productId ? `/product/${productId}/checkout` : '/';
     withViewTransition(() => navigate(target));
   };
 
@@ -46,13 +59,22 @@ export function StatusPage() {
         </div>
         <h1>{title}</h1>
         <p>{body}</p>
-        {transactionId ? (
-          <p className="nora-status__id">Ref {transactionId}</p>
-        ) : null}
+        {transactionId ? <p className="nora-status__id">Ref {transactionId}</p> : null}
         {!pending ? (
-          <Button fullWidth onClick={onContinue}>
-            {approved ? 'Back to product' : 'Try again'}
-          </Button>
+          <div className="nora-status__actions">
+            {errored ? (
+              <Button fullWidth onClick={onRetry}>
+                Retry
+              </Button>
+            ) : null}
+            <Button
+              fullWidth
+              onClick={onContinue}
+              variant={errored ? 'ghost' : undefined}
+            >
+              {approved ? 'Back to product' : errored ? 'Back' : 'Try again'}
+            </Button>
+          </div>
         ) : null}
       </main>
     </AppShell>

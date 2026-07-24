@@ -23,24 +23,16 @@ export interface ProductRepositoryPort {
 
 export interface CustomerRepositoryPort {
   getById(id: string): Promise<Result<CustomerRecord, PersistenceError>>;
-  put(
-    customer: CustomerRecord,
-  ): Promise<Result<CustomerRecord, PersistenceError>>;
+  put(customer: CustomerRecord): Promise<Result<CustomerRecord, PersistenceError>>;
 }
 
 export interface DeliveryRepositoryPort {
   getById(id: string): Promise<Result<DeliveryRecord, PersistenceError>>;
-  put(
-    delivery: DeliveryRecord,
-  ): Promise<Result<DeliveryRecord, PersistenceError>>;
+  put(delivery: DeliveryRecord): Promise<Result<DeliveryRecord, PersistenceError>>;
 }
 
 export interface TransactionRepositoryPort {
   getById(id: string): Promise<Result<TransactionRecord, PersistenceError>>;
-  put(
-    tx: TransactionRecord,
-  ): Promise<Result<TransactionRecord, PersistenceError>>;
-  update(
-    tx: TransactionRecord,
-  ): Promise<Result<TransactionRecord, PersistenceError>>;
+  put(tx: TransactionRecord): Promise<Result<TransactionRecord, PersistenceError>>;
+  update(tx: TransactionRecord): Promise<Result<TransactionRecord, PersistenceError>>;
 }

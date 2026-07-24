@@ -54,9 +54,7 @@ describe('ProductsController (thin)', () => {
 
   it('maps not found', async () => {
     const getProduct = {
-      execute: jest
-        .fn()
-        .mockResolvedValue(err({ type: 'NOT_FOUND', id: 'x' })),
+      execute: jest.fn().mockResolvedValue(err({ type: 'NOT_FOUND', id: 'x' })),
     };
     const module = await Test.createTestingModule({
       controllers: [ProductsController],
@@ -69,6 +67,28 @@ describe('ProductsController (thin)', () => {
     const controller = module.get(ProductsController);
     await expect(controller.get('x')).rejects.toMatchObject({
       status: 404,
+    });
+    await expect(controller.stock('x')).rejects.toMatchObject({
+      status: 404,
+    });
+  });
+
+  it('maps list persistence failure', async () => {
+    const listProducts = {
+      execute: jest
+        .fn()
+        .mockResolvedValue(err({ type: 'PERSISTENCE_ERROR', message: 'down' })),
+    };
+    const module = await Test.createTestingModule({
+      controllers: [ProductsController],
+      providers: [
+        { provide: ListProductsUseCase, useValue: listProducts },
+        { provide: GetProductUseCase, useValue: { execute: jest.fn() } },
+      ],
+    }).compile();
+
+    await expect(module.get(ProductsController).list()).rejects.toMatchObject({
+      status: 500,
     });
   });
 });

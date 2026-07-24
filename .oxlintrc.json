@@ -1,0 +1,27 @@
+{
+  "$schema": "https://www.schemastore.org/oxlintrc.json",
+  "categories": {
+    "correctness": "warn",
+    "suspicious": "warn"
+  },
+  "rules": {
+    "eslint/no-underscore-dangle": [
+      "warn",
+      {
+        "allow": ["_unsafeUnwrap", "_unsafeUnwrapErr"]
+      }
+    ],
+    "typescript/no-extraneous-class": [
+      "warn",
+      {
+        "allowWithDecorator": true
+      }
+    ]
+  },
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/coverage/**",
+    "**/.serverless/**",
+    "**/node_modules/**"
+  ]
+}

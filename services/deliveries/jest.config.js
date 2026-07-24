@@ -1,4 +1,4 @@
-module.exports = {
+const serviceCoverage = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
@@ -8,5 +8,19 @@ module.exports = {
     '^@app/persistence$': '<rootDir>/../../packages/persistence/dist',
     '^@app/persistence/(.*)$': '<rootDir>/../../packages/persistence/dist/$1',
   },
-  collectCoverageFrom: ['src/**/*.ts', '!src/main.ts', '!src/lambda.ts', '!src/**/*.module.ts'],
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/main.ts',
+    '!src/lambda.ts',
+    '!src/**/*.module.ts',
+    '!src/**/*.spec.ts',
+    '!src/**/dto.ts',
+    '!src/domain/**/*.ts',
+    '!src/ports/**/*.ts',
+  ],
+  coverageThreshold: {
+    global: { branches: 70, functions: 80, lines: 80, statements: 80 },
+  },
 };
+
+module.exports = serviceCoverage;

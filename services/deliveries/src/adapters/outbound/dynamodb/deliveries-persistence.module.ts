@@ -1,8 +1,5 @@
 import { Module } from '@nestjs/common';
-import {
-  createPersistence,
-  type DeliveryRepositoryPort,
-} from '@app/persistence';
+import { createPersistence, type DeliveryRepositoryPort } from '@app/persistence';
 import {
   CreateDeliveryUseCase,
   GetDeliveryUseCase,

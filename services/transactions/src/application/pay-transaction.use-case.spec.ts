@@ -87,9 +87,7 @@ describe('PayTransactionUseCase', () => {
       expect(result.value.paymentStatus).toBe('APPROVED');
       expect(result.value.transaction.status).toBe('APPROVED');
     }
-    expect(products.decrementCalls).toEqual([
-      { id: 'prod_aura_quiet', qty: 1 },
-    ]);
+    expect(products.decrementCalls).toEqual([{ id: 'prod_aura_quiet', qty: 1 }]);
     const stock = await products.getById('prod_aura_quiet');
     expect(stock._unsafeUnwrap().stock).toBe(4);
     const delivery = await deliveries.getById(pending.deliveryId);

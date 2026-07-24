@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  HttpException,
-  NotFoundException,
-  Param,
-} from '@nestjs/common';
+import { Controller, Get, HttpException, NotFoundException, Param } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   GetProductUseCase,

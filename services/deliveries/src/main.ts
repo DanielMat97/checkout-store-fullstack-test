@@ -17,7 +17,9 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Deliveries API')
-    .setDescription('Checkout store — deliveries microservice (via API Gateway /deliveries)')
+    .setDescription(
+      'Checkout store — deliveries microservice (via API Gateway /deliveries)',
+    )
     .setVersion('0.1.0')
     .addServer('/', 'API Gateway / local service')
     .build();

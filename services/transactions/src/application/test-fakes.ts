@@ -11,14 +11,10 @@ import type {
   TransactionRepositoryPort,
 } from '@app/persistence';
 
-export class InMemoryTransactionRepository
-  implements TransactionRepositoryPort
-{
+export class InMemoryTransactionRepository implements TransactionRepositoryPort {
   private readonly items = new Map<string, TransactionRecord>();
 
-  async getById(
-    id: string,
-  ): Promise<Result<TransactionRecord, PersistenceError>> {
+  async getById(id: string): Promise<Result<TransactionRecord, PersistenceError>> {
     const item = this.items.get(id);
     if (!item) {
       return err({ type: 'NOT_FOUND', entity: 'transaction', id });
@@ -26,9 +22,7 @@ export class InMemoryTransactionRepository
     return ok({ ...item });
   }
 
-  async put(
-    tx: TransactionRecord,
-  ): Promise<Result<TransactionRecord, PersistenceError>> {
+  async put(tx: TransactionRecord): Promise<Result<TransactionRecord, PersistenceError>> {
     this.items.set(tx.id, { ...tx });
     return ok({ ...tx });
   }
@@ -54,9 +48,7 @@ export class InMemoryProductReader implements ProductRepositoryPort {
     }
   }
 
-  async getById(
-    id: string,
-  ): Promise<Result<ProductRecord, PersistenceError>> {
+  async getById(id: string): Promise<Result<ProductRecord, PersistenceError>> {
     const item = this.items.get(id);
     if (!item) {
       return err({ type: 'NOT_FOUND', entity: 'product', id });
@@ -68,9 +60,7 @@ export class InMemoryProductReader implements ProductRepositoryPort {
     return ok([...this.items.values()].map((p) => ({ ...p })));
   }
 
-  async put(
-    product: ProductRecord,
-  ): Promise<Result<ProductRecord, PersistenceError>> {
+  async put(product: ProductRecord): Promise<Result<ProductRecord, PersistenceError>> {
     this.items.set(product.id, { ...product });
     return ok({ ...product });
   }
@@ -118,9 +108,7 @@ export class InMemoryCustomerReader implements CustomerRepositoryPort {
     }
   }
 
-  async getById(
-    id: string,
-  ): Promise<Result<CustomerRecord, PersistenceError>> {
+  async getById(id: string): Promise<Result<CustomerRecord, PersistenceError>> {
     const item = this.items.get(id);
     if (!item) {
       return err({ type: 'NOT_FOUND', entity: 'customer', id });
@@ -128,9 +116,7 @@ export class InMemoryCustomerReader implements CustomerRepositoryPort {
     return ok({ ...item });
   }
 
-  async put(
-    customer: CustomerRecord,
-  ): Promise<Result<CustomerRecord, PersistenceError>> {
+  async put(customer: CustomerRecord): Promise<Result<CustomerRecord, PersistenceError>> {
     this.items.set(customer.id, { ...customer });
     return ok({ ...customer });
   }
@@ -139,9 +125,7 @@ export class InMemoryCustomerReader implements CustomerRepositoryPort {
 export class InMemoryDeliveryWriter implements DeliveryRepositoryPort {
   private readonly items = new Map<string, DeliveryRecord>();
 
-  async getById(
-    id: string,
-  ): Promise<Result<DeliveryRecord, PersistenceError>> {
+  async getById(id: string): Promise<Result<DeliveryRecord, PersistenceError>> {
     const item = this.items.get(id);
     if (!item) {
       return err({ type: 'NOT_FOUND', entity: 'delivery', id });
@@ -149,9 +133,7 @@ export class InMemoryDeliveryWriter implements DeliveryRepositoryPort {
     return ok({ ...item });
   }
 
-  async put(
-    delivery: DeliveryRecord,
-  ): Promise<Result<DeliveryRecord, PersistenceError>> {
+  async put(delivery: DeliveryRecord): Promise<Result<DeliveryRecord, PersistenceError>> {
     this.items.set(delivery.id, { ...delivery });
     return ok({ ...delivery });
   }

@@ -1,7 +1,7 @@
 # Scorecard — evaluación estricta (hiring bar)
 
 > Fuente rúbrica: `docs/fullstack-test.md` (100 base + 50 bonus).  
-> Última evaluación: **2026-07-24** (post `api-domains`)  
+> Última evaluación: **2026-07-24** (post cloud-deploy automation; **sin URL pública aún**)  
 > Modo: **evaluador técnico de la empresa contratante** (no autoelogio del candidato).
 
 ---
@@ -33,13 +33,13 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 ### Checklist del evaluador (antes de publicar números)
 
-- [ ] Corrí o verifiqué el flujo feliz local.
-- [ ] Busqué PAN/CVV en persistencia / logs.
-- [ ] Confirmé dominios API reales (no solo `/health`).
-- [ ] Vi coverage report o dije explícitamente que no existe.
-- [ ] Vi URL de deploy o dije que no existe.
-- [ ] Releí la rúbrica base y bonus sin inventar criterios nuevos.
-- [ ] Apliqué las 4 lentes (Arquitecto / TL / PO / Security) en el veredicto.
+- [x] Corrí o verifiqué el flujo feliz local (tests; smoke live API no re-ejecutado en este corte).
+- [x] Busqué PAN/CVV en persistencia / logs.
+- [x] Confirmé dominios API reales (no solo `/health`).
+- [x] Vi coverage report (`npm run test:cov` + `docs/coverage.md`).
+- [ ] Vi URL de deploy o dije que no existe. → **no existe**.
+- [x] Releí la rúbrica base y bonus sin inventar criterios nuevos.
+- [x] Apliqué las 4 lentes (Arquitecto / TL / PO / Security) en el veredicto.
 
 ---
 
@@ -47,17 +47,17 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 | Lente | Veredicto (1 línea) |
 |---|---|
-| Arquitecto | 4 dominios HTTP + OpenAPI + ValidationPipe. **FE aún mock**. |
-| Líder técnico | Contratos listos; falta `.env` root + coverage/deploy/README. |
-| Product Owner | API puede completar 5.x; **UI no consume API**. |
-| Security | Headers + validation; pay aún manda tarjeta al BE. |
-| Hiring bar | **Aún no.** Backend usable; no aprueba base. |
+| Arquitecto | Pipeline deploy listo; evidencia runtime pública aún ausente. |
+| Líder técnico | CI gates + selective/FB deploy; #6 sigue 0 sin URL. |
+| Product Owner | Journey cableable; deploy no verificado en internet. |
+| Security | Secrets vía GH; OK diseño. |
+| Hiring bar | **Aún no.** Coverage sí; cloud URL no. |
 
 | | Puntos (modo estricto) |
 |---|---|
-| **Base** | **29 / 100** |
-| **Bonus** | **29 / 50** |
-| **Total** | **58 / 150** |
+| **Base** | **60 / 100** |
+| **Bonus** | **30 / 50** |
+| **Total** | **90 / 150** |
 | **¿Aprueba (≥100 base)?** | **No** |
 
 ---
@@ -66,12 +66,12 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 | Paso brief | Evidencia | Nota del panel | Score parcial |
 |---|---|---|---|
-| 1–4 UI + fees | Mock NORA Soft | OK. | ✅ |
-| 5.1–5.3 BE | Create/Pay + sandbox + APIs | BE listo; FE no. | 🟡 |
-| 4 dominios API | OpenAPI 0.3 + DTOs + stock | Cumple contrato; smoke doc existe. | ✅ |
-| Seed | `npm run seed` | OK. | ✅ |
-| Jest >80% + README | No | **Fallo duro.** | ❌ |
-| Deploy cloud | No | **Fallo duro.** | ❌ |
+| 1–4 UI + fees | NORA Soft | OK. | ✅ |
+| 5.1–5.3 | BE + FE live path | Código listo; smoke live no ejecutado aquí. | 🟡 |
+| 4 dominios API | OpenAPI + DTOs | OK. | ✅ |
+| Seed | seed script | OK. | ✅ |
+| Jest >80% + README | `test:cov` + `docs/coverage.md` + README | Cumple métrica lines; −por exclusiones/branches tx. | ✅ |
+| Deploy | Pipeline listo; **sin URL pública** | **Fallo duro (#6=0).** | ❌ |
 
 ---
 
@@ -79,15 +79,15 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 | # | Criterio | Max | **Strict** | Justificación del panel |
 |---|---|---|---|---|
-| 1 | README completado | 5 | **1** | Sin entregable completo. |
-| 2 | Imágenes / sin desborde | 5 | **4** | Sin cambio. |
-| 3 | Onboarding pago completo | 20 | **12** | BE completo; FE mock. |
-| 4 | API funcionando | 20 | **12** | 4 dominios + OpenAPI + validation + stock. −8: smoke live no verificado en corte / sin deploy. |
-| 5 | Unit tests >80% FE y BE | 30 | **0** | Sin umbral documentado. |
-| 6 | Deploy cloud | 20 | **0** | Sin URL. |
-| | **Subtotal base** | **100** | **29** | |
+| 1 | README | 5 | **2** | Coverage section added; still incomplete deliverable (URLs/runbook). |
+| 2 | Imágenes | 5 | **4** | Sin cambio. |
+| 3 | Onboarding pago | 20 | **15** | Live wiring en código. −5: default mock + sin evidencia E2E live. |
+| 4 | API funcionando | 20 | **12** | Sin cambio material. |
+| 5 | Tests >80% | 30 | **27** | FE/BE lines >80, `npm run test:cov` verde, cifras publicadas. −3: branches tx 45% threshold; sandbox gateway fuera del collectCoverageFrom global. |
+| 6 | Deploy | 20 | **0** | Actions+Amplify en repo; panel exige URL pública verificable → 0. |
+| | **Subtotal base** | **100** | **60** | |
 
-**Base oficial del corte: 29 / 100.**
+**Base oficial del corte: 60 / 100.**
 
 ---
 
@@ -95,35 +95,33 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 | # | Criterio | Max | **Strict** | Justificación del panel |
 |---|---|---|---|---|
-| 1 | OWASP + HTTPS + headers | 5 | **1** | Headers sí; HTTPS público no. |
-| 2 | Responsive multi-browser | 5 | **2** | Sin matriz. |
-| 3 | Habilidades CSS | 10 | **6** | Sin cambio. |
-| 4 | Código limpio | 10 | **5** | DTOs + thin controllers. |
-| 5 | Hexagonal | 10 | **8** | Sin cambio material. |
-| 6 | ROP | 10 | **7** | Sin cambio material. |
-| | **Subtotal bonus** | **50** | **29** | |
+| 1 | OWASP/HTTPS | 5 | **1** | Sin HTTPS público. |
+| 2 | Responsive | 5 | **2** | Sin matriz. |
+| 3 | CSS | 10 | **6** | Sin cambio. |
+| 4 | Clean code | 10 | **6** | Suites FE/BE más serias; publicEnv testable. |
+| 5 | Hexagonal | 10 | **8** | Sin cambio. |
+| 6 | ROP | 10 | **7** | Sin cambio. |
+| | **Subtotal bonus** | **50** | **30** | |
 
 ---
 
 ## 5. Total estricto
 
 ```
-Base   29 / 100
-Bonus  29 /  50
+Base   60 / 100
+Bonus  30 /  50
 ───────────────
-Total  58 / 150
+Total  90 / 150
 ```
 
-**Resultado hiring:** **REJECT / NEEDS MAJOR WORK**.
+**Resultado hiring:** **REJECT** (falta deploy + README entregable + smoke live).
 
 ### Gap mínimo a 100
 
 | Prioridad | Trabajo | Pts base ≈ |
 |---|---|---|
-| P0 | FE live + onboarding E2E | +6–8 (#3) |
-| P0 | Smoke live + polish API | +4–6 (#4) |
-| P0 | Jest >80% + README | +28–30 |
-| P0 | Deploy + README URLs | +20 +4 |
+| P0 | Deploy + README URLs | +20 +3 |
+| P0 | Smoke live documentado / demo off mock | +3–5 (#3/#4) |
 
 ---
 
@@ -131,10 +129,8 @@ Total  58 / 150
 
 | Hito | Base ≈ | Bonus ≈ | Total ≈ | Hiring |
 |---|---|---|---|---|
-| Hoy | 29 | 29 | **58** | Reject |
-| + FE live | 42 | 30 | **72** | Reject |
-| + tests >80% | 72 | 32 | **104** | Condicional pass base |
-| + deploy + README + OWASP | 98–100 | 40 | **138–140** | Strong pass posible |
+| Hoy | 60 | 30 | **90** | Reject |
+| + deploy + README | 95–100 | 36 | **131–136** | Pass posible |
 
 ---
 

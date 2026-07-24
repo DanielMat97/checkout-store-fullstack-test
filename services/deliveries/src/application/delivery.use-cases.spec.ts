@@ -4,17 +4,12 @@ import type {
   DeliveryRepositoryPort,
   PersistenceError,
 } from '@app/persistence';
-import {
-  CreateDeliveryUseCase,
-  GetDeliveryUseCase,
-} from './delivery.use-cases';
+import { CreateDeliveryUseCase, GetDeliveryUseCase } from './delivery.use-cases';
 
 class MemoryDeliveries implements DeliveryRepositoryPort {
   private readonly items = new Map<string, DeliveryRecord>();
 
-  async getById(
-    id: string,
-  ): Promise<Result<DeliveryRecord, PersistenceError>> {
+  async getById(id: string): Promise<Result<DeliveryRecord, PersistenceError>> {
     const item = this.items.get(id);
     if (!item) {
       return err({ type: 'NOT_FOUND', entity: 'delivery', id });
@@ -22,9 +17,7 @@ class MemoryDeliveries implements DeliveryRepositoryPort {
     return ok({ ...item });
   }
 
-  async put(
-    delivery: DeliveryRecord,
-  ): Promise<Result<DeliveryRecord, PersistenceError>> {
+  async put(delivery: DeliveryRecord): Promise<Result<DeliveryRecord, PersistenceError>> {
     this.items.set(delivery.id, { ...delivery });
     return ok({ ...delivery });
   }
@@ -57,5 +50,40 @@ describe('Delivery use-cases (ROP)', () => {
     if (result.isErr()) {
       expect(result.error.type).toBe('NOT_FOUND');
     }
+  });
+
+  it('validates payload and maps persistence errors', async () => {
+    expect(
+      (
+        await create.execute({
+          transactionId: '',
+          customerId: '',
+          address: '',
+          city: '',
+          region: '',
+          feeMinor: -1,
+        })
+      )._unsafeUnwrapErr().type,
+    ).toBe('VALIDATION');
+
+    const failing: DeliveryRepositoryPort = {
+      getById: async () => err({ type: 'PERSISTENCE_ERROR', message: 'down' }),
+      put: async () => err({ type: 'PERSISTENCE_ERROR', message: 'down' }),
+    };
+    expect(
+      (
+        await new CreateDeliveryUseCase(failing).execute({
+          transactionId: 't',
+          customerId: 'c',
+          address: 'Calle 1',
+          city: 'Bogotá',
+          region: 'Cund',
+          feeMinor: 1,
+        })
+      )._unsafeUnwrapErr().type,
+    ).toBe('PERSISTENCE_ERROR');
+    expect(
+      (await new GetDeliveryUseCase(failing).execute('x'))._unsafeUnwrapErr().type,
+    ).toBe('PERSISTENCE_ERROR');
   });
 });

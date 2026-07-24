@@ -6,10 +6,7 @@ import { createTransactionEntity } from './transaction';
 
 export type CheckoutEntities = ReturnType<typeof createCheckoutEntities>;
 
-export function createCheckoutEntities(
-  client: DynamoDBDocumentClient,
-  table: string,
-) {
+export function createCheckoutEntities(client: DynamoDBDocumentClient, table: string) {
   const options = { client, table };
   return {
     products: createProductEntity(options),

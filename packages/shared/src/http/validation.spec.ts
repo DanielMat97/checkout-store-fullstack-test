@@ -1,37 +1,51 @@
-import { BadRequestException, ValidationPipe } from '@nestjs/common';
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { BadRequestException, type INestApplication } from '@nestjs/common';
+import { applyGlobalValidation } from './validation';
 
-class SampleDto {
-  @IsString()
-  @MinLength(2)
-  name!: string;
+describe('applyGlobalValidation', () => {
+  it('registers a ValidationPipe that maps errors to VALIDATION shape', () => {
+    const pipes: unknown[] = [];
+    const app = {
+      useGlobalPipes: (...args: unknown[]) => {
+        pipes.push(...args);
+      },
+    } as unknown as INestApplication;
 
-  @IsEmail()
-  email!: string;
-}
+    applyGlobalValidation(app);
+    expect(pipes).toHaveLength(1);
 
-describe('ValidationPipe exceptionFactory shape', () => {
-  it('rejects invalid body with BadRequestException', async () => {
-    const pipe = new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-      exceptionFactory: (errors) =>
-        new BadRequestException({
-          error: 'VALIDATION',
-          message: 'Request validation failed',
-          details: errors.map((e) => ({
-            field: e.property,
-            constraints: Object.values(e.constraints ?? {}),
-          })),
-        }),
-    });
+    const pipe = pipes[0] as {
+      exceptionFactory: (errors: unknown[]) => BadRequestException;
+    };
 
-    await expect(
-      pipe.transform(
-        { name: 'A', email: 'bad' },
-        { type: 'body', metatype: SampleDto },
-      ),
-    ).rejects.toBeInstanceOf(BadRequestException);
+    const flat = pipe.exceptionFactory([
+      {
+        property: 'email',
+        constraints: { isEmail: 'email must be an email' },
+        children: [],
+      },
+      {
+        property: 'delivery',
+        children: [
+          {
+            property: 'city',
+            constraints: { isNotEmpty: 'city should not be empty' },
+            children: [],
+          },
+        ],
+      },
+    ]);
+
+    expect(flat).toBeInstanceOf(BadRequestException);
+    const body = flat.getResponse() as {
+      error: string;
+      details: Array<{ field: string; constraints: string[] }>;
+    };
+    expect(body.error).toBe('VALIDATION');
+    expect(body.details).toEqual(
+      expect.arrayContaining([
+        { field: 'email', constraints: ['email must be an email'] },
+        { field: 'delivery.city', constraints: ['city should not be empty'] },
+      ]),
+    );
   });
 });

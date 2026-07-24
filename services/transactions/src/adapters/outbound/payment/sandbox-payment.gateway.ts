@@ -5,10 +5,7 @@ import type {
   ChargeOutcome,
   PaymentGatewayPort,
 } from '../../../ports/payment-gateway.port';
-import {
-  readPaymentGatewayConfig,
-  type PaymentGatewayConfig,
-} from './config';
+import { readPaymentGatewayConfig, type PaymentGatewayConfig } from './config';
 import { buildIntegritySignature } from './integrity';
 
 type FetchLike = typeof fetch;
@@ -42,9 +39,7 @@ export class SandboxPaymentGateway implements PaymentGatewayPort {
     return ok(new SandboxPaymentGateway(config, fetchFn));
   }
 
-  async charge(
-    input: CardChargeInput,
-  ): Promise<Result<ChargeOutcome, DomainError>> {
+  async charge(input: CardChargeInput): Promise<Result<ChargeOutcome, DomainError>> {
     if (!input.customerEmail) {
       return err({
         type: 'VALIDATION',
@@ -76,8 +71,7 @@ export class SandboxPaymentGateway implements PaymentGatewayPort {
     } catch (error) {
       return err({
         type: 'PAYMENT_FAILED',
-        message:
-          error instanceof Error ? error.message : 'Payment provider error',
+        message: error instanceof Error ? error.message : 'Payment provider error',
       });
     }
   }
@@ -107,8 +101,7 @@ export class SandboxPaymentGateway implements PaymentGatewayPort {
       });
     }
 
-    const acceptanceToken =
-      body.data?.presigned_acceptance?.acceptance_token ?? '';
+    const acceptanceToken = body.data?.presigned_acceptance?.acceptance_token ?? '';
     if (!acceptanceToken) {
       return err({
         type: 'PAYMENT_FAILED',
@@ -118,8 +111,7 @@ export class SandboxPaymentGateway implements PaymentGatewayPort {
 
     return ok({
       acceptanceToken,
-      personalAuthToken:
-        body.data?.presigned_personal_data_auth?.acceptance_token,
+      personalAuthToken: body.data?.presigned_personal_data_auth?.acceptance_token,
     });
   }
 
@@ -150,8 +142,7 @@ export class SandboxPaymentGateway implements PaymentGatewayPort {
     if (!response.ok || !body.data?.id) {
       return err({
         type: 'PAYMENT_FAILED',
-        message:
-          stringifyProviderError(body) || `Tokenize failed (${response.status})`,
+        message: stringifyProviderError(body) || `Tokenize failed (${response.status})`,
       });
     }
 

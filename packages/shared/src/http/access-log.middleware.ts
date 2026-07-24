@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NestMiddleware,
-  Type,
-  mixin,
-} from '@nestjs/common';
+import { Injectable, NestMiddleware, Type, mixin } from '@nestjs/common';
 import type { NextFunction, Request, Response } from 'express';
 import { logHttpRequest, newCorrelationId } from '../logging/http-request';
 
@@ -17,8 +12,7 @@ export function AccessLogMiddleware(targetService: string): Type<NestMiddleware>
     use(req: Request, res: Response, next: NextFunction): void {
       const started = Date.now();
       const correlationId =
-        (req.headers['x-correlation-id'] as string | undefined) ??
-        newCorrelationId();
+        (req.headers['x-correlation-id'] as string | undefined) ?? newCorrelationId();
       const requestId =
         (req.headers['x-request-id'] as string | undefined) ??
         (req.headers['x-amzn-requestid'] as string | undefined);

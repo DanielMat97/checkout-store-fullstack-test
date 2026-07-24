@@ -4,8 +4,7 @@ import type { ProductRepositoryPort, ProductRecord } from '@app/persistence';
 import { PRODUCT_REPOSITORY } from '../ports/tokens';
 
 export type ProductError =
-  | { type: 'NOT_FOUND'; id: string }
-  | { type: 'PERSISTENCE_ERROR'; message: string };
+  { type: 'NOT_FOUND'; id: string } | { type: 'PERSISTENCE_ERROR'; message: string };
 
 @Injectable()
 export class GetProductUseCase {

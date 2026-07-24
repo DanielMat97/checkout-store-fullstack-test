@@ -10,9 +10,7 @@ async function main(): Promise<void> {
       console.error(`Failed to seed ${product.id}:`, result.error);
       process.exit(1);
     }
-    console.log(
-      `Seeded ${product.id} stock=${product.stock} (${product.name})`,
-    );
+    console.log(`Seeded ${product.id} stock=${product.stock} (${product.name})`);
   }
 
   const listed = await products.listAll();
@@ -23,9 +21,7 @@ async function main(): Promise<void> {
 
   const withStock = listed.value.filter((p: { stock: number }) => p.stock > 0);
   if (withStock.length < 3) {
-    console.error(
-      `Expected ≥3 products with stock > 0, got ${withStock.length}`,
-    );
+    console.error(`Expected ≥3 products with stock > 0, got ${withStock.length}`);
     process.exit(1);
   }
 

@@ -3,11 +3,7 @@ import { err, ok, type Result } from 'neverthrow';
 import { randomUUID } from 'crypto';
 import type { TransactionRepositoryPort } from '@app/persistence';
 import type { Transaction } from '../domain/transaction';
-import {
-  totalOf,
-  type DomainError,
-  type MoneyInput,
-} from '../domain/errors';
+import { totalOf, type DomainError, type MoneyInput } from '../domain/errors';
 import type { CustomerReaderPort } from '../ports/cross-domain.ports';
 import type { ProductReaderPort } from '../ports/product-reader.port';
 import type { DeliveryWriterPort } from '../ports/cross-domain.ports';
@@ -58,11 +54,7 @@ export class CreateTransactionUseCase {
     ) {
       return err({ type: 'VALIDATION', message: 'Invalid create payload' });
     }
-    if (
-      !input.delivery?.address ||
-      !input.delivery?.city ||
-      !input.delivery?.region
-    ) {
+    if (!input.delivery?.address || !input.delivery?.city || !input.delivery?.region) {
       return err({ type: 'VALIDATION', message: 'Delivery address required' });
     }
 

@@ -1,6 +1,6 @@
 ---
 feature: cloud-deploy
-status: ready
+status: in_progress
 owner: devops
 rubric: [6]
 ---
@@ -9,15 +9,16 @@ rubric: [6]
 
 ## Resumen
 
-Como evaluador, abro una **URL pública** de la SPA y una **API pública** (HTTPS) conectadas, desplegadas en AWS (SF4 + hosting estático), sin secrets en el repo.
+Como evaluador, abro una **URL pública** de la SPA y una **API pública** (HTTPS) conectadas, desplegadas en AWS (SF4 + Amplify), sin secrets en el repo.
 
 ## Alcance
 
-- Backend: Serverless Framework 4 → API Gateway + Lambdas + DynamoDB.
-- Frontend: S3+CloudFront (o Amplify/otro AWS) sirviendo build Vite.
-- CORS correcto hacia origen FE.
-- Variables/secrets vía env / SSM / Secrets Manager.
-- Documentar URLs en README.
+- Backend: Serverless Framework 4 → API Gateway + Lambdas + DynamoDB (GitHub Actions).
+- Frontend: **AWS Amplify** (build `amplify.yml`; prod + branches `fb-*`).
+- Feature envs: branches/tags `fb-*` / `fb-*/**` → stack Serverless aislado + rama Amplify.
+- CI stages: validate → prettier → lint → audit → test → coverage.
+- CORS hacia origen FE; secrets vía GitHub Secrets / Amplify env.
+- Documentar URLs en README **cuando existan**.
 
 ## Fuera de alcance
 

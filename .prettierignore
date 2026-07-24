@@ -1,0 +1,9 @@
+node_modules
+dist
+coverage
+.serverless
+.webpack
+.esbuild
+package-lock.json
+*.md
+docs/api/openapi.json

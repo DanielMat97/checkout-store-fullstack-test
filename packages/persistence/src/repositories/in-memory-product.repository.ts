@@ -12,9 +12,7 @@ export class InMemoryProductRepository implements ProductRepositoryPort {
     }
   }
 
-  async getById(
-    id: string,
-  ): Promise<Result<ProductRecord, PersistenceError>> {
+  async getById(id: string): Promise<Result<ProductRecord, PersistenceError>> {
     const item = this.items.get(id);
     if (!item) {
       return err({ type: 'NOT_FOUND', entity: 'product', id });
@@ -26,9 +24,7 @@ export class InMemoryProductRepository implements ProductRepositoryPort {
     return ok([...this.items.values()].map((p) => ({ ...p })));
   }
 
-  async put(
-    product: ProductRecord,
-  ): Promise<Result<ProductRecord, PersistenceError>> {
+  async put(product: ProductRecord): Promise<Result<ProductRecord, PersistenceError>> {
     this.items.set(product.id, { ...product });
     return ok({ ...product });
   }

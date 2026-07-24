@@ -1,3 +1,4 @@
+import { readPublicEnv } from '../publicEnv';
 import {
   getProductById,
   initialStockMap,
@@ -7,7 +8,7 @@ import {
 } from './catalog';
 
 export function isMockMode(): boolean {
-  return import.meta.env.VITE_MOCK_MODE !== 'false';
+  return readPublicEnv('VITE_MOCK_MODE', 'true') !== 'false';
 }
 
 let stockById: Record<string, number> = initialStockMap();
@@ -20,8 +21,7 @@ export function listMockProducts(): MockProduct[] {
 }
 
 export function getMockProduct(productId?: string | null): MockProduct {
-  const base =
-    (productId ? getProductById(productId) : undefined) ?? MOCK_PRODUCTS[0];
+  const base = (productId ? getProductById(productId) : undefined) ?? MOCK_PRODUCTS[0];
   return {
     ...base,
     stock: stockById[base.id] ?? base.stock,

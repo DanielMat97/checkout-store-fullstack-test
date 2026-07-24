@@ -111,10 +111,7 @@ describe('SandboxPaymentGateway', () => {
           data: { presigned_acceptance: { acceptance_token: 'acc_1' } },
         });
       }
-      return jsonResponse(
-        { error: { reason: 'Invalid card' } },
-        { status: 422 },
-      );
+      return jsonResponse({ error: { reason: 'Invalid card' } }, { status: 422 });
     }) as unknown as typeof fetch;
 
     const gateway = new SandboxPaymentGateway(baseConfig, fetchFn);
@@ -126,10 +123,7 @@ describe('SandboxPaymentGateway', () => {
   });
 });
 
-function jsonResponse(
-  body: unknown,
-  opts?: { status?: number },
-): Response {
+function jsonResponse(body: unknown, opts?: { status?: number }): Response {
   return {
     ok: (opts?.status ?? 200) >= 200 && (opts?.status ?? 200) < 300,
     status: opts?.status ?? 200,

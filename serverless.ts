@@ -3,9 +3,21 @@ import type { AWS } from '@serverless/typescript';
 /**
  * Single Serverless Framework stack = one HTTP API (API Gateway) that routes
  * to all NestJS microservice Lambdas. No custom Node gateway service.
+ *
+ * Stages:
+ * - `dev` / `prod` — shared long-lived environments
+ * - `fb-*` — isolated feature stacks (unique DynamoDB table + API URL)
  */
 const stage = '${sls:stage}';
-const tableName = '${env:DYNAMODB_TABLE_NAME, "checkout-store"}';
+
+function corsOrigins(): string[] {
+  const raw = process.env.CORS_ORIGIN ?? 'http://localhost:5173';
+  const list = raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return list.length > 0 ? list : ['http://localhost:5173'];
+}
 
 const serverlessConfiguration: AWS = {
   service: 'checkout-api',
@@ -24,7 +36,7 @@ const serverlessConfiguration: AWS = {
     },
     httpApi: {
       cors: {
-        allowedOrigins: ['${env:CORS_ORIGIN, "http://localhost:5173"}'],
+        allowedOrigins: corsOrigins(),
         allowedHeaders: [
           'Content-Type',
           'Authorization',
@@ -37,8 +49,16 @@ const serverlessConfiguration: AWS = {
     },
     environment: {
       STAGE: stage,
-      DYNAMODB_TABLE_NAME: tableName,
+      DYNAMODB_TABLE_NAME: '${self:custom.tableName}',
       DYNAMODB_ENDPOINT: '${env:DYNAMODB_ENDPOINT, ""}',
+      PAYMENT_GATEWAY_MODE: '${env:PAYMENT_GATEWAY_MODE, "fake"}',
+      PAYMENT_API_URL: '${env:PAYMENT_API_URL, ""}',
+      PAYMENT_PUBLIC_KEY: '${env:PAYMENT_PUBLIC_KEY, ""}',
+      PAYMENT_PRIVATE_KEY: '${env:PAYMENT_PRIVATE_KEY, ""}',
+      PAYMENT_INTEGRITY_KEY: '${env:PAYMENT_INTEGRITY_KEY, ""}',
+      PAYMENT_CURRENCY: '${env:PAYMENT_CURRENCY, "COP"}',
+      BASE_FEE: '${env:BASE_FEE, "1500"}',
+      DELIVERY_FEE: '${env:DELIVERY_FEE, "5000"}',
     },
     iam: {
       role: {
@@ -69,6 +89,8 @@ const serverlessConfiguration: AWS = {
     },
   },
   custom: {
+    defaultTableName: 'checkout-store-${sls:stage}',
+    tableName: '${env:DYNAMODB_TABLE_NAME, self:custom.defaultTableName}',
     'serverless-offline': {
       httpPort: 3000,
       lambdaPort: 3005,
@@ -126,7 +148,7 @@ const serverlessConfiguration: AWS = {
       CheckoutTable: {
         Type: 'AWS::DynamoDB::Table',
         Properties: {
-          TableName: tableName,
+          TableName: '${self:custom.tableName}',
           BillingMode: 'PAY_PER_REQUEST',
           AttributeDefinitions: [
             { AttributeName: 'pk', AttributeType: 'S' },
@@ -148,6 +170,10 @@ const serverlessConfiguration: AWS = {
               Projection: { ProjectionType: 'ALL' },
             },
           ],
+          Tags: [
+            { Key: 'Service', Value: 'checkout-api' },
+            { Key: 'Stage', Value: stage },
+          ],
         },
       },
     },
@@ -155,13 +181,22 @@ const serverlessConfiguration: AWS = {
       HttpApiUrl: {
         Description: 'Single API Gateway URL (Serverless HTTP API)',
         Value: {
-          'Fn::Sub':
-            'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com',
+          'Fn::Sub': 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com',
+        },
+        Export: {
+          Name: 'checkout-api-${sls:stage}-HttpApiUrl',
         },
       },
       CheckoutTableName: {
         Description: 'Single-table DynamoDB name',
         Value: { Ref: 'CheckoutTable' },
+        Export: {
+          Name: 'checkout-api-${sls:stage}-CheckoutTableName',
+        },
+      },
+      StageName: {
+        Description: 'Deployed Serverless stage',
+        Value: stage,
       },
     },
   },
