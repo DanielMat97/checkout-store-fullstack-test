@@ -1,0 +1,71 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Checkout Store API",
+    "version": "0.1.0",
+    "description": "Single API Gateway entrypoint. Import into Apidog. Update on every endpoint change."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local API Gateway"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["gateway"],
+        "summary": "API Gateway health",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/products/health": {
+      "get": {
+        "tags": ["products"],
+        "summary": "Products service health (via gateway)",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/customers/health": {
+      "get": {
+        "tags": ["customers"],
+        "summary": "Customers service health (via gateway)",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/deliveries/health": {
+      "get": {
+        "tags": ["deliveries"],
+        "summary": "Deliveries service health (via gateway)",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/transactions/health": {
+      "get": {
+        "tags": ["transactions"],
+        "summary": "Transactions service health (via gateway)",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}

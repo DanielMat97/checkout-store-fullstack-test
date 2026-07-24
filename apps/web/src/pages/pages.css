@@ -1,0 +1,110 @@
+:root {
+  color-scheme: light;
+  --bg: #0f1c17;
+  --fg: #f4f7f5;
+  --accent: #3dcf8e;
+  --muted: #9bb0a5;
+  --panel: #182821;
+  font-family: 'Segoe UI', 'Avenir Next', system-ui, sans-serif;
+  line-height: 1.45;
+  background: radial-gradient(1200px 600px at 10% -10%, #1f3d32, var(--bg));
+  color: var(--fg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.page {
+  width: min(100%, 420px);
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 2.5rem;
+}
+
+.brand {
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 0.75rem;
+}
+
+h1 {
+  font-size: 1.75rem;
+  margin: 0 0 0.75rem;
+}
+
+.lede,
+.meta,
+.hint {
+  color: var(--muted);
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.25rem;
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--accent);
+  color: #062016;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.back {
+  display: inline-block;
+  margin-top: 1rem;
+  color: var(--muted);
+}
+
+.dev-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #2a3f36;
+}
+
+.dev-nav a {
+  color: var(--accent);
+  font-size: 0.85rem;
+}
+
+.backdrop-shell {
+  background: color-mix(in srgb, var(--panel) 88%, black);
+  border-radius: 16px;
+  margin-top: 1rem;
+}
+
+.fees {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+}
+
+.fees li {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #2a3f36;
+}
+
+.linkish {
+  text-align: center;
+}

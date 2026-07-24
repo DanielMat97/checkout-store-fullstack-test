@@ -1,0 +1,29 @@
+{
+  "name": "checkout-store",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "services/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @app/shared && npm run build --workspaces --if-present",
+    "build:shared": "npm run build -w @app/shared",
+    "test": "npm run test --workspaces --if-present",
+    "test:cov": "npm run test:cov --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "dev": "npm run build:shared && concurrently -n gateway,web,products,customers,deliveries,transactions -c white,cyan,green,yellow,blue,magenta \"npm:dev:gateway\" \"npm:dev:web\" \"npm:dev:products\" \"npm:dev:customers\" \"npm:dev:deliveries\" \"npm:dev:transactions\"",
+    "dev:gateway": "npm run start:dev -w @app/gateway",
+    "dev:web": "npm run dev -w @app/web",
+    "dev:products": "npm run start:dev -w @app/products",
+    "dev:customers": "npm run start:dev -w @app/customers",
+    "dev:deliveries": "npm run start:dev -w @app/deliveries",
+    "dev:transactions": "npm run start:dev -w @app/transactions"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

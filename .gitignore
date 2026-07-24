@@ -1,0 +1,31 @@
+# Dependencies & secrets
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Cursor local (rules/skills may mention sandbox; keep out of public repo)
+.cursor/
+
+# Local brief / credentials / playbooks (do not publish)
+docs/fullstack-test.md
+docs/skills-checkout.md
+docs/sdd-playbook.md
+
+skills-lock.json
+
+# Build / coverage / Serverless
+dist/
+coverage/
+.serverless/
+.webpack/
+.esbuild/
+
+# OS / IDE
+.DS_Store
+*.log
+.idea/
+.vscode/
+
+.agents/
+.tmp-skills/
