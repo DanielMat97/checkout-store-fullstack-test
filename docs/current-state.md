@@ -8,9 +8,9 @@ Ver **`docs/scorecard.md`**.
 
 | | Estricto |
 |---|---|
-| Base | **21 / 100** |
-| Bonus | **28 / 50** |
-| **Total** | **49 / 150** |
+| Base | **23 / 100** |
+| Bonus | **29 / 50** |
+| **Total** | **52 / 150** |
 | Aprueba (≥100 base) | **No — REJECT** |
 
 ## Specs (path to 100%)
@@ -22,8 +22,8 @@ Ver **`docs/scorecard.md`**.
 | `checkout-ui-mock` | **done** |
 | `persistence-seed` | **done** |
 | `architecture-hex-rop` | **done** |
-| `payment-gateway` | ready (**next**) |
-| `api-domains` | ready (HTTP thin already started; OpenAPI partial) |
+| `payment-gateway` | **done** |
+| `api-domains` | ready (**next** — polish DTOs/validation/E2E) |
 | `checkout-payment` | ready |
 | `frontend-live-wiring` | ready |
 | `testing-coverage` | ready |
@@ -36,15 +36,15 @@ Ver **`docs/scorecard.md`**.
 
 | Area | Status |
 |---|---|
-| Mock UI NORA Soft + split checkout | **Done** |
+| Mock UI NORA Soft | **Done** |
 | DynamoDB + ElectroDB + seed | **Done** |
-| Hex use-cases ROP (Create/Pay + products/customers/deliveries) | **Done** |
-| Thin HTTP controllers + OpenAPI paths | **Partial** (fake payment port) |
-| Sandbox payment adapter | **Not started** (`FakePaymentGateway`) |
-| Live FE / Jest >80% / deploy / README | **Not started** |
+| Hex use-cases ROP | **Done** |
+| `SandboxPaymentGateway` (tokenize → tx → poll) | **Done** (unit-tested w/ mock HTTP) |
+| Fake gateway for local | **Done** (`PAYMENT_GATEWAY_MODE=fake`) |
+| Live FE / coverage 80% / deploy | **Not started** |
 
 ## Next
 
-1. `payment-gateway` — adapter sandbox real detrás del puerto.
-2. Cerrar `api-domains` (DTOs/validación/OpenAPI completo).
-3. `frontend-live-wiring`.
+1. `api-domains` — DTOs/class-validator, stock endpoint, OpenAPI completo, smoke local.
+2. `frontend-live-wiring` — apagar mock.
+3. Coverage + deploy + README.

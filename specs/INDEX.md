@@ -12,7 +12,7 @@
 | Pago E2E (contrato negocio) | `checkout-payment/` | **ready** | Base #3 (mitad sistema) |
 | Persistencia + seed | `persistence-seed/` | **done** | Base #4 prereq; brief seed |
 | APIs 4 dominios | `api-domains/` | **ready** | Base #4 (20) |
-| Pasarela sandbox | `payment-gateway/` | **ready** | Base #3 pasos 5.1–5.3 |
+| Pasarela sandbox | `payment-gateway/` | **done** | Base #3 pasos 5.1–5.3 |
 | FE live (off mock) | `frontend-live-wiring/` | **ready** | Base #3 completo |
 | Cobertura Jest | `testing-coverage/` | **ready** | Base #5 (30) |
 | Deploy AWS | `cloud-deploy/` | **ready** | Base #6 (20) |

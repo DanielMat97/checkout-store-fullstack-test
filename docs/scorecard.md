@@ -1,7 +1,7 @@
 # Scorecard — evaluación estricta (hiring bar)
 
 > Fuente rúbrica: `docs/fullstack-test.md` (100 base + 50 bonus).  
-> Última evaluación: **2026-07-24** (post `architecture-hex-rop`)  
+> Última evaluación: **2026-07-24** (post `payment-gateway`)  
 > Modo: **evaluador técnico de la empresa contratante** (no autoelogio del candidato).
 
 ---
@@ -47,20 +47,20 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 | Lente | Veredicto (1 línea) |
 |---|---|
-| Arquitecto | Hex + ROP reales en transactions (Create/Pay + tests). **Pasarela aún fake** — no es integración sandbox. |
-| Líder técnico | Use-cases testeables; **coverage global / deploy / README entregable ausentes**. |
-| Product Owner | PENDING/pay existen en BE; **FE sigue en mock** → journey brief 5.x incompleto E2E. |
-| Security | Sin PAN en repos; pay body aún transporta tarjeta al fake — **PCI story incompleta hasta sandbox tokenizado**. |
-| Hiring bar | **Aún no.** Avance serio de backend; no cierra rúbrica base. |
+| Arquitecto | Adapter sandbox real detrás del puerto + tests HTTP mock. **Sin smoke live UAT documentado** en este corte. |
+| Líder técnico | Wiring listo; default local sigue `fake`. Falta coverage/deploy/README. |
+| Product Owner | BE puede cobrar vía puerto; **FE mock** → onboarding E2E incompleto. |
+| Security | Tokeniza en adapter (no persiste PAN); body pay aún recibe tarjeta en BE — aceptable para brief, mejorar con FE tokenize luego. |
+| Hiring bar | **Aún no.** Backend de pago maduro; no cierra base 100. |
 
 | | Puntos (modo estricto) |
 |---|---|
-| **Base** | **21 / 100** |
-| **Bonus** | **28 / 50** |
-| **Total** | **49 / 150** |
+| **Base** | **23 / 100** |
+| **Bonus** | **29 / 50** |
+| **Total** | **52 / 150** |
 | **¿Aprueba (≥100 base)?** | **No** |
 
-> Nota: `FakePaymentGateway` **no** cuenta como paso 5.2 del brief.
+> Nota: adapter sandbox **sí** implementa 5.2; el panel exige evidencia live/FE cableado para subir más el #3.
 
 ---
 
@@ -68,19 +68,14 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 | Paso brief | Evidencia | Nota del panel | Score parcial |
 |---|---|---|---|
-| 1. UI producto + stock + precio + descripción | Catálogo + detalle | Cumple y excede (catálogo). OK. | ✅ |
-| 2. CTA exacto + modal tarjeta | Split checkout | OK. | ✅ |
-| 3. Validación tarjeta + VISA/MC | Luhn/expiry/CVV + logos | OK a nivel FE. | ✅ |
-| 3b. Delivery | Campos presentes | OK. | ✅ |
-| 4. Backdrop fees (base + delivery) | FeeList | OK. | ✅ |
-| 5.1 Tx `PENDING` en **backend propio** | `CreateTransactionUseCase` + HTTP | **BE sí**; FE no cableado. | 🟡 |
-| 5.2 Llamada pasarela sandbox | `FakePaymentGateway` | **Fallo duro** vs brief (exige sandbox). | ❌ |
-| 5.3 Update tx + delivery + stock BE | `PayTransactionUseCase` + tests | Lógica sí con fake; no sandbox. | 🟡 |
-| 6. Status + producto con stock | Mock FE | Demo UI only. | 🟡 |
-| Persistencia segura progreso | redux-persist sin PAN | Bien; falta prueba de amenaza. | 🟡 |
-| 4 dominios API | Controllers thin + OpenAPI | Parcial — falta validación/DTOs/smoke E2E documentado. | 🟡 |
-| Seed DB ≥ productos | `npm run seed` | OK. | ✅ |
-| Jest >80% FE+BE + README | No | **Fallo duro.** | ❌ |
+| 1–4 UI + fees | Mock NORA Soft | OK. | ✅ |
+| 5.1 Tx `PENDING` BE | `CreateTransactionUseCase` | OK en BE; FE no cableado. | 🟡 |
+| 5.2 Pasarela sandbox | `SandboxPaymentGateway` | Código + unit tests mock HTTP. −live smoke. | 🟡 |
+| 5.3 Update tx/delivery/stock | `PayTransactionUseCase` | OK con puerto. | 🟡 |
+| 6 Status + stock fresco | Mock FE | Incompleto E2E. | 🟡 |
+| 4 dominios API | Controllers thin | Parcial. | 🟡 |
+| Seed | `npm run seed` | OK. | ✅ |
+| Jest >80% + README | No | **Fallo duro.** | ❌ |
 | Deploy cloud | No | **Fallo duro.** | ❌ |
 
 ---
@@ -89,15 +84,15 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 | # | Criterio | Max | **Strict** | Justificación del panel |
 |---|---|---|---|---|
-| 1 | README completado | 5 | **1** | Aún no entregable de prueba (sin coverage/URLs). |
-| 2 | Imágenes / sin desborde | 5 | **4** | Sin cambio material. |
-| 3 | Onboarding pago completo | 20 | **10** | BE desbloquea mitad del sistema; FE mock + sin sandbox → techo 50%. |
-| 4 | API funcionando | 20 | **6** | Endpoints de negocio existen (list/get/create/pay). −14: fake gateway, sin smoke E2E/deploy, DTOs flojos. |
-| 5 | Unit tests >80% FE y BE | 30 | **0** | Hay tests de use-case; **sin** umbral 80% documentado → 0. |
-| 6 | Deploy cloud | 20 | **0** | Sin URL pública. |
-| | **Subtotal base** | **100** | **21** | |
+| 1 | README completado | 5 | **1** | Sin entregable completo. |
+| 2 | Imágenes / sin desborde | 5 | **4** | Sin cambio. |
+| 3 | Onboarding pago completo | 20 | **12** | Adapter sandbox + ROP pay. −8: FE mock, sin smoke UAT citado, default fake local. |
+| 4 | API funcionando | 20 | **6** | Endpoints existen; falta validación/E2E documentado. |
+| 5 | Unit tests >80% FE y BE | 30 | **0** | Tests de adapter/use-case ≠ umbral 80%. |
+| 6 | Deploy cloud | 20 | **0** | Sin URL. |
+| | **Subtotal base** | **100** | **23** | |
 
-**Base oficial del corte: 21 / 100.**
+**Base oficial del corte: 23 / 100.**
 
 ---
 
@@ -105,38 +100,35 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 | # | Criterio | Max | **Strict** | Justificación del panel |
 |---|---|---|---|---|
-| 1 | OWASP + HTTPS + headers | 5 | **1** | Sin HTTPS público / Observatory. |
-| 2 | Responsive multi-browser | 5 | **2** | Sin matriz browsers. |
-| 3 | Habilidades CSS | 10 | **6** | Sin cambio material. |
-| 4 | Código limpio | 10 | **5** | Capas hex claras + tests ROP; monolito de orquestación en transactions aceptable. |
-| 5 | Hexagonal | 10 | **7** | Ports + adapters + use-cases + HTTP thin + tests con fakes. −3: payment adapter no es el real. |
-| 6 | ROP | 10 | **7** | Create/Pay retornan `Result`; DECLINED sin decrement probado. −3: no todo el sistema orquestado vía ROP E2E. |
-| | **Subtotal bonus** | **50** | **28** | |
+| 1 | OWASP + HTTPS + headers | 5 | **1** | Sin HTTPS público. |
+| 2 | Responsive multi-browser | 5 | **2** | Sin matriz. |
+| 3 | Habilidades CSS | 10 | **6** | Sin cambio. |
+| 4 | Código limpio | 10 | **5** | Adapter + config + integrity separados. |
+| 5 | Hexagonal | 10 | **8** | Puerto + fake + sandbox adapters + DI. |
+| 6 | ROP | 10 | **7** | Charge retorna `Result`; DECLINED tipado. |
+| | **Subtotal bonus** | **50** | **29** | |
 
 ---
 
 ## 5. Total estricto
 
 ```
-Base   21 / 100
-Bonus  28 /  50
+Base   23 / 100
+Bonus  29 /  50
 ───────────────
-Total  49 / 150
+Total  52 / 150
 ```
 
-**Resultado hiring:** **REJECT / NEEDS MAJOR WORK** — no alcanza entrevista por rúbrica (≥100 base).
+**Resultado hiring:** **REJECT / NEEDS MAJOR WORK**.
 
-### Gap mínimo a 100 (orden del panel)
+### Gap mínimo a 100
 
 | Prioridad | Trabajo | Pts base ≈ |
 |---|---|---|
-| P0 | Sandbox payment + FE live + cerrar onboarding | +8–10 (#3) |
-| P0 | API E2E + OpenAPI completo | +10–12 (#4) |
-| P0 | Jest >80% FE+BE + cifras README | +28–30 |
-| P0 | Deploy AWS + README entregable | +20 + README +3–4 |
-| P1 | HTTPS + Observatory | bonus +3–4 |
-
-Sin P0 cerrado, **hablar de 100 es ruido**.
+| P0 | FE live + smoke sandbox | +6–8 (#3) |
+| P0 | API polish + evidencia | +10–12 (#4) |
+| P0 | Jest >80% + README cifras | +28–30 |
+| P0 | Deploy + README URLs | +20 +4 |
 
 ---
 
@@ -144,12 +136,10 @@ Sin P0 cerrado, **hablar de 100 es ruido**.
 
 | Hito | Base ≈ | Bonus ≈ | Total ≈ | Hiring |
 |---|---|---|---|---|
-| Hoy | 21 | 28 | **49** | Reject |
-| + sandbox + FE live | 40 | 30 | **70** | Reject |
-| + tests >80% documentados | 70 | 32 | **102** | Condicional pass base |
-| + deploy + README + OWASP público | 98–100 | 38 | **136–138** | Strong pass posible |
-
-El panel **no asume** que la proyección se cumplirá.
+| Hoy | 23 | 29 | **52** | Reject |
+| + FE live + API polish | 45 | 30 | **75** | Reject |
+| + tests >80% | 75 | 32 | **107** | Condicional pass base |
+| + deploy + README + OWASP | 98–100 | 40 | **138–140** | Strong pass posible |
 
 ---
 

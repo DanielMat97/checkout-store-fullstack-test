@@ -72,6 +72,7 @@ describe('PayTransactionUseCase', () => {
       transactions,
       products,
       deliveries,
+      customers,
       new FakePaymentGateway('APPROVED'),
     );
 
@@ -101,6 +102,7 @@ describe('PayTransactionUseCase', () => {
       transactions,
       products,
       deliveries,
+      customers,
       new FakePaymentGateway('DECLINED'),
     );
 
@@ -126,6 +128,7 @@ describe('PayTransactionUseCase', () => {
       transactions,
       products,
       deliveries,
+      customers,
       new FakePaymentGateway('ERROR'),
     );
 

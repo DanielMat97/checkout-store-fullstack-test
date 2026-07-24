@@ -3,13 +3,17 @@ import { err, ok, type Result } from 'neverthrow';
 import type { TransactionRepositoryPort } from '@app/persistence';
 import type { Transaction } from '../domain/transaction';
 import { assertPending, type DomainError } from '../domain/errors';
-import type { DeliveryWriterPort } from '../ports/cross-domain.ports';
+import type {
+  CustomerReaderPort,
+  DeliveryWriterPort,
+} from '../ports/cross-domain.ports';
 import type { ProductReaderPort } from '../ports/product-reader.port';
 import type {
   CardChargeInput,
   PaymentGatewayPort,
 } from '../ports/payment-gateway.port';
 import {
+  CUSTOMER_READER,
   DELIVERY_WRITER,
   PAYMENT_GATEWAY,
   PRODUCT_READER,
@@ -19,7 +23,7 @@ import {
 export type PayTransactionInput = {
   transactionId: string;
   deliveryId: string;
-  card: Omit<CardChargeInput, 'amountMinor' | 'reference'>;
+  card: Omit<CardChargeInput, 'amountMinor' | 'reference' | 'customerEmail'>;
 };
 
 export type PayTransactionOutput = {
@@ -36,6 +40,8 @@ export class PayTransactionUseCase {
     private readonly products: ProductReaderPort,
     @Inject(DELIVERY_WRITER)
     private readonly deliveries: DeliveryWriterPort,
+    @Inject(CUSTOMER_READER)
+    private readonly customers: CustomerReaderPort,
     @Inject(PAYMENT_GATEWAY)
     private readonly payments: PaymentGatewayPort,
   ) {}
@@ -44,7 +50,10 @@ export class PayTransactionUseCase {
     input: PayTransactionInput,
   ): Promise<Result<PayTransactionOutput, DomainError>> {
     if (!input.transactionId || !input.deliveryId) {
-      return err({ type: 'VALIDATION', message: 'transactionId and deliveryId required' });
+      return err({
+        type: 'VALIDATION',
+        message: 'transactionId and deliveryId required',
+      });
     }
     if (
       !input.card?.number ||
@@ -66,10 +75,16 @@ export class PayTransactionUseCase {
       return err(pendingError);
     }
 
+    const customer = await this.customers.getById(loaded.value.customerId);
+    if (customer.isErr()) {
+      return err(mapPersistence(customer.error));
+    }
+
     const charge = await this.payments.charge({
       ...input.card,
       amountMinor: loaded.value.total,
       reference: loaded.value.id,
+      customerEmail: customer.value.email,
     });
     if (charge.isErr()) {
       return err(charge.error);
@@ -78,7 +93,11 @@ export class PayTransactionUseCase {
     const outcome = charge.value.status;
 
     if (outcome === 'APPROVED') {
-      return this.onApproved(loaded.value, input.deliveryId, charge.value.providerRef);
+      return this.onApproved(
+        loaded.value,
+        input.deliveryId,
+        charge.value.providerRef,
+      );
     }
 
     if (outcome === 'DECLINED') {

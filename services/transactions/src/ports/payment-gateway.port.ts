@@ -4,6 +4,7 @@ import type { DomainError } from '../domain/errors';
 export type CardChargeInput = {
   amountMinor: number;
   reference: string;
+  customerEmail: string;
   number: string;
   cvc: string;
   expMonth: string;

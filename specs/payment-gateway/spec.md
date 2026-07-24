@@ -1,6 +1,6 @@
 ---
 feature: payment-gateway
-status: ready
+status: done
 owner: backend
 rubric: [3]
 ---
