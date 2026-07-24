@@ -20,6 +20,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Mock checkout flow: product hero, card/delivery modal (Luhn + Visa/MC), summary backdrop with fees, status, stock update; `VITE_MOCK_MODE=true`.
 - Rubric autoevaluación vs brief: `docs/scorecard.md` (protocolo evaluador estricto hiring-bar; corte actual **32/150**).
 - Cursor rule `scorecard-evaluator.mdc`: always grade as harsh hiring panel (architect / TL / PO / security).
+- Specs path-to-100%: `specs/INDEX.md` + features `persistence-seed`, `payment-gateway`, `api-domains`, `frontend-live-wiring`, `testing-coverage`, `cloud-deploy`, `readme-deliverables`, `security-hardening`, `architecture-hex-rop`, `ux-quality-bar` (SDD only; no impl yet). `checkout-payment` refreshed; `checkout-ui-mock` marked **done**.
 
 ### Changed
 

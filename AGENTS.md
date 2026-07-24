@@ -4,9 +4,10 @@ This project follows **Spec-Driven Development (SDD)**. Before implementing any 
 
 1. `docs/current-state.md` — what exists today.
 2. `docs/adr/` — architecture decisions already taken (do not contradict without a new ADR).
-3. `specs/<feature>/spec.md` — what to build.
-4. `specs/<feature>/plan.md` — how to build it.
-5. `specs/<feature>/tasks.md` — in what order.
+3. `specs/INDEX.md` — map of features → rubric (path to 100%).
+4. `specs/<feature>/spec.md` — what to build.
+5. `specs/<feature>/plan.md` — how to build it.
+6. `specs/<feature>/tasks.md` — in what order.
 
 Also follow `.cursor/rules/` and the `checkout-flow` skill for locked stack and scoring. UI identity lives in `docs/design-system.md` and `apps/web/src/design-system/`.
 

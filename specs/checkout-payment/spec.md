@@ -1,49 +1,48 @@
 ---
 feature: checkout-payment
-status: draft
+status: ready
+owner: fullstack
+rubric: [3]
 ---
 
-# Spec — Onboarding de pago con tarjeta
+# Spec — Onboarding de pago E2E (sistema real)
 
 ## Resumen
 
-Como cliente, quiero comprar un producto pagando con tarjeta de crédito, para recibir el producto con el stock actualizado al finalizar.
+Como cliente, compro un producto con tarjeta: el **backend** crea `PENDING`, llama la pasarela sandbox, actualiza tx/delivery/stock y el FE muestra el resultado con stock fresco.
 
 ## Alcance
 
-- Mostrar producto + stock disponible (descripción, precio).
-- Capturar datos de tarjeta y de entrega (modal **"Pay with credit card"**).
-- Mostrar resumen de costos (producto + fee base siempre + fee de entrega) en un **backdrop**.
-- Procesar el pago contra la pasarela externa (sandbox).
-- Reflejar el resultado (éxito/rechazo) y actualizar stock solo si aprobado.
-- Flujo de 5 pantallas: Product → Card/Delivery → Summary → Status → Product (stock refreshed).
-- App resiliente: recuperar progreso tras refresh.
+- Flujo de negocio brief (5 pantallas): Product → Card/Delivery → Summary (backdrop) → Status → Product.
+- UI existente (split checkout, catálogo) se **reutiliza**; este spec exige **cableado real** (ver `frontend-live-wiring`).
+- Transacción `PENDING` **antes** de la pasarela.
+- Aprobado → update tx + delivery + decrement stock.
+- Rechazado → update tx **sin** tocar stock.
+- Fees: `product + baseFee (siempre) + deliveryFee`.
+- Persistencia FE sin PAN/CVV.
 
 ## Fuera de alcance
 
-- Creación de productos nuevos (DB sembrada).
-- Autenticación de usuarios / cuentas persistentes.
-- Reembolsos o cancelaciones post-pago.
-- Cálculo dinámico de fee de entrega (fee fijo).
+- Alta de productos (seed).
+- Auth de usuarios.
+- Reembolsos.
+- Modal legacy (reemplazado por split flow ADR 0008).
 
 ## Criterios de aceptación (EARS)
 
-- Cuando el cliente completa el formulario de tarjeta con datos inválidos, el sistema debe bloquear el envío y mostrar el campo con error.
-- Cuando el cliente confirma el pago, el sistema debe crear una transacción en estado `PENDING` antes de llamar a la pasarela externa.
-- Cuando la pasarela responde aprobado, el sistema debe actualizar la transacción, asignar el producto a entrega y descontar stock, en ese orden.
-- Cuando la pasarela responde rechazado, el sistema debe actualizar la transacción **sin** tocar el stock ni crear entrega fulfillable.
-- Cuando el cliente refresca la página en cualquier paso del checkout, el sistema debe recuperar el progreso de la transacción en curso (sin PAN/CVV en claro).
+- Cuando el cliente pulsa **Pay** en el summary, el sistema debe crear una transacción `PENDING` en el backend **antes** de invocar la pasarela.
+- Cuando la pasarela aprueba, el sistema debe persistir `APPROVED`, asociar delivery al customer/producto y decrementar stock en 1.
+- Cuando la pasarela rechaza, el sistema debe persistir `DECLINED` y el stock del producto debe permanecer igual.
+- Cuando el FE muestra Status y vuelve al producto, el stock visible debe coincidir con DynamoDB.
+- Cuando falla la pasarela por error técnico, el sistema debe marcar `ERROR` (o equivalente) sin decrementar stock.
+- Cuando el usuario refresca mid-flow, el progreso seguro (sin PAN/CVV) se restaura.
 
-## Supuestos / preguntas abiertas
+## Dependencias de specs
 
-- UX del formulario: un solo paso con validación inline (no wizard multi-step).
-- Fee de entrega: fijo (valor concreto en plan/README).
-- Fee base: siempre aplicado.
-- Detección de logos VISA/Mastercard: incluida (plus del enunciado).
-- Dominios API: stock, transactions, customers, deliveries como microservicios Nest.
+- `persistence-seed`, `payment-gateway`, `api-domains`, `frontend-live-wiring`.
 
 ## Referencias
 
-- ADR: 0001, 0002, 0003, 0004, 0005
-- Estado: `docs/current-state.md`
-- Rúbrica / brief local: no commitear al repo público
+- ADRs 0001–0006, 0008
+- Brief proceso de negocio § pasos 5.x
+- `docs/scorecard.md` criterio base #3
