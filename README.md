@@ -35,15 +35,19 @@ npm run dev
 
 | Proceso | URL |
 |---|---|
+| **Web (NORA mock UI)** | `http://localhost:5173` |
 | **API Gateway** (`serverless offline`) | `http://localhost:3000` |
-| Web (Vite) | `http://localhost:5173` |
 
-Examples: `GET /products/health`, `GET /customers/health`, …
+Mock checkout: Product → **Pay with credit card** → card/delivery modal → Order summary (backdrop) → Pay → Status → Product (stock updates if approved).  
+Test card: `4111 1111 1111 1111`, future `MM/YY`, CVV `123`. Toggle “Simulate declined payment” on summary.
+
+Design system: [`docs/design-system.md`](docs/design-system.md) · Spec: [`specs/checkout-ui-mock/spec.md`](specs/checkout-ui-mock/spec.md)
 
 Deploy API: `npm run deploy:api`
 
 ## Docs
 
 - Agent workflow: `AGENTS.md`
-- Current status: `docs/current-state.md`
+- Current status: `docs/current-state.md` (keep in sync while building)
+- Changelog: `CHANGELOG.md` (update every meaningful change)
 - OpenAPI: `docs/api/openapi.json` (Apidog)

@@ -2,10 +2,12 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { createLogger } from '@app/shared';
+import { NestStandardLogger, createLogger } from '@app/shared';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { logger: false });
+  const app = await NestFactory.create(AppModule, {
+    logger: new NestStandardLogger('customers'),
+  });
   const logger = createLogger('customers');
   const prefix = process.env.SERVICE_PREFIX ?? 'customers';
 

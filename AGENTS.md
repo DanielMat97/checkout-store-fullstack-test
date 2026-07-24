@@ -8,7 +8,7 @@ This project follows **Spec-Driven Development (SDD)**. Before implementing any 
 4. `specs/<feature>/plan.md` — how to build it.
 5. `specs/<feature>/tasks.md` — in what order.
 
-Also follow `.cursor/rules/` and the `checkout-flow` skill for locked stack and scoring.
+Also follow `.cursor/rules/` and the `checkout-flow` skill for locked stack and scoring. UI identity lives in `docs/design-system.md` and `apps/web/src/design-system/`.
 
 ## Fixed project rules
 
@@ -22,6 +22,7 @@ Also follow `.cursor/rules/` and the `checkout-flow` skill for locked stack and 
 - Test coverage must not drop below **80%** (FE and BE).
 - Public repo must never contain the payment company brand name; secrets only in env / Secrets Manager.
 - Update `docs/api/` OpenAPI (Apidog-importable) on every endpoint create/change.
+- **Living docs:** every meaningful change updates `CHANGELOG.md` + `docs/current-state.md` (+ `tasks.md` / OpenAPI / ADR / README as relevant) in the same turn — see `.cursor/rules/living-docs.mdc`.
 
 ## If the spec does not cover something
 

@@ -1,0 +1,61 @@
+.nora-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nora-space-2);
+  width: 100%;
+}
+
+.nora-field__label {
+  font-size: var(--nora-fs-sm);
+  font-weight: 600;
+  color: var(--nora-ink);
+}
+
+.nora-field__control {
+  display: flex;
+  align-items: center;
+  min-height: var(--nora-touch);
+  padding: 0 var(--nora-space-3);
+  background: var(--nora-paper);
+  border: 1px solid var(--nora-line);
+  border-radius: var(--nora-radius-sm);
+}
+
+.nora-field__control:focus-within {
+  border-color: var(--nora-ink);
+  box-shadow: var(--nora-focus-ring);
+}
+
+.nora-field__control--error {
+  border-color: var(--nora-danger);
+  background: var(--nora-danger-soft);
+}
+
+.nora-field__input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: var(--nora-fs-md);
+  color: var(--nora-ink);
+  outline: none;
+  height: var(--nora-touch);
+}
+
+.nora-field__trailing {
+  display: inline-flex;
+  align-items: center;
+  margin-left: var(--nora-space-2);
+}
+
+.nora-field__hint {
+  font-size: var(--nora-fs-xs);
+  color: var(--nora-slate);
+}
+
+.nora-field__error {
+  font-size: var(--nora-fs-xs);
+  color: var(--nora-danger);
+  font-weight: 600;
+}

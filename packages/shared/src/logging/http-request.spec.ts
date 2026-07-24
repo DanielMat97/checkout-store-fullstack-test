@@ -21,6 +21,7 @@ describe('logHttpRequest', () => {
     process.stdout.write = original;
     expect(writes[0]).toContain('"service":"api-gateway"');
     expect(writes[0]).toContain('"message":"http.request"');
+    expect(writes[0]).toContain('"channel":"http"');
     expect(writes[0]).toContain('/products/health');
   });
 });

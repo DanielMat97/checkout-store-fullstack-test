@@ -1,0 +1,40 @@
+.nora-checkout {
+  display: grid;
+  gap: var(--nora-space-5);
+}
+
+.nora-checkout__tip {
+  margin: 0;
+  padding: var(--nora-space-3);
+  background: var(--nora-mist);
+  border-radius: var(--nora-radius-sm);
+  font-size: var(--nora-fs-xs);
+  color: var(--nora-slate);
+}
+
+.nora-checkout__tip code {
+  font-family: ui-monospace, monospace;
+  color: var(--nora-ink);
+}
+
+.nora-checkout__group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: var(--nora-space-3);
+}
+
+.nora-checkout__group legend {
+  padding: 0;
+  margin-bottom: var(--nora-space-2);
+  font-family: var(--nora-font-display);
+  font-size: var(--nora-fs-md);
+  font-weight: 700;
+}
+
+.nora-checkout__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--nora-space-3);
+}

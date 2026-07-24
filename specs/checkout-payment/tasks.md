@@ -57,5 +57,8 @@ Orden estricto salvo dependencia explícita. Cada commit: Conventional Commits +
 - [ ] Tests pasan; coverage no baja de 80% en paquetes tocados (meta global en T8).
 - [ ] Sin secrets hardcodeados.
 - [ ] Responsive / a11y básica si tocó FE.
-- [ ] `CHANGELOG.md` + `docs/current-state.md` actualizados.
+- [ ] **`CHANGELOG.md` actualizado** (Keep a Changelog / Unreleased).
+- [ ] **`docs/current-state.md` actualizado** (tabla + Next + fecha).
+- [ ] Esta `tasks.md` refleja el progreso (checkbox).
+- [ ] OpenAPI/README/ADR si la tarea tocó esos superficies.
 - [ ] Commit cita spec + task T#.

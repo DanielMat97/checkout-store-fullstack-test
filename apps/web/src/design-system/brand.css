@@ -1,0 +1,21 @@
+.nora-brand {
+  margin: 0;
+  font-family: var(--nora-font-display);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--nora-ink);
+}
+
+.nora-brand--sm {
+  font-size: var(--nora-fs-sm);
+}
+
+.nora-brand--md {
+  font-size: var(--nora-fs-lg);
+}
+
+.nora-brand--lg {
+  font-size: var(--nora-fs-2xl);
+  line-height: 1;
+}

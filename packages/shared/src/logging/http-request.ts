@@ -12,21 +12,26 @@ export interface HttpRequestLogInput {
   errorMessage?: string;
 }
 
-/** Standardized access log for API Gateway / edge proxy. */
+/**
+ * API access log — same envelope as every other app log (`createLogger`).
+ * Always uses message key `http.request`.
+ */
 export function logHttpRequest(input: HttpRequestLogInput): void {
-  const logger = createLogger(input.service ?? 'api-gateway', {
+  const service = input.service ?? 'api-gateway';
+  const logger = createLogger(service, {
     correlationId: input.correlationId,
     requestId: input.requestId,
   });
 
-  const data = {
+  const data: Record<string, unknown> = {
+    channel: 'http',
     method: input.method,
     path: input.path,
     statusCode: input.statusCode,
     durationMs: input.durationMs,
-    targetService: input.targetService,
-    errorMessage: input.errorMessage,
   };
+  if (input.targetService) data.targetService = input.targetService;
+  if (input.errorMessage) data.errorMessage = input.errorMessage;
 
   if (input.statusCode >= 500) {
     logger.error('http.request', data);

@@ -10,7 +10,10 @@
     "test:cov": "jest --config jest.config.js --coverage"
   },
   "dependencies": {
-    "neverthrow": "^8.2.0"
+    "@nestjs/common": "^11.0.12",
+    "neverthrow": "^8.2.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
   },
   "devDependencies": {
     "@types/express": "^5.0.1",

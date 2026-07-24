@@ -1,0 +1,31 @@
+.nora-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(900px 420px at 0% -10%, #d7e3f2, transparent),
+    var(--nora-mist);
+  color: var(--nora-ink);
+  font-family: var(--nora-font-body);
+}
+
+.nora-shell__mock {
+  margin: 0;
+  padding: var(--nora-space-2) var(--nora-space-4);
+  text-align: center;
+  font-size: var(--nora-fs-xs);
+  font-weight: 600;
+  background: var(--nora-ink);
+  color: var(--nora-citrus);
+}
+
+.nora-shell__frame {
+  width: min(100%, var(--nora-max));
+  margin: 0 auto;
+  padding: var(--nora-space-4) var(--nora-space-4) var(--nora-space-7);
+}
+
+.nora-shell__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--nora-space-4);
+}

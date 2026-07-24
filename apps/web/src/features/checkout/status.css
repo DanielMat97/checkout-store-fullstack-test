@@ -1,0 +1,69 @@
+.nora-status {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--nora-space-3);
+  animation: nora-fade-in var(--nora-med) var(--nora-ease);
+}
+
+.nora-status h1 {
+  margin: 0;
+  font-family: var(--nora-font-display);
+  font-size: var(--nora-fs-xl);
+}
+
+.nora-status p {
+  margin: 0;
+  color: var(--nora-slate);
+  line-height: 1.5;
+}
+
+.nora-status__icon {
+  width: 3rem;
+  height: 3rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  background: var(--nora-line);
+}
+
+.nora-status--approved .nora-status__icon {
+  background: var(--nora-success-soft);
+  color: var(--nora-success);
+}
+
+.nora-status--declined .nora-status__icon,
+.nora-status--error .nora-status__icon {
+  background: var(--nora-danger-soft);
+  color: var(--nora-danger);
+}
+
+.nora-status--pending .nora-status__icon {
+  background: var(--nora-warning-soft);
+  color: var(--nora-warning);
+}
+
+.nora-status__id {
+  font-size: var(--nora-fs-xs) !important;
+  font-family: ui-monospace, monospace;
+}
+
+@keyframes nora-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nora-status {
+    animation: none;
+  }
+}

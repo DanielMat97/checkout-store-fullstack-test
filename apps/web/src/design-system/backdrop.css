@@ -1,0 +1,55 @@
+.nora-backdrop {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  align-items: end;
+}
+
+.nora-backdrop__back {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(11, 18, 32, 0.15), rgba(11, 18, 32, 0.55)),
+    radial-gradient(800px 400px at 80% -10%, #dfe8f4, var(--nora-mist));
+}
+
+.nora-backdrop__front {
+  position: relative;
+  z-index: 1;
+  width: min(100%, var(--nora-max));
+  margin: 0 auto;
+  padding: var(--nora-space-5) var(--nora-space-4) var(--nora-space-6);
+  background: var(--nora-paper);
+  border-radius: var(--nora-radius-lg) var(--nora-radius-lg) 0 0;
+  box-shadow: var(--nora-shadow);
+  animation: nora-rise var(--nora-med) var(--nora-ease);
+}
+
+.nora-backdrop__title {
+  margin: 0 0 var(--nora-space-4);
+  font-family: var(--nora-font-display);
+  font-size: var(--nora-fs-xl);
+}
+
+.nora-backdrop__footer {
+  margin-top: var(--nora-space-5);
+  display: grid;
+  gap: var(--nora-space-3);
+}
+
+@keyframes nora-rise {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nora-backdrop__front {
+    animation: none;
+  }
+}

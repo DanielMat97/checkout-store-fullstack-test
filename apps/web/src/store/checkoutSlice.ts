@@ -1,4 +1,6 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { CardBrand } from '../features/checkout/card';
+import { MOCK_PRODUCT } from '../mocks/catalog';
 
 export type CheckoutStep =
   | 'product'
@@ -17,7 +19,7 @@ export interface DeliveryInfo {
 
 /** Safe card metadata only — never store PAN/CVV here. */
 export interface CardMeta {
-  brand: 'visa' | 'mastercard' | 'unknown';
+  brand: CardBrand;
   last4: string;
   holderName: string;
 }
@@ -29,15 +31,19 @@ export interface CheckoutState {
   cardMeta: CardMeta | null;
   transactionId: string | null;
   paymentStatus: 'idle' | 'PENDING' | 'APPROVED' | 'DECLINED' | 'ERROR';
+  mockStock: number;
+  simulateDecline: boolean;
 }
 
 const initialState: CheckoutState = {
   step: 'product',
-  productId: null,
+  productId: MOCK_PRODUCT.id,
   delivery: null,
   cardMeta: null,
   transactionId: null,
   paymentStatus: 'idle',
+  mockStock: MOCK_PRODUCT.stock,
+  simulateDecline: false,
 };
 
 const checkoutSlice = createSlice({
@@ -65,8 +71,19 @@ const checkoutSlice = createSlice({
     ) {
       state.paymentStatus = action.payload;
     },
-    resetCheckout() {
-      return initialState;
+    setMockStock(state, action: PayloadAction<number>) {
+      state.mockStock = action.payload;
+    },
+    setSimulateDecline(state, action: PayloadAction<boolean>) {
+      state.simulateDecline = action.payload;
+    },
+    resetCheckout(state) {
+      state.step = 'product';
+      state.delivery = null;
+      state.cardMeta = null;
+      state.transactionId = null;
+      state.paymentStatus = 'idle';
+      state.simulateDecline = false;
     },
   },
 });
@@ -78,6 +95,8 @@ export const {
   setCardMeta,
   setTransactionId,
   setPaymentStatus,
+  setMockStock,
+  setSimulateDecline,
   resetCheckout,
 } = checkoutSlice.actions;
 

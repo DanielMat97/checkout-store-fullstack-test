@@ -13,7 +13,7 @@ import storage from 'redux-persist/lib/storage';
 import checkoutReducer from './checkoutSlice';
 
 const persistConfig = {
-  key: 'checkout-store',
+  key: 'nora-checkout',
   storage,
   whitelist: ['checkout'],
 };

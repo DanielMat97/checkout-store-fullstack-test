@@ -1,0 +1,30 @@
+.nora-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0 var(--nora-space-2);
+  border-radius: var(--nora-radius-sm);
+  font-size: var(--nora-fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.nora-badge--neutral {
+  background: var(--nora-line);
+  color: var(--nora-ink);
+}
+
+.nora-badge--success {
+  background: var(--nora-success-soft);
+  color: var(--nora-success);
+}
+
+.nora-badge--danger {
+  background: var(--nora-danger-soft);
+  color: var(--nora-danger);
+}
+
+.nora-badge--warning {
+  background: var(--nora-warning-soft);
+  color: var(--nora-warning);
+}

@@ -1,0 +1,51 @@
+.nora-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--nora-space-2);
+  min-height: var(--nora-touch);
+  padding: 0 var(--nora-space-5);
+  border: 1px solid transparent;
+  border-radius: var(--nora-radius-md);
+  font-family: var(--nora-font-body);
+  font-size: var(--nora-fs-md);
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform var(--nora-fast) var(--nora-ease),
+    background var(--nora-fast) var(--nora-ease),
+    opacity var(--nora-fast) var(--nora-ease);
+}
+
+.nora-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--nora-focus-ring);
+}
+
+.nora-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.nora-btn--block {
+  width: 100%;
+}
+
+.nora-btn--primary {
+  background: var(--nora-citrus);
+  color: var(--nora-citrus-ink);
+}
+
+.nora-btn--primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.nora-btn--ghost {
+  background: transparent;
+  color: var(--nora-ink);
+  border-color: var(--nora-line);
+}
+
+.nora-btn--danger {
+  background: var(--nora-danger);
+  color: #fff;
+}

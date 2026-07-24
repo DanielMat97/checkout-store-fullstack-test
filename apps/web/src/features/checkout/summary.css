@@ -1,0 +1,36 @@
+.nora-summary__product {
+  margin: var(--nora-space-3) 0 var(--nora-space-4);
+  font-family: var(--nora-font-display);
+  font-size: var(--nora-fs-lg);
+  font-weight: 700;
+}
+
+.nora-summary__meta {
+  margin-top: var(--nora-space-4);
+  display: grid;
+  gap: var(--nora-space-3);
+  color: var(--nora-slate);
+  font-size: var(--nora-fs-sm);
+}
+
+.nora-summary__card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--nora-space-2);
+  color: var(--nora-ink);
+}
+
+.nora-summary__toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--nora-space-2);
+  font-size: var(--nora-fs-sm);
+  color: var(--nora-slate);
+}
+
+.nora-summary__back {
+  text-align: center;
+  color: var(--nora-slate);
+  font-size: var(--nora-fs-sm);
+}
