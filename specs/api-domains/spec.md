@@ -1,6 +1,6 @@
 ---
 feature: api-domains
-status: ready
+status: done
 owner: backend
 rubric: [4]
 ---

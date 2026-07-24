@@ -33,10 +33,10 @@ export function domainErrorToHttp(error: DomainError): HttpException {
         message: error.message,
       });
     case 'PAYMENT_FAILED':
-      return new UnprocessableEntityException({
-        error: error.type,
-        message: error.message,
-      });
+      return new HttpException(
+        { error: error.type, message: error.message },
+        502,
+      );
     case 'PERSISTENCE_ERROR':
     default:
       return new HttpException(

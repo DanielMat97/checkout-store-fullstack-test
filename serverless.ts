@@ -10,6 +10,7 @@ const tableName = '${env:DYNAMODB_TABLE_NAME, "checkout-store"}';
 const serverlessConfiguration: AWS = {
   service: 'checkout-api',
   frameworkVersion: '4',
+  useDotenv: true,
   plugins: ['serverless-offline'],
   provider: {
     name: 'aws',

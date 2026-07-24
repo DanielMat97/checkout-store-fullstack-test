@@ -24,6 +24,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **`@app/persistence`**: ElectroDB single-table (Product/Customer/Delivery/Transaction), repository ports + adapters (`Result`/`neverthrow`), DynamoDB table in `serverless.ts`, `docker compose` DynamoDB Local, `npm run ensure-table` + `npm run seed` (4 NORA products). Access patterns: `docs/data-model.md`.
 - **Hex + ROP** (`architecture-hex-rop`): ADR 0009 (`neverthrow`); `CreateTransaction` / `PayTransaction` use-cases with port fakes (DECLINED no decrementa stock); thin HTTP controllers; minimal use-cases in products/customers/deliveries; OpenAPI paths updated. Payment still `FakePaymentGateway` until `payment-gateway`.
 - **Payment sandbox adapter** (`payment-gateway`): `SandboxPaymentGateway` (acceptance → tokenize → create tx → poll), integrity SHA-256, env-only keys, Nest wiring (`PAYMENT_GATEWAY_MODE=sandbox|fake`). Docs: `docs/payment-adapter.md`. Zero provider brand in public source.
+- **API domains**: DTOs + global `ValidationPipe` (stable 400 body), `GET /products/:id/stock`, `POST /deliveries`, 201 on creates, OpenAPI 0.3 with schemas/examples, smoke guide `docs/api/smoke.md`, `useDotenv: true` in `serverless.ts`.
 
 ### Changed
 

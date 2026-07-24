@@ -1,30 +1,20 @@
-import { Body, Controller, Get, Inject, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Inject,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { TransactionRepositoryPort } from '@app/persistence';
 import { CreateTransactionUseCase } from '../../../application/create-transaction.use-case';
 import { PayTransactionUseCase } from '../../../application/pay-transaction.use-case';
 import { TRANSACTION_REPOSITORY } from '../../../ports/injection.tokens';
 import { domainErrorToHttp } from './domain-error.mapper';
-
-class CreateTransactionBody {
-  productId!: string;
-  customerId!: string;
-  productAmount!: number;
-  baseFee!: number;
-  deliveryFee!: number;
-  delivery!: { address: string; city: string; region: string };
-}
-
-class PayTransactionBody {
-  deliveryId!: string;
-  card!: {
-    number: string;
-    cvc: string;
-    expMonth: string;
-    expYear: string;
-    cardHolder: string;
-  };
-}
+import { CreateTransactionDto, PayTransactionDto } from './dto';
 
 @ApiTags('transactions')
 @Controller()
@@ -37,8 +27,9 @@ export class TransactionsController {
   ) {}
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create PENDING transaction + delivery' })
-  async create(@Body() body: CreateTransactionBody) {
+  async create(@Body() body: CreateTransactionDto) {
     const result = await this.createTransaction.execute(body);
     if (result.isErr()) {
       throw domainErrorToHttp(result.error);
@@ -61,8 +52,12 @@ export class TransactionsController {
   }
 
   @Post(':id/pay')
-  @ApiOperation({ summary: 'Pay PENDING transaction via payment port' })
-  async pay(@Param('id') id: string, @Body() body: PayTransactionBody) {
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Pay PENDING transaction (returns 200 with paymentStatus APPROVED|DECLINED|ERROR)',
+  })
+  async pay(@Param('id') id: string, @Body() body: PayTransactionDto) {
     const result = await this.payTransaction.execute({
       transactionId: id,
       deliveryId: body.deliveryId,

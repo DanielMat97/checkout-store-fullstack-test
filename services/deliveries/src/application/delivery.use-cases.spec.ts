@@ -4,14 +4,13 @@ import type {
   DeliveryRepositoryPort,
   PersistenceError,
 } from '@app/persistence';
-import { GetDeliveryUseCase } from './delivery.use-cases';
+import {
+  CreateDeliveryUseCase,
+  GetDeliveryUseCase,
+} from './delivery.use-cases';
 
 class MemoryDeliveries implements DeliveryRepositoryPort {
   private readonly items = new Map<string, DeliveryRecord>();
-
-  seed(d: DeliveryRecord): void {
-    this.items.set(d.id, { ...d });
-  }
 
   async getById(
     id: string,
@@ -31,24 +30,25 @@ class MemoryDeliveries implements DeliveryRepositoryPort {
   }
 }
 
-describe('GetDeliveryUseCase (ROP)', () => {
+describe('Delivery use-cases (ROP)', () => {
   const repo = new MemoryDeliveries();
   const get = new GetDeliveryUseCase(repo);
+  const create = new CreateDeliveryUseCase(repo);
 
-  it('returns delivery by id', async () => {
-    repo.seed({
-      id: 'del_1',
+  it('creates and gets a delivery', async () => {
+    const created = await create.execute({
       transactionId: 'tx_1',
       customerId: 'cust_1',
       address: 'Calle 1',
       city: 'Bogotá',
       region: 'Cundinamarca',
       feeMinor: 5000,
-      status: 'PENDING',
     });
-    const result = await get.execute('del_1');
-    expect(result.isOk()).toBe(true);
-    expect(result._unsafeUnwrap().city).toBe('Bogotá');
+    expect(created.isOk()).toBe(true);
+    const id = created._unsafeUnwrap().id;
+    const loaded = await get.execute(id);
+    expect(loaded.isOk()).toBe(true);
+    expect(loaded._unsafeUnwrap().city).toBe('Bogotá');
   });
 
   it('returns typed NOT_FOUND', async () => {

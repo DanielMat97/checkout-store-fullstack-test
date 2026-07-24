@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { NestStandardLogger, createLogger } from '@app/shared';
+import { NestStandardLogger, createLogger, applyGlobalValidation } from '@app/shared';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -12,6 +12,7 @@ async function bootstrap() {
   const prefix = process.env.SERVICE_PREFIX ?? 'customers';
 
   app.setGlobalPrefix(prefix);
+  applyGlobalValidation(app);
   app.enableCors({ origin: process.env.CORS_ORIGIN?.split(',') ?? true });
 
   const config = new DocumentBuilder()

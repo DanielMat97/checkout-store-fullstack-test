@@ -11,7 +11,7 @@
 | UI mock (hecho) | `checkout-ui-mock/` | **done** | Base #2 parcial, #3 UI, bonus CSS/responsive parcial |
 | Pago E2E (contrato negocio) | `checkout-payment/` | **ready** | Base #3 (mitad sistema) |
 | Persistencia + seed | `persistence-seed/` | **done** | Base #4 prereq; brief seed |
-| APIs 4 dominios | `api-domains/` | **ready** | Base #4 (20) |
+| APIs 4 dominios | `api-domains/` | **done** | Base #4 (20) |
 | Pasarela sandbox | `payment-gateway/` | **done** | Base #3 pasos 5.1–5.3 |
 | FE live (off mock) | `frontend-live-wiring/` | **ready** | Base #3 completo |
 | Cobertura Jest | `testing-coverage/` | **ready** | Base #5 (30) |

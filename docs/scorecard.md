@@ -1,7 +1,7 @@
 # Scorecard — evaluación estricta (hiring bar)
 
 > Fuente rúbrica: `docs/fullstack-test.md` (100 base + 50 bonus).  
-> Última evaluación: **2026-07-24** (post `payment-gateway`)  
+> Última evaluación: **2026-07-24** (post `api-domains`)  
 > Modo: **evaluador técnico de la empresa contratante** (no autoelogio del candidato).
 
 ---
@@ -47,20 +47,18 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 | Lente | Veredicto (1 línea) |
 |---|---|
-| Arquitecto | Adapter sandbox real detrás del puerto + tests HTTP mock. **Sin smoke live UAT documentado** en este corte. |
-| Líder técnico | Wiring listo; default local sigue `fake`. Falta coverage/deploy/README. |
-| Product Owner | BE puede cobrar vía puerto; **FE mock** → onboarding E2E incompleto. |
-| Security | Tokeniza en adapter (no persiste PAN); body pay aún recibe tarjeta en BE — aceptable para brief, mejorar con FE tokenize luego. |
-| Hiring bar | **Aún no.** Backend de pago maduro; no cierra base 100. |
+| Arquitecto | 4 dominios HTTP + OpenAPI + ValidationPipe. **FE aún mock**. |
+| Líder técnico | Contratos listos; falta `.env` root + coverage/deploy/README. |
+| Product Owner | API puede completar 5.x; **UI no consume API**. |
+| Security | Headers + validation; pay aún manda tarjeta al BE. |
+| Hiring bar | **Aún no.** Backend usable; no aprueba base. |
 
 | | Puntos (modo estricto) |
 |---|---|
-| **Base** | **23 / 100** |
+| **Base** | **29 / 100** |
 | **Bonus** | **29 / 50** |
-| **Total** | **52 / 150** |
+| **Total** | **58 / 150** |
 | **¿Aprueba (≥100 base)?** | **No** |
-
-> Nota: adapter sandbox **sí** implementa 5.2; el panel exige evidencia live/FE cableado para subir más el #3.
 
 ---
 
@@ -69,11 +67,8 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 | Paso brief | Evidencia | Nota del panel | Score parcial |
 |---|---|---|---|
 | 1–4 UI + fees | Mock NORA Soft | OK. | ✅ |
-| 5.1 Tx `PENDING` BE | `CreateTransactionUseCase` | OK en BE; FE no cableado. | 🟡 |
-| 5.2 Pasarela sandbox | `SandboxPaymentGateway` | Código + unit tests mock HTTP. −live smoke. | 🟡 |
-| 5.3 Update tx/delivery/stock | `PayTransactionUseCase` | OK con puerto. | 🟡 |
-| 6 Status + stock fresco | Mock FE | Incompleto E2E. | 🟡 |
-| 4 dominios API | Controllers thin | Parcial. | 🟡 |
+| 5.1–5.3 BE | Create/Pay + sandbox + APIs | BE listo; FE no. | 🟡 |
+| 4 dominios API | OpenAPI 0.3 + DTOs + stock | Cumple contrato; smoke doc existe. | ✅ |
 | Seed | `npm run seed` | OK. | ✅ |
 | Jest >80% + README | No | **Fallo duro.** | ❌ |
 | Deploy cloud | No | **Fallo duro.** | ❌ |
@@ -86,13 +81,13 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 |---|---|---|---|---|
 | 1 | README completado | 5 | **1** | Sin entregable completo. |
 | 2 | Imágenes / sin desborde | 5 | **4** | Sin cambio. |
-| 3 | Onboarding pago completo | 20 | **12** | Adapter sandbox + ROP pay. −8: FE mock, sin smoke UAT citado, default fake local. |
-| 4 | API funcionando | 20 | **6** | Endpoints existen; falta validación/E2E documentado. |
-| 5 | Unit tests >80% FE y BE | 30 | **0** | Tests de adapter/use-case ≠ umbral 80%. |
+| 3 | Onboarding pago completo | 20 | **12** | BE completo; FE mock. |
+| 4 | API funcionando | 20 | **12** | 4 dominios + OpenAPI + validation + stock. −8: smoke live no verificado en corte / sin deploy. |
+| 5 | Unit tests >80% FE y BE | 30 | **0** | Sin umbral documentado. |
 | 6 | Deploy cloud | 20 | **0** | Sin URL. |
-| | **Subtotal base** | **100** | **23** | |
+| | **Subtotal base** | **100** | **29** | |
 
-**Base oficial del corte: 23 / 100.**
+**Base oficial del corte: 29 / 100.**
 
 ---
 
@@ -100,12 +95,12 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 | # | Criterio | Max | **Strict** | Justificación del panel |
 |---|---|---|---|---|
-| 1 | OWASP + HTTPS + headers | 5 | **1** | Sin HTTPS público. |
+| 1 | OWASP + HTTPS + headers | 5 | **1** | Headers sí; HTTPS público no. |
 | 2 | Responsive multi-browser | 5 | **2** | Sin matriz. |
 | 3 | Habilidades CSS | 10 | **6** | Sin cambio. |
-| 4 | Código limpio | 10 | **5** | Adapter + config + integrity separados. |
-| 5 | Hexagonal | 10 | **8** | Puerto + fake + sandbox adapters + DI. |
-| 6 | ROP | 10 | **7** | Charge retorna `Result`; DECLINED tipado. |
+| 4 | Código limpio | 10 | **5** | DTOs + thin controllers. |
+| 5 | Hexagonal | 10 | **8** | Sin cambio material. |
+| 6 | ROP | 10 | **7** | Sin cambio material. |
 | | **Subtotal bonus** | **50** | **29** | |
 
 ---
@@ -113,10 +108,10 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 ## 5. Total estricto
 
 ```
-Base   23 / 100
+Base   29 / 100
 Bonus  29 /  50
 ───────────────
-Total  52 / 150
+Total  58 / 150
 ```
 
 **Resultado hiring:** **REJECT / NEEDS MAJOR WORK**.
@@ -125,9 +120,9 @@ Total  52 / 150
 
 | Prioridad | Trabajo | Pts base ≈ |
 |---|---|---|
-| P0 | FE live + smoke sandbox | +6–8 (#3) |
-| P0 | API polish + evidencia | +10–12 (#4) |
-| P0 | Jest >80% + README cifras | +28–30 |
+| P0 | FE live + onboarding E2E | +6–8 (#3) |
+| P0 | Smoke live + polish API | +4–6 (#4) |
+| P0 | Jest >80% + README | +28–30 |
 | P0 | Deploy + README URLs | +20 +4 |
 
 ---
@@ -136,9 +131,9 @@ Total  52 / 150
 
 | Hito | Base ≈ | Bonus ≈ | Total ≈ | Hiring |
 |---|---|---|---|---|
-| Hoy | 23 | 29 | **52** | Reject |
-| + FE live + API polish | 45 | 30 | **75** | Reject |
-| + tests >80% | 75 | 32 | **107** | Condicional pass base |
+| Hoy | 29 | 29 | **58** | Reject |
+| + FE live | 42 | 30 | **72** | Reject |
+| + tests >80% | 72 | 32 | **104** | Condicional pass base |
 | + deploy + README + OWASP | 98–100 | 40 | **138–140** | Strong pass posible |
 
 ---

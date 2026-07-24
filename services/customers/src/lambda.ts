@@ -3,7 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import serverlessExpress from '@codegenie/serverless-express';
 import { Callback, Context, Handler } from 'aws-lambda';
 import { AppModule } from './app.module';
-import { NestStandardLogger, createLogger } from '@app/shared';
+import { NestStandardLogger, createLogger, applyGlobalValidation } from '@app/shared';
 
 const serviceName = process.env.SERVICE_NAME ?? 'customers';
 let cachedServer: Handler | undefined;
@@ -14,6 +14,7 @@ async function bootstrap(): Promise<Handler> {
   });
   const prefix = process.env.SERVICE_PREFIX ?? 'customers';
   app.setGlobalPrefix(prefix);
+  applyGlobalValidation(app);
   app.enableCors({
     origin: process.env.CORS_ORIGIN?.split(',') ?? true,
   });

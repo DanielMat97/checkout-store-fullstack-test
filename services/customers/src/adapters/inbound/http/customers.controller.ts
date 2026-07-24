@@ -1,17 +1,21 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   NotFoundException,
   Param,
   Post,
+  BadRequestException,
+  HttpException,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   CreateCustomerUseCase,
   GetCustomerUseCase,
 } from '../../../application/customer.use-cases';
+import { CreateCustomerDto } from './dto';
 
 @ApiTags('customers')
 @Controller()
@@ -22,17 +26,15 @@ export class CustomersController {
   ) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create customer' })
-  async create(
-    @Body()
-    body: { fullName: string; email: string; phone: string },
-  ) {
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create customer (no card data)' })
+  async create(@Body() body: CreateCustomerDto) {
     const result = await this.createCustomer.execute(body);
     if (result.isErr()) {
       if (result.error.type === 'VALIDATION') {
         throw new BadRequestException(result.error);
       }
-      throw new NotFoundException(result.error);
+      throw new HttpException({ error: result.error }, 500);
     }
     return result.value;
   }

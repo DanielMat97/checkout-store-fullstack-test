@@ -8,9 +8,9 @@ Ver **`docs/scorecard.md`**.
 
 | | Estricto |
 |---|---|
-| Base | **23 / 100** |
+| Base | **29 / 100** |
 | Bonus | **29 / 50** |
-| **Total** | **52 / 150** |
+| **Total** | **58 / 150** |
 | Aprueba (≥100 base) | **No — REJECT** |
 
 ## Specs (path to 100%)
@@ -23,9 +23,9 @@ Ver **`docs/scorecard.md`**.
 | `persistence-seed` | **done** |
 | `architecture-hex-rop` | **done** |
 | `payment-gateway` | **done** |
-| `api-domains` | ready (**next** — polish DTOs/validation/E2E) |
-| `checkout-payment` | ready |
-| `frontend-live-wiring` | ready |
+| `api-domains` | **done** |
+| `checkout-payment` | ready (BE listo; falta FE) |
+| `frontend-live-wiring` | ready (**next**) |
 | `testing-coverage` | ready |
 | `cloud-deploy` | ready |
 | `readme-deliverables` | ready |
@@ -36,15 +36,13 @@ Ver **`docs/scorecard.md`**.
 
 | Area | Status |
 |---|---|
-| Mock UI NORA Soft | **Done** |
-| DynamoDB + ElectroDB + seed | **Done** |
-| Hex use-cases ROP | **Done** |
-| `SandboxPaymentGateway` (tokenize → tx → poll) | **Done** (unit-tested w/ mock HTTP) |
-| Fake gateway for local | **Done** (`PAYMENT_GATEWAY_MODE=fake`) |
-| Live FE / coverage 80% / deploy | **Not started** |
+| 4 domain HTTP APIs + DTOs + ValidationPipe | **Done** |
+| OpenAPI + `docs/api/smoke.md` | **Done** |
+| Sandbox/fake payment + Dynamo seed | **Done** |
+| FE live (off mock) | **Not started** |
+| Coverage 80% / deploy / README | **Not started** |
 
 ## Next
 
-1. `api-domains` — DTOs/class-validator, stock endpoint, OpenAPI completo, smoke local.
-2. `frontend-live-wiring` — apagar mock.
-3. Coverage + deploy + README.
+1. `frontend-live-wiring` — `VITE_MOCK_MODE=false`, client API, Redux live.
+2. Luego coverage → deploy → README.
