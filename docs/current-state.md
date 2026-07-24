@@ -8,9 +8,9 @@ Ver **`docs/scorecard.md`**.
 
 | | Estricto |
 |---|---|
-| Base | **18 / 100** |
-| Bonus | **15 / 50** |
-| **Total** | **33 / 150** |
+| Base | **21 / 100** |
+| Bonus | **28 / 50** |
+| **Total** | **49 / 150** |
 | Aprueba (≥100 base) | **No — REJECT** |
 
 ## Specs (path to 100%)
@@ -21,10 +21,10 @@ Ver **`docs/scorecard.md`**.
 |---|---|
 | `checkout-ui-mock` | **done** |
 | `persistence-seed` | **done** |
+| `architecture-hex-rop` | **done** |
+| `payment-gateway` | ready (**next**) |
+| `api-domains` | ready (HTTP thin already started; OpenAPI partial) |
 | `checkout-payment` | ready |
-| `payment-gateway` | ready |
-| `api-domains` | ready |
-| `architecture-hex-rop` | ready (next) |
 | `frontend-live-wiring` | ready |
 | `testing-coverage` | ready |
 | `cloud-deploy` | ready |
@@ -37,24 +37,14 @@ Ver **`docs/scorecard.md`**.
 | Area | Status |
 |---|---|
 | Mock UI NORA Soft + split checkout | **Done** |
-| `@app/persistence` ElectroDB + single-table + seed | **Done** |
-| DynamoDB table en `serverless.ts` + docker local | **Done** |
-| Repository ports wired in 4 Nest services | **Done** (no HTTP use-cases yet) |
-| Payment adapter / live FE | **Not started** |
-| Jest >80% / AWS deploy / README entregable | **Not started** |
-
-## Local persistence
-
-```bash
-npm run dynamodb:up
-npm run ensure-table
-npm run seed
-```
-
-Access patterns: `docs/data-model.md`.
+| DynamoDB + ElectroDB + seed | **Done** |
+| Hex use-cases ROP (Create/Pay + products/customers/deliveries) | **Done** |
+| Thin HTTP controllers + OpenAPI paths | **Partial** (fake payment port) |
+| Sandbox payment adapter | **Not started** (`FakePaymentGateway`) |
+| Live FE / Jest >80% / deploy / README | **Not started** |
 
 ## Next
 
-1. `architecture-hex-rop` — use-cases ROP reales (CreateTransaction / PayTransaction).
-2. Luego `payment-gateway` → `api-domains`.
-3. Re-scorear scorecard al cerrar cada feature.
+1. `payment-gateway` — adapter sandbox real detrás del puerto.
+2. Cerrar `api-domains` (DTOs/validación/OpenAPI completo).
+3. `frontend-live-wiring`.

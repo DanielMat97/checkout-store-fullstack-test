@@ -1,6 +1,6 @@
 ---
 feature: architecture-hex-rop
-status: ready
+status: done
 owner: backend
 rubric: [B5, B6, B4]
 ---

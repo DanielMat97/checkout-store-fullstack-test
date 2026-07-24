@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Checkout Store API",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "Single Serverless Framework HTTP API. Import into Apidog. Update on every endpoint change."
   },
   "servers": [
@@ -19,11 +19,64 @@
         "responses": { "200": { "description": "OK" } }
       }
     },
+    "/products": {
+      "get": {
+        "tags": ["products"],
+        "summary": "List products",
+        "responses": { "200": { "description": "Product list" } }
+      }
+    },
+    "/products/{id}": {
+      "get": {
+        "tags": ["products"],
+        "summary": "Get product by id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Product" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
     "/customers/health": {
       "get": {
         "tags": ["customers"],
         "summary": "Customers service health",
         "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/customers": {
+      "post": {
+        "tags": ["customers"],
+        "summary": "Create customer",
+        "responses": {
+          "201": { "description": "Created" },
+          "400": { "description": "Validation" }
+        }
+      }
+    },
+    "/customers/{id}": {
+      "get": {
+        "tags": ["customers"],
+        "summary": "Get customer by id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Customer" },
+          "404": { "description": "Not found" }
+        }
       }
     },
     "/deliveries/health": {
@@ -33,11 +86,79 @@
         "responses": { "200": { "description": "OK" } }
       }
     },
+    "/deliveries/{id}": {
+      "get": {
+        "tags": ["deliveries"],
+        "summary": "Get delivery by id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Delivery" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
     "/transactions/health": {
       "get": {
         "tags": ["transactions"],
         "summary": "Transactions service health",
         "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/transactions": {
+      "post": {
+        "tags": ["transactions"],
+        "summary": "Create PENDING transaction + delivery",
+        "responses": {
+          "200": { "description": "Created PENDING" },
+          "400": { "description": "Validation" },
+          "404": { "description": "Product/customer not found" },
+          "409": { "description": "Insufficient stock" }
+        }
+      }
+    },
+    "/transactions/{id}": {
+      "get": {
+        "tags": ["transactions"],
+        "summary": "Get transaction by id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Transaction" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/transactions/{id}/pay": {
+      "post": {
+        "tags": ["transactions"],
+        "summary": "Pay PENDING transaction (payment port)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Payment outcome (APPROVED/DECLINED/ERROR)" },
+          "400": { "description": "Validation" },
+          "404": { "description": "Not found" },
+          "422": { "description": "Invalid state" }
+        }
       }
     }
   }

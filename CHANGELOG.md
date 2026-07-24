@@ -22,6 +22,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Cursor rule `scorecard-evaluator.mdc`: always grade as harsh hiring panel (architect / TL / PO / security).
 - Specs path-to-100%: `specs/INDEX.md` + features `persistence-seed`, `payment-gateway`, `api-domains`, `frontend-live-wiring`, `testing-coverage`, `cloud-deploy`, `readme-deliverables`, `security-hardening`, `architecture-hex-rop`, `ux-quality-bar` (SDD only; no impl yet). `checkout-payment` refreshed; `checkout-ui-mock` marked **done**.
 - **`@app/persistence`**: ElectroDB single-table (Product/Customer/Delivery/Transaction), repository ports + adapters (`Result`/`neverthrow`), DynamoDB table in `serverless.ts`, `docker compose` DynamoDB Local, `npm run ensure-table` + `npm run seed` (4 NORA products). Access patterns: `docs/data-model.md`.
+- **Hex + ROP** (`architecture-hex-rop`): ADR 0009 (`neverthrow`); `CreateTransaction` / `PayTransaction` use-cases with port fakes (DECLINED no decrementa stock); thin HTTP controllers; minimal use-cases in products/customers/deliveries; OpenAPI paths updated. Payment still `FakePaymentGateway` until `payment-gateway`.
 
 ### Changed
 

@@ -18,7 +18,7 @@
 | Deploy AWS | `cloud-deploy/` | **ready** | Base #6 (20) |
 | README entregable | `readme-deliverables/` | **ready** | Base #1 (5) |
 | Seguridad OWASP/HTTPS | `security-hardening/` | **ready** | Bonus #1 (5) |
-| Hexagonal + ROP real | `architecture-hex-rop/` | **ready** | Bonus #5–6 (20) |
+| Hexagonal + ROP real | `architecture-hex-rop/` | **done** | Bonus #5–6 (20) |
 | Barra UX/calidad | `ux-quality-bar/` | **ready** | Base #2 resto + bonus #2–4 |
 
 ## Orden de implementación (obligatorio)
