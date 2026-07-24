@@ -12,6 +12,7 @@ services/customers/      # NestJS Lambda — /customers/**
 services/deliveries/     # NestJS Lambda — /deliveries/**
 services/transactions/   # NestJS Lambda — /transactions/**
 apps/web/                # React SPA + Redux (S3/CloudFront via Serverless later)
+packages/persistence/    # ElectroDB entities, repository adapters, seed (`@app/persistence`)
 packages/shared/         # logger, access-log middleware, security headers, types
 ```
 

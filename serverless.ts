@@ -5,6 +5,7 @@ import type { AWS } from '@serverless/typescript';
  * to all NestJS microservice Lambdas. No custom Node gateway service.
  */
 const stage = '${sls:stage}';
+const tableName = '${env:DYNAMODB_TABLE_NAME, "checkout-store"}';
 
 const serverlessConfiguration: AWS = {
   service: 'checkout-api',
@@ -35,7 +36,35 @@ const serverlessConfiguration: AWS = {
     },
     environment: {
       STAGE: stage,
-      DYNAMODB_TABLE_NAME: '${env:DYNAMODB_TABLE_NAME, "checkout-store"}',
+      DYNAMODB_TABLE_NAME: tableName,
+      DYNAMODB_ENDPOINT: '${env:DYNAMODB_ENDPOINT, ""}',
+    },
+    iam: {
+      role: {
+        statements: [
+          {
+            Effect: 'Allow',
+            Action: [
+              'dynamodb:GetItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:Query',
+              'dynamodb:Scan',
+              'dynamodb:DescribeTable',
+            ],
+            Resource: [
+              { 'Fn::GetAtt': ['CheckoutTable', 'Arn'] },
+              {
+                'Fn::Join': [
+                  '/',
+                  [{ 'Fn::GetAtt': ['CheckoutTable', 'Arn'] }, 'index', '*'],
+                ],
+              },
+            ],
+          },
+        ],
+      },
     },
   },
   custom: {
@@ -92,6 +121,35 @@ const serverlessConfiguration: AWS = {
     },
   },
   resources: {
+    Resources: {
+      CheckoutTable: {
+        Type: 'AWS::DynamoDB::Table',
+        Properties: {
+          TableName: tableName,
+          BillingMode: 'PAY_PER_REQUEST',
+          AttributeDefinitions: [
+            { AttributeName: 'pk', AttributeType: 'S' },
+            { AttributeName: 'sk', AttributeType: 'S' },
+            { AttributeName: 'gsi1pk', AttributeType: 'S' },
+            { AttributeName: 'gsi1sk', AttributeType: 'S' },
+          ],
+          KeySchema: [
+            { AttributeName: 'pk', KeyType: 'HASH' },
+            { AttributeName: 'sk', KeyType: 'RANGE' },
+          ],
+          GlobalSecondaryIndexes: [
+            {
+              IndexName: 'gsi1',
+              KeySchema: [
+                { AttributeName: 'gsi1pk', KeyType: 'HASH' },
+                { AttributeName: 'gsi1sk', KeyType: 'RANGE' },
+              ],
+              Projection: { ProjectionType: 'ALL' },
+            },
+          ],
+        },
+      },
+    },
     Outputs: {
       HttpApiUrl: {
         Description: 'Single API Gateway URL (Serverless HTTP API)',
@@ -99,6 +157,10 @@ const serverlessConfiguration: AWS = {
           'Fn::Sub':
             'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com',
         },
+      },
+      CheckoutTableName: {
+        Description: 'Single-table DynamoDB name',
+        Value: { Ref: 'CheckoutTable' },
       },
     },
   },

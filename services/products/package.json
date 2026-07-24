@@ -11,6 +11,7 @@
     "lint": "echo \"lint placeholder\""
   },
   "dependencies": {
+    "@app/persistence": "*",
     "@app/shared": "*",
     "@nestjs/common": "^11.0.12",
     "@nestjs/core": "^11.0.12",

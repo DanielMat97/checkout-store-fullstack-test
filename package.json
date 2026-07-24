@@ -7,8 +7,8 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "npm run build -w @app/shared && npm run build --workspaces --if-present",
-    "build:shared": "npm run build -w @app/shared",
+    "build": "npm run build -w @app/shared && npm run build -w @app/persistence && npm run build --workspaces --if-present",
+    "build:shared": "npm run build -w @app/shared && npm run build -w @app/persistence",
     "build:api": "npm run build:shared && npm run build -w @app/products && npm run build -w @app/customers && npm run build -w @app/deliveries && npm run build -w @app/transactions",
     "test": "npm run test --workspaces --if-present",
     "test:cov": "npm run test:cov --workspaces --if-present",
@@ -16,7 +16,10 @@
     "dev": "concurrently -n api,web -c green,cyan \"npm:dev:api\" \"npm:dev:web\"",
     "dev:api": "npm run build:api && serverless offline start",
     "dev:web": "npm run dev -w @app/web",
-    "deploy:api": "npm run build:api && serverless deploy"
+    "deploy:api": "npm run build:api && serverless deploy",
+    "dynamodb:up": "docker compose up -d dynamodb",
+    "ensure-table": "npm run ensure-table -w @app/persistence",
+    "seed": "npm run seed -w @app/persistence"
   },
   "devDependencies": {
     "@serverless/typescript": "^3.38.0",

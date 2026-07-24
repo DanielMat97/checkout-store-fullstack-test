@@ -1,0 +1,28 @@
+{
+  "name": "@app/persistence",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest --config jest.config.js",
+    "test:cov": "jest --config jest.config.js --coverage",
+    "ensure-table": "tsx src/seed/ensure-table.ts",
+    "seed": "tsx src/seed/run-seed.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.787.0",
+    "@aws-sdk/lib-dynamodb": "^3.787.0",
+    "electrodb": "^3.4.1",
+    "neverthrow": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.13.10",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.6",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}

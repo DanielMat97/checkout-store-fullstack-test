@@ -1,6 +1,6 @@
 ---
 feature: persistence-seed
-status: ready
+status: done
 owner: backend
 rubric: [4]
 ---

@@ -1,7 +1,7 @@
 # Scorecard — evaluación estricta (hiring bar)
 
 > Fuente rúbrica: `docs/fullstack-test.md` (100 base + 50 bonus).  
-> Última evaluación: **2026-07-24**  
+> Última evaluación: **2026-07-24** (post `persistence-seed`)  
 > Modo: **evaluador técnico de la empresa contratante** (no autoelogio del candidato).
 
 ---
@@ -47,17 +47,17 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 | Lente | Veredicto (1 línea) |
 |---|---|
-| Arquitecto | Monorepo prometedor; **dominio de pago inexistente** en BE. Hex/ROP aún teatro. |
-| Líder técnico | FE mock pulido; **no hay definición de “done” de ingeniería** (tests/deploy/API). |
-| Product Owner | Journey visual OK; **proceso de negocio del brief incompleto** en 5.1–5.3. |
-| Security | Buenas intenciones (headers, no persistir PAN); **no auditado en HTTPS público**. |
-| Hiring bar | **No contrataría aún** por este entregable. Es portfolio UI + scaffold, no prueba full-stack cerrada. |
+| Arquitecto | Persistencia ElectroDB real + ports; **dominio de pago / use-cases aún ausentes**. |
+| Líder técnico | Seed + tabla listos; **sigue sin definition of done** (API/tests/deploy). |
+| Product Owner | Journey visual OK; **5.1–5.3 del brief siguen rotos**. |
+| Security | Headers + no PAN en seed; **sin HTTPS público**. |
+| Hiring bar | **No contrataría aún.** Un paso de infraestructura; no es full-stack cerrado. |
 
 | | Puntos (modo estricto) |
 |---|---|
 | **Base** | **18 / 100** |
-| **Bonus** | **14 / 50** |
-| **Total** | **32 / 150** |
+| **Bonus** | **15 / 50** |
+| **Total** | **33 / 150** |
 | **¿Aprueba (≥100 base)?** | **No** |
 
 > Nota: evaluaciones previas más generosas (~47) se **rechazan** bajo este protocolo. El panel no premia storytelling.
@@ -79,7 +79,7 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 | 6. Status + producto con stock | Mock | Aceptable solo como demo UI. | 🟡 |
 | Persistencia segura progreso | redux-persist sin PAN | Bien; falta prueba de amenaza. | 🟡 |
 | 4 dominios API | Health stubs | **No cuenta como API del negocio.** | ❌ |
-| Seed DB ≥ productos | Catálogo FE | Seed BE **ausente**. | ❌ |
+| Seed DB ≥ productos | `npm run seed` + ElectroDB | **Cumple seed**; aún no expuesto por API. | ✅ |
 | Jest >80% FE+BE + README | No | **Fallo duro.** | ❌ |
 | Deploy cloud | No | **Fallo duro.** | ❌ |
 
@@ -92,10 +92,10 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 | 1 | README completado | 5 | **1** | Hay README, pero **no** es entregable de prueba: sin coverage, sin modelo datos serio, sin URLs cloud, OpenAPI stub. Un TL lo marcaría incompleto. |
 | 2 | Imágenes / sin desborde | 5 | **4** | Bien en mock (aspect-ratio, lazy, hero). −1: dependencia Unsplash remota, sin budget/perf medido, sin evidencia Lighthouse. |
 | 3 | Onboarding pago completo | 20 | **10** | Mitad del valor es el **sistema**. UI + validación + fees + status mock = demo. Sin PENDING real ni pasarela = **máximo 50%** del criterio. |
-| 4 | API funcionando | 20 | **1** | Health ≠ funcionando. Cero casos de uso de checkout. Arquitecto: 1 pt por cableado SF4 local. |
+| 4 | API funcionando | 20 | **2** | Seed + tabla + repos DI. Sigue sin endpoints de negocio. +1 vs corte anterior por evidencia Dynamo real; **no** es “API funcionando”. |
 | 5 | Unit tests >80% FE y BE | 30 | **0** | Umbral explícito. Smoke tests no califican. Sin reporte → **0**. |
 | 6 | Deploy cloud | 20 | **0** | Sin URL pública conectada = 0. IaC en repo no despliega sola. |
-| | **Subtotal base** | **100** | **16→18*** | *+2 de margen solo si el evaluador admite “SF4 local arranca”; default panel = **16**. Usamos **18** como techo estricto actual. |
+| | **Subtotal base** | **100** | **18** | Suma dura ~17; se mantiene techo previo **18** (+ margen SF4 local). |
 
 **Base oficial del corte: 18 / 100.**
 
@@ -108,10 +108,10 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 | 1 | OWASP + HTTPS + headers | 5 | **1** | Headers en código. Sin HTTPS público / Observatory / threat model = cosmético. |
 | 2 | Responsive multi-browser | 5 | **2** | Mobile-first visible. Sin matriz browsers, sin evidencia iPhone SE real device / Safari+Firefox. |
 | 3 | Habilidades CSS | 10 | **6** | Design system + motion + storefront: sólido. −4: no design tokens auditados, Unsplash, mock banner, falta polish de estados vacíos/error de red. |
-| 4 | Código limpio | 10 | **3** | FE ordenado; BE hueco; living docs inflan percepción. Clean code se juzga en el **sistema completo**. |
-| 5 | Hexagonal | 10 | **2** | Carpetas + ADR. Sin ports de dominio ni adapters outbound reales de pago/DB. |
-| 6 | ROP | 10 | **0** | Ausente. |
-| | **Subtotal bonus** | **50** | **14** | |
+| 4 | Código limpio | 10 | **3** | FE ordenado; BE empieza (persistence package); living docs. Aún incompleto. |
+| 5 | Hexagonal | 10 | **3** | Ports + ElectroDB adapters reales. Sin use-cases de pago → techo bajo. |
+| 6 | ROP | 10 | **1** | `Result` en repos; **sin** use-cases ROP. |
+| | **Subtotal bonus** | **50** | **15** | |
 
 ---
 
@@ -119,9 +119,9 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 ```
 Base   18 / 100
-Bonus  14 /  50
+Bonus  15 /  50
 ───────────────
-Total  32 / 150
+Total  33 / 150
 ```
 
 **Resultado hiring:** **REJECT / NEEDS MAJOR WORK** — no alcanza entrevista por rúbrica (≥100 base).
@@ -145,7 +145,7 @@ Sin P0 cerrado, **hablar de bonus es ruido**.
 
 | Hito | Base ≈ | Bonus ≈ | Total ≈ | Hiring |
 |---|---|---|---|---|
-| Hoy | 18 | 14 | **32** | Reject |
+| Hoy | 18 | 15 | **33** | Reject |
 | + API/pago/seed cableado | 45 | 22 | **67** | Reject |
 | + tests >80% documentados | 75 | 26 | **101** | Condicional pass base |
 | + deploy + README + OWASP público | 98–100 | 35 | **133–135** | Strong pass posible |
