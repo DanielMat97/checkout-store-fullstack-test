@@ -1,19 +1,19 @@
 import type { AWS } from '@serverless/typescript';
 
 /**
- * Single API Gateway (HTTP API) entrypoint that routes to domain Lambdas.
- * Deploy this service as the public HTTP edge — not per-microservice gateways.
+ * Single Serverless Framework stack = one HTTP API (API Gateway) that routes
+ * to all NestJS microservice Lambdas. No custom Node gateway service.
  */
-const region = '${aws:region}';
 const stage = '${sls:stage}';
 
 const serverlessConfiguration: AWS = {
-  service: 'checkout-gateway',
+  service: 'checkout-api',
   frameworkVersion: '4',
+  plugins: ['serverless-offline'],
   provider: {
     name: 'aws',
     runtime: 'nodejs20.x',
-    region: 'us-east-1',
+    region: '${env:AWS_REGION, "us-east-1"}',
     stage: '${opt:stage, "dev"}',
     memorySize: 512,
     timeout: 29,
@@ -22,7 +22,7 @@ const serverlessConfiguration: AWS = {
     },
     httpApi: {
       cors: {
-        allowedOrigins: ['${env:CORS_ORIGIN, "*"}'],
+        allowedOrigins: ['${env:CORS_ORIGIN, "http://localhost:5173"}'],
         allowedHeaders: [
           'Content-Type',
           'Authorization',
@@ -36,13 +36,18 @@ const serverlessConfiguration: AWS = {
     environment: {
       STAGE: stage,
       DYNAMODB_TABLE_NAME: '${env:DYNAMODB_TABLE_NAME, "checkout-store"}',
-      SERVICE_NAME: 'api-gateway',
+    },
+  },
+  custom: {
+    'serverless-offline': {
+      httpPort: 3000,
+      lambdaPort: 3005,
+      noPrependStageInUrl: true,
     },
   },
   functions: {
     products: {
-      name: 'checkout-${sls:stage}-products',
-      handler: '../products/dist/lambda.handler',
+      handler: 'services/products/dist/lambda.handler',
       environment: {
         SERVICE_NAME: 'products',
         SERVICE_PREFIX: 'products',
@@ -53,8 +58,7 @@ const serverlessConfiguration: AWS = {
       ],
     },
     customers: {
-      name: 'checkout-${sls:stage}-customers',
-      handler: '../customers/dist/lambda.handler',
+      handler: 'services/customers/dist/lambda.handler',
       environment: {
         SERVICE_NAME: 'customers',
         SERVICE_PREFIX: 'customers',
@@ -65,8 +69,7 @@ const serverlessConfiguration: AWS = {
       ],
     },
     deliveries: {
-      name: 'checkout-${sls:stage}-deliveries',
-      handler: '../deliveries/dist/lambda.handler',
+      handler: 'services/deliveries/dist/lambda.handler',
       environment: {
         SERVICE_NAME: 'deliveries',
         SERVICE_PREFIX: 'deliveries',
@@ -77,8 +80,7 @@ const serverlessConfiguration: AWS = {
       ],
     },
     transactions: {
-      name: 'checkout-${sls:stage}-transactions',
-      handler: '../transactions/dist/lambda.handler',
+      handler: 'services/transactions/dist/lambda.handler',
       environment: {
         SERVICE_NAME: 'transactions',
         SERVICE_PREFIX: 'transactions',
@@ -90,39 +92,15 @@ const serverlessConfiguration: AWS = {
     },
   },
   resources: {
-    Resources: {
-      GatewayAccessLogGroup: {
-        Type: 'AWS::Logs::LogGroup',
-        Properties: {
-          LogGroupName: `/aws/apigateway/checkout-gateway-${stage}`,
-          RetentionInDays: 14,
-        },
-      },
-    },
     Outputs: {
       HttpApiUrl: {
-        Description: 'Single API Gateway entrypoint URL',
+        Description: 'Single API Gateway URL (Serverless HTTP API)',
         Value: {
-          'Fn::Sub': `https://\${HttpApi}.execute-api.${region}.amazonaws.com`,
+          'Fn::Sub':
+            'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com',
         },
       },
     },
-  },
-  package: {
-    individually: true,
-    patterns: [
-      '!**',
-      '../products/dist/**',
-      '../customers/dist/**',
-      '../deliveries/dist/**',
-      '../transactions/dist/**',
-      '../products/node_modules/**',
-      '../customers/node_modules/**',
-      '../deliveries/node_modules/**',
-      '../transactions/node_modules/**',
-      '../../packages/shared/dist/**',
-      '../../node_modules/**',
-    ],
   },
 };
 

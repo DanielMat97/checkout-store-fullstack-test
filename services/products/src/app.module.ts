@@ -1,4 +1,5 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { createAccessLogMiddleware } from '@app/shared';
 import { HealthController } from './adapters/inbound/http/health.controller';
 import { SecurityHeadersMiddleware } from './adapters/inbound/http/security-headers.middleware';
 
@@ -7,6 +8,8 @@ import { SecurityHeadersMiddleware } from './adapters/inbound/http/security-head
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(SecurityHeadersMiddleware).forRoutes('*');
+    consumer
+      .apply(SecurityHeadersMiddleware, createAccessLogMiddleware('products'))
+      .forRoutes('*');
   }
 }

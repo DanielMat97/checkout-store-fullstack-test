@@ -14,10 +14,10 @@ Also follow `.cursor/rules/` and the `checkout-flow` skill for locked stack and 
 
 - **Hexagonal**: business logic never lives in Nest controllers (ADR 0001).
 - **ROP**: use-cases return `Result`/`Either` (e.g. neverthrow), not exceptions for expected flows (ADR 0002).
-- **NestJS** is the required app framework; **Serverless Framework 4** deploys it; **one API Gateway** (`services/gateway`) is the only public HTTP entry (ADR 0006).
+- **NestJS** is the required app framework; **Serverless Framework 4** creates the **single API Gateway** in root `serverless.ts` (ADR 0006) — no custom gateway service.
 - **DynamoDB + ElectroDB** only for persistence (ADR 0004).
 - Domain microservices: products, customers, deliveries, transactions behind `/products`, `/customers`, `/deliveries`, `/transactions` (ADR 0005).
-- No card data logged or stored in plaintext; shared logger + `logHttpRequest` on the gateway + OWASP headers on every endpoint.
+- No card data logged or stored in plaintext; `logHttpRequest` (`service: api-gateway`) + OWASP headers on every endpoint.
 - New dependencies require an ADR before adding to `package.json`.
 - Test coverage must not drop below **80%** (FE and BE).
 - Public repo must never contain the payment company brand name; secrets only in env / Secrets Manager.

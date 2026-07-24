@@ -3,68 +3,41 @@
   "info": {
     "title": "Checkout Store API",
     "version": "0.1.0",
-    "description": "Single API Gateway entrypoint. Import into Apidog. Update on every endpoint change."
+    "description": "Single Serverless Framework HTTP API. Import into Apidog. Update on every endpoint change."
   },
   "servers": [
     {
       "url": "http://localhost:3000",
-      "description": "Local API Gateway"
+      "description": "serverless offline / deployed HttpApi"
     }
   ],
   "paths": {
-    "/health": {
-      "get": {
-        "tags": ["gateway"],
-        "summary": "API Gateway health",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/products/health": {
       "get": {
         "tags": ["products"],
-        "summary": "Products service health (via gateway)",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
+        "summary": "Products service health",
+        "responses": { "200": { "description": "OK" } }
       }
     },
     "/customers/health": {
       "get": {
         "tags": ["customers"],
-        "summary": "Customers service health (via gateway)",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
+        "summary": "Customers service health",
+        "responses": { "200": { "description": "OK" } }
       }
     },
     "/deliveries/health": {
       "get": {
         "tags": ["deliveries"],
-        "summary": "Deliveries service health (via gateway)",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
+        "summary": "Deliveries service health",
+        "responses": { "200": { "description": "OK" } }
       }
     },
     "/transactions/health": {
       "get": {
         "tags": ["transactions"],
-        "summary": "Transactions service health (via gateway)",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
+        "summary": "Transactions service health",
+        "responses": { "200": { "description": "OK" } }
       }
     }
   }

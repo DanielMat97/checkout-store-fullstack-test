@@ -11,7 +11,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Cursor rules and skills for locked stack (NestJS, Hexagonal, ROP, DynamoDB/ElectroDB, SF4, Jest >80%).
 - SDD workflow Cursor rule (`sdd-workflow`).
 - Monorepo scaffold (T0): `packages/shared`, Nest microservices, React+Redux `apps/web`.
-- Single API Gateway entry (`services/gateway`) with standardized access logs and path routing to microservices (ADR 0006).
+- Single API Gateway via root `serverless.ts` (Serverless Framework HTTP API → Nest Lambdas). Removed custom Express gateway service.
 
 ### Changed
 
