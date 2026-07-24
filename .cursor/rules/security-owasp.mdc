@@ -1,0 +1,25 @@
+---
+description: Sensitive data handling, OWASP baseline, HTTPS and git hygiene
+alwaysApply: true
+---
+
+# Security
+
+## Card & PII
+
+- Never log PAN, CVV, full card, or raw provider private keys (use shared logger redaction).
+- Prefer tokenization; persist at most last-4, brand, expiry month/year, and provider tokens.
+- Validate card shape client + server (length, expiry, CVV digits, Luhn optional plus).
+- HTTPS everywhere in deployed environments.
+
+## OWASP + headers (maximize)
+
+- Every endpoint must use the shared security-headers helper and pass the endpoint OWASP checklist (see `endpoint-owasp` rule).
+- Security headers, CORS allowlist, input validation, rate limits on writes/payments, `no-store` on sensitive responses.
+- Prefer validating deployed HTTPS headers with [Mozilla Observatory](https://observatory.mozilla.org/) (listed in brief references).
+- Secrets in env / AWS Secrets Manager / SSM — not in git.
+- Public repo: strip brand name, credentials, and internal UAT passwords from all committed files.
+
+## Git hygiene
+
+Ignore: `.env`, `.env.*`, `docs/fullstack-test.md` (if it contains secrets/brand), provider credential dumps. Ship `.env.example` with empty placeholders and neutral names.

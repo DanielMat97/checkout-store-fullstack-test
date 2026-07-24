@@ -1,0 +1,37 @@
+---
+description: Monorepo layout: web app, domain microservices, shared packages
+alwaysApply: true
+---
+
+# Project Structure
+
+```
+serverless.ts            # Serverless Framework: single HTTP API Gateway
+services/products/       # NestJS Lambda — /products/**
+services/customers/      # NestJS Lambda — /customers/**
+services/deliveries/     # NestJS Lambda — /deliveries/**
+services/transactions/   # NestJS Lambda — /transactions/**
+apps/web/                # React SPA + Redux (S3/CloudFront via Serverless later)
+packages/shared/         # logger, access-log middleware, security headers, types
+```
+
+Each Nest service exposes `src/lambda.ts` for the root `serverless.ts` HTTP API. Do not add a custom gateway Node service.
+
+## Naming
+
+- Product/app name: neutral store brand; never the payment company name.
+- Packages: `@app/shared`, `@app/web`, `@app/products`, etc. — not provider-prefixed.
+- Commits: feature-focused; never mention the forbidden brand.
+
+## Implementation order (when coding starts)
+
+Follow `specs/checkout-payment/tasks.md` (T0→T9). Summary:
+
+1. `packages/shared` logger + security headers (T0)  
+2. DynamoDB + ElectroDB + seed (T1)  
+3. Nest use-cases + ports (ROP) + Jest (T2–T4)  
+4. HTTP adapters + OpenAPI/Apidog (T5)  
+5. FE screens + Redux persist (T6–T7)  
+6. Coverage + `serverless deploy` + README (T8–T9)  
+
+Do not skip tests — coverage is the highest single score item.

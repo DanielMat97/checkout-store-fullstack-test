@@ -1,0 +1,41 @@
+.nora-suggest {
+  position: relative;
+  z-index: 1;
+}
+
+.nora-suggest:focus-within {
+  z-index: 5;
+}
+
+.nora-suggest__list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 0.25rem);
+  z-index: 20;
+  margin: 0;
+  padding: var(--nora-space-1);
+  list-style: none;
+  max-height: 12.5rem;
+  overflow: auto;
+  background: var(--nora-paper);
+  border: 1.5px solid var(--nora-line);
+  border-radius: var(--nora-radius-sm);
+  box-shadow: var(--nora-shadow);
+  animation: nora-fade-up var(--nora-fast) var(--nora-ease-out) both;
+}
+
+.nora-suggest__option {
+  padding: 0.65rem 0.75rem;
+  border-radius: calc(var(--nora-radius-sm) - 2px);
+  font-size: var(--nora-fs-sm);
+  color: var(--nora-ink);
+  cursor: pointer;
+}
+
+.nora-suggest__option:hover,
+.nora-suggest__option--active {
+  background: var(--nora-accent-soft);
+  color: var(--nora-ink);
+}
+

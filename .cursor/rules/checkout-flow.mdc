@@ -1,0 +1,29 @@
+---
+description: Mandatory 5-screen checkout business flow and transaction lifecycle
+alwaysApply: true
+---
+
+# Checkout Business Flow
+
+## Screen sequence (mandatory)
+
+```
+1. Product page → 2. Card + delivery form → 3. Payment summary (backdrop) → 4. Final status → 5. Product page (updated stock)
+```
+
+## Step rules
+
+1. **Product**: show description, price, available stock units; CTA **"Pay with credit card"**.
+2. **Form modal**: validate card fields (fake but real structure) + delivery info. Card brand logo detection (Visa/Mastercard) is a plus.
+3. **Summary backdrop** (Material Backdrop pattern): product amount + **base fee (always)** + **delivery fee**; confirm pay button.
+4. On pay:
+   - Create own-backend transaction `PENDING` → get transaction id.
+   - Call payment-provider sandbox API to charge.
+   - **Always** update the transaction with the provider result (approved or failed).
+   - **Only if approved:** assign the product to the customer delivery **and** decrement stock.
+   - If declined/error: do **not** decrement stock or create a fulfillable delivery assignment.
+5. **Status**: show result; redirect to product page with refreshed stock.
+
+## Resilience
+
+Persist checkout progress (Redux + safe `localStorage`) so refresh recovers the customer's step without losing validated form/summary state. Never persist full PAN/CVV in plaintext; tokenize or keep only masked last-4 + provider tokens.

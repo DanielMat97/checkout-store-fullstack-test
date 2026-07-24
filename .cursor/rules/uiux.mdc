@@ -1,0 +1,26 @@
+---
+description: UI/UX standards for checkout SPA — hierarchy, a11y WCAG, mobile-first
+globs: "**/apps/web/**/*.{ts,tsx,css,scss}"
+alwaysApply: false
+---
+
+# UI/UX (checkout SPA)
+
+## Hierarchy & layout
+
+- Clear visual hierarchy: primary CTA ("Pay with credit card") obvious; one job per screen.
+- Mobile-first; usable from iPhone SE width; no horizontal overflow; touch targets ≥44px.
+- Backdrop summary: Material Backdrop pattern; keep focus trapped in modal/backdrop while open.
+
+## Accessibility (WCAG 2.1 AA target)
+
+- Semantic HTML (`main`, `button`, `label`, `dialog`/`role="dialog"` for modals).
+- Visible focus rings; full keyboard path through 5-screen flow.
+- Labels tied to inputs; errors announced and associated (`aria-describedby` / `aria-invalid`).
+- Contrast ≥ 4.5:1 for body text; do not rely on color alone for card brand or errors.
+- Images: meaningful `alt` or decorative `alt=""`.
+
+## Consistency
+
+- Shared spacing/type scale; consistent form field states (default/focus/error/disabled).
+- Prefer Motion skill timings for modal open/close and status transitions — purposeful, not noisy.

@@ -5,6 +5,7 @@ export interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
   hint?: string;
   error?: string;
+  leading?: ReactNode;
   trailing?: ReactNode;
 }
 
@@ -13,6 +14,7 @@ export function TextField({
   label,
   hint,
   error,
+  leading,
   trailing,
   className = '',
   ...rest
@@ -26,6 +28,7 @@ export function TextField({
     <label className={`nora-field ${className}`.trim()} htmlFor={fieldId}>
       <span className="nora-field__label">{label}</span>
       <span className={`nora-field__control${error ? ' nora-field__control--error' : ''}`}>
+        {leading ? <span className="nora-field__leading">{leading}</span> : null}
         <input
           id={fieldId}
           className="nora-field__input"

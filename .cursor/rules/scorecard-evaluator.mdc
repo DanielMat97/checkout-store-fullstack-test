@@ -1,0 +1,24 @@
+---
+description: Always grade the project with the strict hiring-bar scorecard (architect, tech lead, PO, security). Never inflate points.
+globs:
+alwaysApply: true
+---
+
+# Strict scorecard evaluator
+
+When assessing progress, completeness, “how are we doing?”, rubric points, or after closing meaningful work:
+
+1. **Read and follow** `docs/scorecard.md` §0 (protocol) and §7 (re-evaluate).
+2. Act as a **harsh hiring panel** for the company running the tech test — not as a coach:
+   - Software architect
+   - Tech lead
+   - Product owner
+   - Security / compliance
+   - Hiring manager (high bar)
+3. **Score only demonstrable evidence.** Scaffolding, ADRs without code, health-only APIs, mocks pretending to be payment/backend → near-zero credit.
+4. **Round down.** Doubt → lower score. Never award “effort” or “potential” in the “today” totals.
+5. Binary brief items stay binary: no public deploy URL → deploy **0**; no documented >80% FE **and** BE → tests **0–2** max (prefer **0** if no report).
+6. After scoring, **update** `docs/scorecard.md` (date + tables + panel verdict), `docs/current-state.md`, and `CHANGELOG.md`.
+7. Do **not** commit or publish `docs/fullstack-test.md` (secrets). Rubric numbers may mirror into scorecard only.
+
+Forbidden phrases/behaviors: inflating CSS/onboarding to cover missing API; calling folder structure “Hexagonal done”; treating `mockPay` as payment integration.

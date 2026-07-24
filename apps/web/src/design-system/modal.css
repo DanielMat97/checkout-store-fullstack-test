@@ -3,7 +3,7 @@
   inset: 0;
   z-index: 40;
   display: grid;
-  align-items: end;
+  align-items: stretch;
   justify-items: center;
 }
 
@@ -11,21 +11,24 @@
   position: absolute;
   inset: 0;
   border: 0;
-  background: rgba(11, 18, 32, 0.55);
-  animation: nora-fade var(--nora-med) var(--nora-ease);
+  background: rgba(29, 29, 31, 0.35);
+  backdrop-filter: blur(8px);
+  animation: nora-fade var(--nora-med) var(--nora-ease) both;
 }
 
 .nora-modal__panel {
   position: relative;
   z-index: 1;
+  align-self: end;
   width: min(100%, var(--nora-max));
-  max-height: min(92vh, 40rem);
+  max-width: 100%;
+  max-height: min(94vh, 44rem);
   display: flex;
   flex-direction: column;
-  background: var(--nora-paper);
-  border-radius: var(--nora-radius-lg) var(--nora-radius-lg) 0 0;
-  box-shadow: var(--nora-shadow);
-  animation: nora-rise var(--nora-med) var(--nora-ease);
+  background: var(--nora-bg);
+  border-radius: 0;
+  animation: nora-sheet-up var(--nora-slow) var(--nora-ease-out) both;
+  overflow-x: hidden;
 }
 
 .nora-modal__header {
@@ -33,59 +36,40 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--nora-space-3);
-  padding: var(--nora-space-4) var(--nora-space-4) var(--nora-space-3);
-  border-bottom: 1px solid var(--nora-line);
+  padding: var(--nora-space-5) var(--nora-space-4) var(--nora-space-4);
+  border-bottom: var(--nora-hairline);
+  min-width: 0;
 }
 
 .nora-modal__header h2 {
   margin: 0;
   font-family: var(--nora-font-display);
-  font-size: var(--nora-fs-lg);
+  font-size: var(--nora-fs-xl);
+  font-weight: 500;
+  letter-spacing: var(--nora-tracking-display);
 }
 
 .nora-modal__close {
+  flex-shrink: 0;
   border: 0;
   background: transparent;
-  color: var(--nora-slate);
+  color: var(--nora-ink-soft);
   font: inherit;
-  font-size: var(--nora-fs-sm);
+  font-size: var(--nora-fs-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   min-height: var(--nora-touch);
   cursor: pointer;
 }
 
 .nora-modal__body {
-  overflow: auto;
-  padding: var(--nora-space-4);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: var(--nora-space-5) var(--nora-space-4);
+  min-width: 0;
 }
 
 .nora-modal__footer {
-  padding: var(--nora-space-3) var(--nora-space-4) var(--nora-space-5);
-  border-top: 1px solid var(--nora-line);
-}
-
-@keyframes nora-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes nora-rise {
-  from {
-    opacity: 0;
-    transform: translateY(1rem);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nora-modal__scrim,
-  .nora-modal__panel {
-    animation: none;
-  }
+  padding: var(--nora-space-4);
+  border-top: var(--nora-hairline);
 }

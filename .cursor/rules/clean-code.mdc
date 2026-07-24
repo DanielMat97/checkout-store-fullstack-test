@@ -1,0 +1,14 @@
+---
+description: Clean code standards for the clean-code scoring bonus
+alwaysApply: true
+---
+
+# Clean Code (bonus 10)
+
+- Small focused modules; one responsibility per use-case/adapter/component.
+- Meaningful names; no provider brand in identifiers.
+- No business logic in HTTP handlers — Hexagonal layers stay strict.
+- Prefer early returns / ROP over deep nesting; avoid dead code and commented-out blocks.
+- Consistent formatting (Prettier/ESLint); shared types in `packages/shared` instead of duplicated DTOs.
+- Errors: typed domain errors → mapped HTTP; no swallowed catches.
+- Keep PRs/commits incremental and reviewable (anti-fraud: visible progress history).

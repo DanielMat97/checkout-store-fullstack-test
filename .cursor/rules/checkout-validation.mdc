@@ -1,0 +1,28 @@
+---
+description: Card and delivery form validation rules for checkout
+globs: "**/*{card,payment,checkout,validat,delivery}*.{ts,tsx,js,jsx}"
+alwaysApply: false
+---
+
+# Card & Delivery Validation
+
+## Card (fake but real structure)
+
+| Field | Rules |
+|---|---|
+| Number | Digits only; 13–19 length; spaces optional in UI; Luhn recommended |
+| Exp | Future MM/YY; reject expired |
+| CVV | 3–4 digits; never persist |
+| Holder | Non-empty; reasonable charset |
+
+- Detect Visa (`4…`) / Mastercard (`51–55`, `2221–2720`) for logo plus.
+- Mask in UI after entry where possible; summary shows last-4 only.
+
+## Delivery
+
+- Full name, phone, email (valid format), address line, city, region/postal as required by model.
+- Reject empty/whitespace; normalize phone/email before API.
+
+## Fees on summary
+
+`total = productPrice + baseFee + deliveryFee` — base fee always applied; show line items in backdrop before charge.

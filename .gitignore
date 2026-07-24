@@ -4,9 +4,6 @@ node_modules/
 .env.*
 !.env.example
 
-# Cursor local (rules/skills may mention sandbox; keep out of public repo)
-.cursor/
-
 # Local brief / credentials / playbooks (do not publish)
 docs/fullstack-test.md
 docs/skills-checkout.md

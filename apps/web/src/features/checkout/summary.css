@@ -1,16 +1,25 @@
 .nora-summary__product {
-  margin: var(--nora-space-3) 0 var(--nora-space-4);
+  margin: var(--nora-space-3) 0 var(--nora-space-5);
   font-family: var(--nora-font-display);
-  font-size: var(--nora-fs-lg);
-  font-weight: 700;
+  font-size: var(--nora-fs-xl);
+  font-weight: 500;
+  letter-spacing: var(--nora-tracking-display);
+  line-height: 1.1;
+  animation: nora-fade-up var(--nora-med) var(--nora-ease-out) both;
+  animation-delay: 80ms;
 }
 
 .nora-summary__meta {
-  margin-top: var(--nora-space-4);
+  margin-top: var(--nora-space-5);
   display: grid;
   gap: var(--nora-space-3);
-  color: var(--nora-slate);
+  padding-top: var(--nora-space-4);
+  border-top: var(--nora-hairline);
+  color: var(--nora-ink-soft);
   font-size: var(--nora-fs-sm);
+  line-height: 1.55;
+  animation: nora-fade-up var(--nora-med) var(--nora-ease-out) both;
+  animation-delay: 160ms;
 }
 
 .nora-summary__card {
@@ -25,12 +34,29 @@
   display: flex;
   align-items: center;
   gap: var(--nora-space-2);
-  font-size: var(--nora-fs-sm);
-  color: var(--nora-slate);
+  font-size: var(--nora-fs-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--nora-ink-soft);
 }
 
 .nora-summary__back {
   text-align: center;
-  color: var(--nora-slate);
-  font-size: var(--nora-fs-sm);
+  color: var(--nora-ink-soft);
+  font-size: var(--nora-fs-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--nora-fast) var(--nora-ease), color var(--nora-fast) var(--nora-ease);
+}
+
+.nora-summary__back:hover {
+  color: var(--nora-ink);
+  border-bottom-color: var(--nora-ink);
+}
+
+.nora-fees {
+  animation: nora-fade-up var(--nora-med) var(--nora-ease-out) both;
+  animation-delay: 120ms;
 }

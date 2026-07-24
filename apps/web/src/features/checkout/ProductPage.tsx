@@ -1,64 +1,136 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useEffect, type MouseEvent } from 'react';
 import {
   AppShell,
   ShellHeader,
   Button,
   Price,
   StockBadge,
+  withViewTransition,
 } from '../../design-system';
-import { MOCK_PRODUCT } from '../../mocks/catalog';
+import { getProductById } from '../../mocks/catalog';
 import { isMockMode } from '../../mocks/checkoutService';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { setProductId, setStep, setPaymentStatus } from '../../store/checkoutSlice';
+import {
+  selectProduct,
+  setPaymentStatus,
+  setStep,
+} from '../../store/checkoutSlice';
 import './product.css';
 
-export function ProductPage() {
+export function ProductPage({
+  embed = false,
+}: {
+  /** Under checkout embed (legacy): hide dock and mock banner */
+  embed?: boolean;
+}) {
+  const { productId = '' } = useParams();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const stock = useAppSelector((s) => s.checkout.mockStock);
+  const product = getProductById(productId);
+  const stocks = useAppSelector((s) => s.checkout.stocks);
   const lastStatus = useAppSelector((s) => s.checkout.paymentStatus);
+  const selectedId = useAppSelector((s) => s.checkout.productId);
+
+  useEffect(() => {
+    if (!product) {
+      navigate('/', { replace: true });
+      return;
+    }
+    if (selectedId !== product.id) {
+      dispatch(selectProduct(product.id));
+    }
+  }, [product, selectedId, dispatch, navigate]);
+
+  if (!product) return null;
+
+  const units = stocks[product.id] ?? product.stock;
 
   const onPay = () => {
     dispatch(setPaymentStatus('idle'));
-    dispatch(setProductId(MOCK_PRODUCT.id));
     dispatch(setStep('card-delivery'));
-    navigate('/checkout');
+    withViewTransition(() => navigate(`/product/${product.id}/checkout`));
+  };
+
+  const backHome = (e: MouseEvent) => {
+    e.preventDefault();
+    withViewTransition(() => navigate('/'));
   };
 
   return (
-    <AppShell mockBanner={isMockMode()}>
+    <AppShell layout="store" mockBanner={isMockMode() && !embed}>
       <ShellHeader
+        home
         trailing={
-          lastStatus === 'APPROVED' ? (
+          lastStatus === 'APPROVED' && selectedId === product.id ? (
             <span className="nora-product__hint">Stock updated</span>
-          ) : null
+          ) : (
+            <Link className="nora-product__back" to="/" onClick={backHome}>
+              Back
+            </Link>
+          )
         }
       />
-      <main>
-        <div className="nora-product__hero">
-          <img
-            src={MOCK_PRODUCT.imageUrl}
-            alt={MOCK_PRODUCT.imageAlt}
-            width={800}
-            height={1000}
-            decoding="async"
-          />
+
+      <main className="nora-product">
+        <div className="nora-product__stage">
+          <div className="nora-product__hero">
+            <img
+              className={`nora-vt-product nora-vt-product--${product.id}`}
+              src={product.imageUrl}
+              alt={product.imageAlt}
+              width={1400}
+              height={1400}
+              decoding="async"
+            />
+          </div>
+
+          <div className="nora-product__copy">
+            <p className="nora-product__kicker nora-reveal">{product.kicker}</p>
+            <h1 className="nora-product__title nora-reveal nora-reveal-delay-1">
+              {product.name}
+            </h1>
+            <p className="nora-product__lede nora-reveal nora-reveal-delay-2">
+              {product.description}
+            </p>
+            <div className="nora-product__meta nora-reveal nora-reveal-delay-3">
+              <Price minorUnits={product.priceMinor} size="lg" />
+              <StockBadge units={units} />
+            </div>
+
+            {!embed ? (
+              <div className="nora-product__desk-cta nora-reveal nora-reveal-delay-4">
+                <Button
+                  fullWidth
+                  onClick={onPay}
+                  disabled={units <= 0}
+                  aria-label="Pay with credit card"
+                >
+                  Pay with credit card
+                </Button>
+              </div>
+            ) : null}
+          </div>
         </div>
-        <h1 className="nora-product__title">{MOCK_PRODUCT.name}</h1>
-        <p className="nora-product__lede">{MOCK_PRODUCT.description}</p>
-        <div className="nora-product__meta">
-          <Price minorUnits={MOCK_PRODUCT.priceMinor} size="lg" />
-          <StockBadge units={stock} />
-        </div>
-        <Button
-          fullWidth
-          onClick={onPay}
-          disabled={stock <= 0}
-          aria-label="Pay with credit card"
-        >
-          Pay with credit card
-        </Button>
       </main>
+
+      {!embed ? (
+        <div className="nora-product__dock">
+          <div className="nora-product__dock-inner">
+            <div className="nora-product__dock-info">
+              <span className="nora-product__dock-name">{product.name}</span>
+              <Price minorUnits={product.priceMinor} size="sm" />
+            </div>
+            <Button
+              onClick={onPay}
+              disabled={units <= 0}
+              aria-label="Pay with credit card"
+            >
+              Pay with credit card
+            </Button>
+          </div>
+        </div>
+      ) : null}
     </AppShell>
   );
 }

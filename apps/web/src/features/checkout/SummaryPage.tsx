@@ -6,15 +6,16 @@ import {
   Button,
   CardBrandMark,
   FeeList,
+  withViewTransition,
 } from '../../design-system';
-import { MOCK_PRODUCT } from '../../mocks/catalog';
+import { getProductById } from '../../mocks/catalog';
 import { getMockFees, isMockMode, mockPay } from '../../mocks/checkoutService';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
-  setMockStock,
   setPaymentStatus,
   setSimulateDecline,
   setStep,
+  setStocks,
   setTransactionId,
 } from '../../store/checkoutSlice';
 import './summary.css';
@@ -24,39 +25,45 @@ export function SummaryPage() {
   const navigate = useNavigate();
   const delivery = useAppSelector((s) => s.checkout.delivery);
   const cardMeta = useAppSelector((s) => s.checkout.cardMeta);
+  const productId = useAppSelector((s) => s.checkout.productId);
   const simulateDecline = useAppSelector((s) => s.checkout.simulateDecline);
   const paymentStatus = useAppSelector((s) => s.checkout.paymentStatus);
+  const product = productId ? getProductById(productId) : undefined;
   const fees = getMockFees();
 
   useEffect(() => {
-    if (!delivery || !cardMeta) {
-      navigate('/checkout', { replace: true });
+    if (!delivery || !cardMeta || !product) {
+      navigate(productId ? `/product/${productId}/checkout` : '/', {
+        replace: true,
+      });
     }
-  }, [delivery, cardMeta, navigate]);
+  }, [delivery, cardMeta, product, productId, navigate]);
 
-  if (!delivery || !cardMeta) return null;
+  if (!delivery || !cardMeta || !product) return null;
 
-  const total =
-    MOCK_PRODUCT.priceMinor + fees.baseFee + fees.deliveryFee;
+  const total = product.priceMinor + fees.baseFee + fees.deliveryFee;
   const paying = paymentStatus === 'PENDING';
 
   const onPay = async () => {
     dispatch(setPaymentStatus('PENDING'));
-    navigate('/status');
+    withViewTransition(() => navigate('/status'));
     if (!isMockMode()) {
       dispatch(setPaymentStatus('ERROR'));
       return;
     }
-    const result = await mockPay({ simulateDecline });
+    const result = await mockPay({
+      productId: product.id,
+      simulateDecline,
+    });
     dispatch(setTransactionId(result.transactionId));
     dispatch(setPaymentStatus(result.status));
-    dispatch(setMockStock(result.stock));
+    dispatch(setStocks(result.stocks));
     dispatch(setStep('status'));
   };
 
   return (
     <Backdrop
-      title="Order summary"
+      title="Summary"
       footer={
         <>
           {isMockMode() ? (
@@ -66,25 +73,28 @@ export function SummaryPage() {
                 checked={simulateDecline}
                 onChange={(e) => dispatch(setSimulateDecline(e.target.checked))}
               />
-              Simulate declined payment
+              Simulate decline
             </label>
           ) : null}
           <Button fullWidth onClick={onPay} disabled={paying}>
-            {paying ? 'Processing…' : 'Pay'}
+            {paying ? 'Processing…' : 'Pay now'}
           </Button>
-          <Link className="nora-summary__back" to="/checkout">
-            Edit card & delivery
+          <Link
+            className="nora-summary__back"
+            to={`/product/${product.id}/checkout`}
+          >
+            Edit details
           </Link>
         </>
       }
     >
       <BrandLockup size="sm" />
-      <p className="nora-summary__product">{MOCK_PRODUCT.name}</p>
+      <p className="nora-summary__product">{product.name}</p>
       <FeeList
         lines={[
-          { label: 'Product', amountMinor: MOCK_PRODUCT.priceMinor },
+          { label: 'Product', amountMinor: product.priceMinor },
           { label: 'Base fee', amountMinor: fees.baseFee },
-          { label: 'Delivery fee', amountMinor: fees.deliveryFee },
+          { label: 'Delivery', amountMinor: fees.deliveryFee },
           { label: 'Total', amountMinor: total, emphasis: true },
         ]}
       />
@@ -95,7 +105,11 @@ export function SummaryPage() {
           <span>{cardMeta.holderName}</span>
         </div>
         <p>
-          Deliver to {delivery.fullName}, {delivery.address}, {delivery.city}
+          Deliver to {delivery.fullName}
+          <br />
+          {delivery.address}
+          <br />
+          {delivery.city}, {delivery.region}
         </p>
       </div>
     </Backdrop>

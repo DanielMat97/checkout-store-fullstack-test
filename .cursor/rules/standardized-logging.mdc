@@ -1,0 +1,39 @@
+---
+description: Standardized logging via a single shared logger used everywhere
+alwaysApply: true
+---
+
+# Standardized Logging
+
+## Single entry point
+
+- All backend logs go through `createLogger` from `@app/shared` — **including API Gateway access logs**.
+- Nest runtime logs use `NestStandardLogger` (wraps `createLogger`). Never `console.*` in handlers/use-cases/adapters.
+
+```typescript
+import { createLogger, logHttpRequest, NestStandardLogger } from '@app/shared';
+
+const logger = createLogger('transactions');
+logger.info('transaction.created', { transactionId });
+
+// API access (same JSON envelope)
+logHttpRequest({ service: 'api-gateway', message implied: 'http.request', ... });
+```
+
+## Standard shape
+
+Every line is one JSON object:
+
+`timestamp`, `level`, `service`, `message`, optional `correlationId` / `requestId`, optional `data` (redacted).
+
+| Kind | `service` | `message` |
+|---|---|---|
+| Domain / Lambda | microservice name | event key e.g. `lambda.cold_start` |
+| HTTP access (API) | `api-gateway` | `http.request` |
+
+HTTP `data` includes: `channel: "http"`, `method`, `path`, `statusCode`, `durationMs`, `targetService`.
+
+## Wiring
+
+- Each Nest app: `AccessLogMiddleware(serviceName)` on all routes + `NestStandardLogger` in `NestFactory.create`.
+- Propagate `x-correlation-id` on every response.

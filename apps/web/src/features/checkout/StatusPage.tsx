@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { AppShell, BrandLockup, Button } from '../../design-system';
+import { AppShell, BrandLockup, Button, withViewTransition } from '../../design-system';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { resetCheckout, setStep } from '../../store/checkoutSlice';
 import './status.css';
@@ -9,36 +9,40 @@ export function StatusPage() {
   const navigate = useNavigate();
   const status = useAppSelector((s) => s.checkout.paymentStatus);
   const transactionId = useAppSelector((s) => s.checkout.transactionId);
+  const productId = useAppSelector((s) => s.checkout.productId);
 
   const approved = status === 'APPROVED';
   const pending = status === 'PENDING';
 
   const title = pending
-    ? 'Processing payment'
+    ? 'Confirming'
     : approved
-      ? 'Payment approved'
-      : 'Payment declined';
+      ? 'Approved'
+      : 'Declined';
 
   const body = pending
-    ? 'Confirming with the payment provider…'
+    ? 'A quiet moment while we speak with the payment provider.'
     : approved
-      ? 'Your headphones are reserved. Delivery details were saved for fulfillment.'
-      : 'No charge was completed and stock was not reduced. You can try again with another card.';
+      ? 'Your order is reserved. Delivery details are ready for fulfillment.'
+      : 'No charge was taken and stock stays as it was. You can try another card.';
 
   const onContinue = () => {
-    dispatch(setStep('product'));
+    const target = productId ? `/product/${productId}` : '/';
     if (!approved) {
       dispatch(resetCheckout());
+    } else {
+      dispatch(setStep('product'));
     }
-    navigate('/');
+    withViewTransition(() => navigate(target));
   };
 
   return (
     <AppShell>
       <main className={`nora-status nora-status--${status.toLowerCase()}`}>
+        <div className="nora-status__ambient" aria-hidden="true" />
         <BrandLockup size="md" />
         <div className="nora-status__icon" aria-hidden="true">
-          {pending ? '…' : approved ? '✓' : '!'}
+          {pending ? <span className="nora-status__spinner" /> : approved ? '✓' : '!'}
         </div>
         <h1>{title}</h1>
         <p>{body}</p>

@@ -1,0 +1,27 @@
+---
+description: API domains, HTTP usage, and validation expectations
+globs: "**/services/**/*.{ts,js}"
+alwaysApply: false
+---
+
+# API Domains
+
+Expose distinct resources as **separate serverless microservices**. Domains required: **stock**, **transactions**, **customers**, **deliveries**.
+
+## Suggested contracts
+
+| Domain | Service | Examples | Notes |
+|---|---|---|---|
+| Stock / products | `services/products` | `GET /products/:id`, `GET /products/:id/stock` | Read-only catalog; seed only |
+| Customers | `services/customers` | `POST /customers`, `GET /customers/:id` | Buyer identity |
+| Deliveries | `services/deliveries` | `POST /deliveries`, `GET /deliveries/:id` | Address / recipient |
+| Transactions | `services/transactions` | `POST /transactions` → `PENDING`; `GET /transactions/:id` | Ledger + provider charge |
+
+## HTTP & validation
+
+- Use `201` create, `200` read/update, `400` validation, `404` missing, `409` stock conflict, `502` provider failure.
+- Validate every input for real scenarios (missing fields, invalid card shape, insufficient stock, duplicate payment, invalid email/phone/address); apply shared OWASP headers + logger on every route.
+- Use **distinct request types** per domain (mix of GET/POST/PATCH as needed) — required by brief for stock, transactions, customers, deliveries.
+- Business rules live in use-cases, **never** in controllers/handlers.
+- Document all endpoints in OpenAPI under `docs/api/` (Apidog-importable) and keep Nest Swagger decorators in sync — see `apidog-openapi` rule. Update docs on every route create/change.
+- Amounts: product price + always-on base fee + delivery fee; persist fee breakdown on the transaction.

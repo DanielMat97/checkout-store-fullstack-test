@@ -34,8 +34,15 @@ export function isValidLuhn(number: string): boolean {
 }
 
 export function formatCardNumber(value: string): string {
-  const n = digitsOnly(value).slice(0, 19);
+  // Visa / Mastercard PAN up to 16 digits in this checkout
+  const n = digitsOnly(value).slice(0, 16);
   return n.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+}
+
+export function formatExpiry(value: string): string {
+  const n = digitsOnly(value).slice(0, 4);
+  if (n.length <= 2) return n;
+  return `${n.slice(0, 2)}/${n.slice(2)}`;
 }
 
 export function isValidExpiry(mmYy: string): boolean {
@@ -50,12 +57,19 @@ export function isValidExpiry(mmYy: string): boolean {
   return exp >= now;
 }
 
-export function isValidCvv(cvv: string, brand: CardBrand): boolean {
-  const n = digitsOnly(cvv);
-  if (brand === 'mastercard' || brand === 'visa') return n.length === 3;
-  return n.length === 3 || n.length === 4;
+/** Visa / Mastercard CVV is exactly 3 digits in this flow. */
+export function isValidCvv(cvv: string, _brand?: CardBrand): boolean {
+  return digitsOnly(cvv).length === 3;
+}
+
+export function sanitizeCvv(value: string): string {
+  return digitsOnly(value).slice(0, 3);
 }
 
 export function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const v = email.trim();
+  if (v.length < 5 || v.length > 254 || /\s/.test(v)) return false;
+  return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/.test(
+    v,
+  );
 }

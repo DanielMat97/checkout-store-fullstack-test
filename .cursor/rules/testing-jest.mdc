@@ -1,0 +1,34 @@
+---
+description: Jest unit tests and >80% coverage requirements for FE and BE
+globs: "**/*.{spec,test}.{ts,tsx,js,jsx}"
+alwaysApply: false
+---
+
+# Testing — Jest >80%
+
+## Mandatory
+
+- Unit tests with **Jest** on frontend and backend.
+- Coverage **>80%** each; publish report numbers in README (command + % lines/branches).
+- Prefer testing domain/use-cases and reducers/validators over shallow UI snapshots alone.
+
+## Backend priorities
+
+- Use-cases: happy path, insufficient stock, provider decline, validation errors, idempotent finalize.
+- ROP chains: ensure failure short-circuits without partial stock updates.
+- Adapters: mock `PaymentGatewayPort` and repositories.
+
+## Frontend priorities
+
+- Redux slices/persist rehydration of checkout steps.
+- Card/delivery validators and fee summary totals.
+- Critical components: product stock display, pay CTA, summary backdrop amounts.
+
+## Anti-patterns
+
+```typescript
+// ❌ empty tests or testing only framework wiring
+// ✅ assert business outcomes and HTTP/result mapping
+```
+
+Run coverage in CI or document exact scripts: `test`, `test:cov`.

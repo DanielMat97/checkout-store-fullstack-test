@@ -1,32 +1,34 @@
 # NORA Design System
 
 > Living document. Source of truth for visual identity in `apps/web`.  
-> Code: `apps/web/src/design-system/`. Spec: `specs/checkout-ui-mock/spec.md`.
+> Code: `apps/web/src/design-system/`. Spec: `specs/checkout-ui-mock/spec.md`.  
+> Visual ADRs: `0007` (initial craft) → **`0008` NORA Pop + split checkout**.
 
 ## Brand
 
 | | |
 |---|---|
 | Name | **NORA** |
-| Voice | Clear, calm, precise — home/audio retail |
-| Hero rule | Brand is a hero-level signal on every primary viewport (not just nav text) |
-| Product in mock | “Aura Quiet Headphones” |
+| Voice | Playful, warm, confident — objects for brighter rooms |
+| Hero rule | Brand + photography dominate; coral CTAs pop |
+| Identity | **NORA Soft** — warm stone + muted clay accent |
+| Product in mock | “Aura Quiet” (+ catalog) |
 
 ## Principles
 
-1. **One job per screen** — no dashboard clutter in checkout.
-2. **Product first** — imagery and price before chrome.
-3. **Mobile-first** — design at 375px; enhance upward.
-4. **Tokens only** — no one-off colors/spacing in features.
-5. **Accessible by default** — labels, focus, contrast, reduced motion.
+1. **One job per screen** — clear purchase path.
+2. **Product first** — then fluid handoff to checkout (no modal interrupt).
+3. **Mobile-first** — SE base; split checkout from ~960px; fluid padding.
+4. **Tokens only** — no one-off colors in features.
+5. **One accent color** — clay CTA; sage for success only.
 
 ## Anti-patterns (do not ship)
 
 - Purple / indigo gradient SaaS look
-- Cream canvas + terracotta + default serif “editorial AI”
-- Broadsheet dense columns with hairline rules everywhere
-- Pill soup, floating badge stickers on the hero image
-- Multi-layer neon glow shadows
+- Rainbow brand gradients / neon coral+mint+lemon
+- Broadsheet dense columns
+- Floating badge stickers on hero media
+- Modal for primary pay path (use split flow)
 
 ## Foundations
 
@@ -34,87 +36,42 @@
 
 | Token | Role | Value |
 |---|---|---|
-| `--nora-ink` | Primary text / surfaces dark | `#0B1220` |
-| `--nora-mist` | Page background | `#E8EEF5` |
-| `--nora-paper` | Elevated surface | `#F7FAFC` |
-| `--nora-citrus` | Accent / primary CTA fill | `#C8F542` |
-| `--nora-citrus-ink` | Text on citrus | `#10180A` |
-| `--nora-slate` | Secondary text | `#5A6B7D` |
-| `--nora-line` | Dividers | `#C9D4E2` |
-| `--nora-danger` | Errors | `#B42318` |
-| `--nora-success` | Approved | `#0E7A4B` |
+| `--nora-bg` | Warm stone | `#f6f3ee` |
+| `--nora-bg-soft` | Soft wash | `#ebe6df` |
+| `--nora-ink` | Text | `#22201e` |
+| `--nora-cta` | Muted clay | `#c45d45` |
+| `--nora-success` | Sage | `#5f7d6b` |
+| `--nora-line` | Dividers | `#ddd6cc` |
 
 ### Typography
 
-| Role | Family | Notes |
-|---|---|---|
-| Display | **Syne** | Brand, product title |
-| UI / body | **DM Sans** | Forms, fees, buttons |
+| Role | Family |
+|---|---|
+| Display | **Fraunces** |
+| UI / body | **Outfit** |
 
-Scale: `12 / 14 / 16 / 20 / 28 / 40` with tight display leading.
+### Radius
 
-### Space & radius
-
-- Space scale: `4, 8, 12, 16, 24, 32, 48`
-- Radius: `sm 8`, `md 14`, `lg 22` (no pill CTAs)
-- Touch min: 44px
+Soft: `sm 0.65rem` / `md 1rem` / `lg 1.5rem` / pills for chips.
 
 ### Motion
 
-| Token | Value |
-|---|---|
-| `--nora-ease` | `cubic-bezier(0.22, 1, 0.36, 1)` |
-| `--nora-fast` | 180ms |
-| `--nora-med` | 240ms |
-
-Honor `prefers-reduced-motion`.
-
-## Components
-
-### Primitives
-
-- `Button` — `primary` \| `ghost` \| `danger`
-- `TextField` — label, hint, error, `aria-*`
-- `Badge` — stock / status
-- `Surface` — paper elevation
-
-### Patterns
-
-- `BrandLockup` — NORA wordmark
-- `Modal` — dialog + scrim + focus trap
-- `Backdrop` — Material-like summary layer
-- `Price` — currency formatting (COP mock)
-- `StockBadge`
-- `CardBrandMark` — visa \| mastercard \| unknown
-- `FeeList` — product + base + delivery + total
+`--nora-fast/med/slow` ≈ 200 / 480 / 720ms. Split checkout: `nora-product-slide-left`, `nora-form-slide-right` (desktop); dock + rise (mobile).
 
 ## Screen recipes
 
+### Collection
+
+Featured hero + bento grid.
+
 ### Product
 
-Brand → image plane → title → lede → price/stock row → primary CTA.
+Split stage + sticky dock (mobile).
 
-### Modal checkout
+### Checkout (split flow)
 
-Two stacked groups (Card, Delivery); sticky footer Continue.
+Product pane left ↔ form pane right. No modal.
 
-### Summary backdrop
+### Summary backdrop / Status
 
-Scrim + rising panel; fee list; Pay.
-
-### Status
-
-Icon + title + body + transaction id + CTA home.
-
-## Scaling
-
-New screens must:
-
-1. Reuse tokens/components.
-2. Add patterns to `design-system/` if reused twice.
-3. Update this doc + CHANGELOG.
-
-## Mock mode
-
-`VITE_MOCK_MODE=true` (default): UI talks to `src/mocks/*` only.  
-Set `false` when wiring real API Gateway (`VITE_API_BASE_URL`).
+Sheet + vivid accents; status feedback animations.

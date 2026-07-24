@@ -2,16 +2,17 @@
   display: inline-flex;
   align-items: center;
   min-height: 1.5rem;
-  padding: 0 var(--nora-space-2);
-  border-radius: var(--nora-radius-sm);
+  padding: 0 var(--nora-space-3);
+  border-radius: var(--nora-radius-soft);
   font-size: var(--nora-fs-xs);
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .nora-badge--neutral {
-  background: var(--nora-line);
-  color: var(--nora-ink);
+  background: var(--nora-bg-soft);
+  color: var(--nora-ink-soft);
 }
 
 .nora-badge--success {

@@ -1,0 +1,42 @@
+---
+description: Keep all API routes documented in Apidog-importable OpenAPI whenever endpoints change
+globs: "**/services/**/*.{ts,js}"
+alwaysApply: false
+---
+
+# API Docs → Apidog (mandatory on every endpoint change)
+
+Whenever you **create, change, rename, or remove** any HTTP route/controller in any Nest microservice, update API documentation in the **same change**. Undocumented endpoints are incomplete work.
+
+## Canonical artifact (Apidog import)
+
+Maintain a repo OpenAPI 3.0+ file Apidog can import (JSON or YAML):
+
+```
+docs/api/openapi.json          # aggregated or root index
+docs/api/products.openapi.json # optional per-service specs
+docs/api/customers.openapi.json
+docs/api/deliveries.openapi.json
+docs/api/transactions.openapi.json
+```
+
+- Primary format: **OpenAPI 3.0 / 3.1** (Apidog: Import → OpenAPI).
+- Also keep `.postman/collection.json` (Collection v2.1) in sync when practical — Apidog imports Postman too; brief allows Postman **or** public Swagger.
+- Prefer generating from Nest `@nestjs/swagger` (`DocumentBuilder` + decorators) and writing/exporting into `docs/api/` so the file stays the source of truth for import.
+
+## Required per operation
+
+For every path + method document: summary, tags (domain service), path/query/body schemas, validation rules, success + error responses (`400/404/409/502` as applicable), example request/response (no real secrets/PAN). Use `{{baseUrl}}` or server variables per environment.
+
+## Workflow checklist
+
+1. Add/update Nest controller route + DTO decorators (`@ApiTags`, `@ApiOperation`, `@ApiResponse`, `@ApiBody` / `@ApiParam`).
+2. Regenerate or patch `docs/api/*.openapi.json` (and Postman collection if used).
+3. Ensure README links the OpenAPI path and/or public Swagger JSON URL (raw file, not UI-only).
+4. No provider brand name inside the spec.
+
+## Anti-patterns
+
+- Shipping a route with only code comments and no OpenAPI entry.
+- Spec out of date vs controllers.
+- Import URL pointing at Swagger UI HTML instead of raw `openapi.json`.

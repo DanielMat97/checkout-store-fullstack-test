@@ -3,32 +3,43 @@
   flex-direction: column;
   gap: var(--nora-space-2);
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .nora-field__label {
-  font-size: var(--nora-fs-sm);
+  font-size: var(--nora-fs-xs);
   font-weight: 600;
-  color: var(--nora-ink);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--nora-ink-soft);
 }
 
 .nora-field__control {
   display: flex;
   align-items: center;
   min-height: var(--nora-touch);
+  min-width: 0;
+  max-width: 100%;
   padding: 0 var(--nora-space-3);
   background: var(--nora-paper);
-  border: 1px solid var(--nora-line);
+  border: 1.5px solid var(--nora-line);
   border-radius: var(--nora-radius-sm);
+  transition:
+    border-color var(--nora-fast) var(--nora-ease),
+    box-shadow var(--nora-fast) var(--nora-ease),
+    background var(--nora-fast) var(--nora-ease);
 }
 
 .nora-field__control:focus-within {
-  border-color: var(--nora-ink);
-  box-shadow: var(--nora-focus-ring);
+  border-color: var(--nora-cta);
+  box-shadow: 0 0 0 3px rgba(196, 93, 69, 0.14);
+  background: #fff;
 }
 
 .nora-field__control--error {
   border-color: var(--nora-danger);
-  background: var(--nora-danger-soft);
+  box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12);
 }
 
 .nora-field__input {
@@ -49,13 +60,77 @@
   margin-left: var(--nora-space-2);
 }
 
+.nora-field__reveal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--nora-radius-sm);
+  background: transparent;
+  color: var(--nora-ink-soft);
+  cursor: pointer;
+  transition:
+    color var(--nora-fast) var(--nora-ease),
+    background var(--nora-fast) var(--nora-ease);
+}
+
+.nora-field__reveal:hover {
+  color: var(--nora-ink);
+  background: var(--nora-bg-soft);
+}
+
+.nora-field__reveal:focus-visible {
+  outline: none;
+  box-shadow: var(--nora-focus-ring);
+  color: var(--nora-ink);
+}
+
+.nora-field__input[type='password'] {
+  letter-spacing: 0.18em;
+  font-family: ui-monospace, monospace;
+}
+
 .nora-field__hint {
   font-size: var(--nora-fs-xs);
-  color: var(--nora-slate);
+  color: var(--nora-ink-soft);
 }
 
 .nora-field__error {
   font-size: var(--nora-fs-xs);
   color: var(--nora-danger);
+}
+
+.nora-field__leading {
+  display: inline-flex;
+  align-items: center;
+  margin-right: var(--nora-space-2);
+  flex-shrink: 0;
+}
+
+.nora-co-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  padding-right: 0.55rem;
+  margin-right: 0.1rem;
+  border-right: var(--nora-hairline);
+  user-select: none;
+}
+
+.nora-co-flag svg {
+  display: block;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(34, 32, 30, 0.08);
+}
+
+.nora-co-flag__code {
+  font-size: var(--nora-fs-sm);
   font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--nora-ink-soft);
 }

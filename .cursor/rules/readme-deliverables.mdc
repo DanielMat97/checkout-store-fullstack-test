@@ -1,0 +1,28 @@
+---
+description: README, API docs, data model, coverage and deploy deliverables
+globs: "**/README.md"
+alwaysApply: false
+---
+
+# Deliverables & README
+
+README must include:
+
+1. How to run FE/BE locally and run tests + coverage.
+2. **Data model** (DynamoDB + ElectroDB): entities, PK/SK, GSIs, access patterns — ASCII/mermaid fine.
+3. Link to **OpenAPI** (`docs/api/openapi.json` — Apidog-importable) and/or **Swagger public URL** / **Postman** (`.postman/collection.json`).
+4. Coverage results (>80% FE and BE) with date/command.
+5. Deployed app URL + architecture (SF4 microservices on AWS: API Gateway/Lambda per domain, DynamoDB, FE on S3/CloudFront).
+6. Env var list with neutral names (no secrets, no provider brand).
+7. How to deploy each microservice: Serverless Framework 4 (`serverless deploy`, stage/region).
+8. Note shared logger + OWASP headers package.
+
+## Repo rules
+
+- Public GitHub only when delivering; repo name/description without provider brand.
+- Entire stack on **AWS** with **NestJS** APIs deployed by **Serverless Framework 4**: FE (S3 + CloudFront), domain Nest microservices (API Gateway + Lambda), DynamoDB. Nest and SF4 are both required (framework vs deploy).
+- Seed products so reviewers need no create-product API.
+
+## Definition of done
+
+Full 5-screen flow works against sandbox; stock updates on approval; refresh-safe checkout; tests and deploy links live in README.

@@ -1,4 +1,5 @@
 @import './design-system/tokens.css';
+@import './design-system/motion.css';
 
 *,
 *::before,
@@ -10,15 +11,17 @@ html,
 body,
 #root {
   min-height: 100%;
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
   font-family: var(--nora-font-body);
   color: var(--nora-ink);
-  background: var(--nora-mist);
+  background: var(--nora-bg);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
 }
 
 a {
@@ -27,4 +30,9 @@ a {
 
 img {
   max-width: 100%;
+}
+
+button,
+input {
+  font: inherit;
 }

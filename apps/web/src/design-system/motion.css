@@ -1,0 +1,156 @@
+/* Premium motion language — Apple calm, Aesop restraint, Glossier softness */
+
+@keyframes nora-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes nora-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes nora-sheet-up {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes nora-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes nora-kenburns {
+  from {
+    transform: scale(1.05);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes nora-kenburns-loop {
+  from {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.1) translate3d(-1.5%, -1%, 0);
+  }
+}
+
+@keyframes nora-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes nora-pulse-soft {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.nora-reveal {
+  animation: nora-fade-up var(--nora-med) var(--nora-ease-emphasized) both;
+}
+
+.nora-reveal-delay-1 {
+  animation-delay: 70ms;
+}
+
+.nora-reveal-delay-2 {
+  animation-delay: 140ms;
+}
+
+.nora-reveal-delay-3 {
+  animation-delay: 210ms;
+}
+
+.nora-reveal-delay-4 {
+  animation-delay: 280ms;
+}
+
+/* Shared-element continuity between catalog ↔ product */
+.nora-vt-product--prod_aura_quiet {
+  view-transition-name: nora-prod-aura;
+}
+
+.nora-vt-product--prod_linen_lamp {
+  view-transition-name: nora-prod-lamp;
+}
+
+.nora-vt-product--prod_clay_mug {
+  view-transition-name: nora-prod-mug;
+}
+
+.nora-vt-product--prod_wool_throw {
+  view-transition-name: nora-prod-throw;
+}
+
+@supports (view-transition-name: none) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: var(--nora-med);
+    animation-timing-function: var(--nora-ease);
+  }
+
+  ::view-transition-group(nora-prod-aura),
+  ::view-transition-group(nora-prod-lamp),
+  ::view-transition-group(nora-prod-mug),
+  ::view-transition-group(nora-prod-throw) {
+    animation-duration: var(--nora-slow);
+    animation-timing-function: var(--nora-ease-emphasized);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nora-reveal,
+  .nora-reveal-delay-1,
+  .nora-reveal-delay-2,
+  .nora-reveal-delay-3,
+  .nora-reveal-delay-4,
+  .nora-modal__scrim,
+  .nora-modal__panel,
+  .nora-backdrop__front,
+  .nora-backdrop__back,
+  .nora-status,
+  .nora-product__hero img {
+    animation: none !important;
+  }
+
+  .nora-vt-product--prod_aura_quiet,
+  .nora-vt-product--prod_linen_lamp,
+  .nora-vt-product--prod_clay_mug,
+  .nora-vt-product--prod_wool_throw {
+    view-transition-name: none;
+  }
+}

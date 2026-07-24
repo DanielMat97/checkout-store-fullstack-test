@@ -1,0 +1,33 @@
+---
+description: Sandbox payment-provider integration (tokens, integrity, no brand in repo)
+globs: "**/services/**/*.{ts,js}"
+alwaysApply: false
+---
+
+# Payment Provider Integration
+
+## Environment only
+
+- Base URLs and keys from env (`PAYMENT_API_URL`, `PAYMENT_PUBLIC_KEY`, `PAYMENT_PRIVATE_KEY`, `PAYMENT_INTEGRITY_KEY`, `PAYMENT_EVENTS_KEY`). Never hardcode secrets.
+- Use **sandbox/UAT** only. Prefer API keys over dashboard login.
+- Local reference docs may exist under gitignored `docs/`; do not commit provider brand name or raw keys.
+
+## Typical card charge flow (adapter)
+
+1. Create payment source / tokenize card with **public** key (browser or backend per provider docs — prefer not storing PAN).
+2. Build integrity signature when required by provider.
+3. Create transaction against sandbox API with reference = own `transactionId`.
+4. Poll or read final status; map to domain `APPROVED` | `DECLINED` | `ERROR`.
+5. Idempotent updates on own transaction row.
+
+## Naming in code
+
+```typescript
+// ❌ BAD
+class WompiClient {}
+
+// ✅ GOOD
+class PaymentGatewayClient implements PaymentGatewayPort {}
+```
+
+Card test data: structurally valid fakes (Luhn-capable where needed), never real cards.

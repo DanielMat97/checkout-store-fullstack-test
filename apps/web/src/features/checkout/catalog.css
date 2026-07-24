@@ -1,0 +1,377 @@
+.nora-catalog {
+  display: grid;
+  gap: 0;
+}
+
+.nora-catalog__nav-link {
+  font-size: var(--nora-fs-xs);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--nora-ink-soft);
+  border-bottom: 1px solid transparent;
+  transition:
+    color var(--nora-fast) var(--nora-ease),
+    border-color var(--nora-fast) var(--nora-ease);
+}
+
+.nora-catalog__nav-link:hover {
+  color: var(--nora-ink);
+  border-bottom-color: var(--nora-ink);
+}
+
+.nora-catalog__eyebrow {
+  margin: 0;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--nora-ink-soft);
+}
+
+.nora-catalog__hero {
+  margin: 0;
+  animation: nora-fade var(--nora-slow) var(--nora-ease) both;
+}
+
+.nora-catalog__hero-hit {
+  position: relative;
+  display: grid;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: var(--nora-bg-soft);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  /* iPhone SE / short viewports: avoid giant empty hero */
+  min-height: clamp(18rem, 62vh, 32rem);
+}
+
+.nora-catalog__hero-hit:focus-visible {
+  outline: none;
+  box-shadow: var(--nora-focus-ring);
+}
+
+.nora-catalog__hero-media {
+  position: absolute;
+  inset: 0;
+}
+
+.nora-catalog__hero-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.04);
+  animation: nora-kenburns-loop var(--nora-ambient) var(--nora-ease) infinite alternate;
+  transition: transform var(--nora-slow) var(--nora-ease-out);
+}
+
+.nora-catalog__hero-hit:hover .nora-catalog__hero-media img {
+  transform: scale(1.07);
+  animation-play-state: paused;
+}
+
+.nora-catalog__hero-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(34, 32, 30, 0.05) 0%,
+    rgba(34, 32, 30, 0.55) 100%
+  );
+  pointer-events: none;
+}
+
+.nora-catalog__hero-copy {
+  position: relative;
+  z-index: 1;
+  align-self: end;
+  display: grid;
+  gap: var(--nora-space-3);
+  max-width: 26rem;
+  padding: var(--nora-space-5) var(--nora-shell-pad-x) var(--nora-space-6);
+  color: var(--nora-paper);
+  animation: nora-fade-up var(--nora-slow) var(--nora-ease-emphasized) both;
+  animation-delay: 100ms;
+}
+
+.nora-catalog__hero-copy .nora-catalog__eyebrow {
+  color: rgba(255, 252, 250, 0.72);
+}
+
+.nora-catalog__hero-title {
+  font-family: var(--nora-font-display);
+  font-size: clamp(2rem, 9vw, 3.5rem);
+  font-weight: 550;
+  letter-spacing: var(--nora-tracking-display);
+  line-height: 1;
+}
+
+.nora-catalog__hero-lede {
+  font-size: var(--nora-fs-sm);
+  line-height: 1.6;
+  max-width: 32ch;
+  color: rgba(255, 252, 250, 0.82);
+}
+
+.nora-catalog__hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--nora-space-3);
+}
+
+.nora-catalog__hero-meta .nora-price {
+  color: var(--nora-paper);
+}
+
+.nora-catalog__hero-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--nora-space-1);
+  width: fit-content;
+  min-height: 2.6rem;
+  padding: 0 1.2rem;
+  border: 0;
+  border-radius: var(--nora-radius-soft);
+  background: var(--nora-cta);
+  color: var(--nora-cta-text);
+  font-size: var(--nora-fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  box-shadow: var(--nora-shadow);
+  transition:
+    background var(--nora-fast) var(--nora-ease),
+    transform var(--nora-med) var(--nora-ease-out);
+}
+
+.nora-catalog__hero-hit:hover .nora-catalog__hero-cta {
+  background: var(--nora-cta-hover);
+  transform: translateY(-1px);
+}
+
+.nora-catalog__stock-quiet {
+  font-size: var(--nora-fs-xs);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.nora-catalog__edit {
+  width: min(100%, var(--nora-max-store));
+  margin: 0 auto;
+  padding: clamp(2rem, 6vw, 3.5rem) var(--nora-shell-pad-x) var(--nora-space-6);
+  scroll-margin-top: calc(var(--nora-nav-h) + 0.5rem);
+}
+
+.nora-catalog__edit-head {
+  display: grid;
+  gap: var(--nora-space-2);
+  margin-bottom: var(--nora-space-5);
+  max-width: 28rem;
+  animation: nora-fade-up var(--nora-med) var(--nora-ease-out) both;
+}
+
+.nora-catalog__edit-title {
+  margin: 0;
+  font-family: var(--nora-font-display);
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  font-weight: 550;
+  letter-spacing: var(--nora-tracking-display);
+  line-height: 1.08;
+}
+
+.nora-catalog__bento {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--nora-space-4) var(--nora-space-3);
+}
+
+.nora-catalog__tile {
+  min-width: 0;
+  opacity: 0;
+  animation: nora-fade-up var(--nora-slow) var(--nora-ease-emphasized) both;
+}
+
+.nora-catalog__tile--wide {
+  grid-column: 1 / -1;
+}
+
+.nora-catalog__tile-hit {
+  display: grid;
+  gap: var(--nora-space-3);
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nora-catalog__tile-hit:focus-visible {
+  outline: none;
+  box-shadow: var(--nora-focus-ring);
+}
+
+.nora-catalog__tile-media {
+  display: block;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--nora-bg-soft);
+  border-radius: var(--nora-radius-sm);
+}
+
+.nora-catalog__tile--wide .nora-catalog__tile-media {
+  aspect-ratio: 16 / 10;
+}
+
+.nora-catalog__tile-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--nora-slow) var(--nora-ease-out);
+}
+
+.nora-catalog__tile-hit:hover .nora-catalog__tile-media img {
+  transform: scale(1.04);
+}
+
+.nora-catalog__tile-body {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.nora-catalog__tile-kicker {
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--nora-ink-soft);
+}
+
+.nora-catalog__tile-name {
+  font-family: var(--nora-font-display);
+  font-size: clamp(1.05rem, 3.5vw, 1.4rem);
+  font-weight: 550;
+  letter-spacing: var(--nora-tracking-display);
+  line-height: 1.15;
+}
+
+.nora-catalog__tile-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--nora-space-2);
+  margin-top: var(--nora-space-1);
+}
+
+.nora-catalog__tile-meta .nora-catalog__stock-quiet {
+  color: var(--nora-ink-soft);
+  opacity: 1;
+}
+
+.nora-catalog__foot {
+  width: min(100%, var(--nora-max-store));
+  margin: 0 auto;
+  padding: var(--nora-space-6) var(--nora-shell-pad-x) 0;
+  border-top: var(--nora-hairline);
+}
+
+.nora-catalog__foot p {
+  margin: 0;
+  font-family: var(--nora-font-display);
+  font-size: var(--nora-fs-lg);
+  font-style: italic;
+  color: var(--nora-ink-soft);
+  text-align: center;
+}
+
+/* Tablet */
+@media (min-width: 640px) {
+  .nora-catalog__hero-hit {
+    min-height: clamp(22rem, 68vh, 36rem);
+  }
+
+  .nora-catalog__bento {
+    gap: var(--nora-space-5) var(--nora-space-4);
+  }
+}
+
+/* Desktop storefront */
+@media (min-width: 900px) {
+  .nora-catalog__hero-hit {
+    min-height: min(78vh, 40rem);
+    grid-template-columns: minmax(0, 1.2fr) minmax(16rem, 0.8fr);
+  }
+
+  .nora-catalog__hero-media {
+    position: relative;
+    min-height: min(78vh, 40rem);
+  }
+
+  .nora-catalog__hero-veil {
+    background: linear-gradient(
+      90deg,
+      transparent 42%,
+      color-mix(in srgb, var(--nora-bg) 94%, transparent) 82%
+    );
+  }
+
+  .nora-catalog__hero-copy {
+    align-self: center;
+    color: var(--nora-ink);
+    padding: var(--nora-space-6) var(--nora-shell-pad-x);
+  }
+
+  .nora-catalog__hero-copy .nora-catalog__eyebrow,
+  .nora-catalog__hero-lede,
+  .nora-catalog__stock-quiet {
+    color: var(--nora-ink-soft);
+  }
+
+  .nora-catalog__hero-meta .nora-price {
+    color: var(--nora-ink);
+  }
+
+  .nora-catalog__bento {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .nora-catalog__tile--wide {
+    grid-column: auto;
+  }
+
+  .nora-catalog__tile--wide .nora-catalog__tile-media {
+    aspect-ratio: 4 / 5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nora-catalog__hero-media img,
+  .nora-catalog__tile,
+  .nora-catalog__hero-copy {
+    animation: none !important;
+  }
+
+  .nora-catalog__tile {
+    opacity: 1;
+  }
+
+  .nora-catalog__hero-media img,
+  .nora-catalog__tile-media img {
+    transform: none !important;
+    transition: none !important;
+  }
+}

@@ -1,8 +1,20 @@
+.nora-product {
+  padding-bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
+}
+
+.nora-product__stage {
+  display: grid;
+  gap: var(--nora-space-4);
+}
+
 .nora-product__hero {
-  margin: 0 calc(var(--nora-space-4) * -1) var(--nora-space-5);
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
   aspect-ratio: 4 / 5;
   overflow: hidden;
-  background: var(--nora-line);
+  background: var(--nora-bg-soft);
+  animation: nora-scale-in var(--nora-slow) var(--nora-ease-emphasized) both;
 }
 
 .nora-product__hero img {
@@ -10,32 +22,177 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  animation: nora-kenburns 10s var(--nora-ease) both;
+}
+
+.nora-product__copy {
+  padding: 0 var(--nora-shell-pad-x);
+  display: grid;
+  gap: var(--nora-space-3);
+  max-width: 36rem;
+}
+
+.nora-product__kicker {
+  margin: 0;
+  font-size: var(--nora-fs-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--nora-ink-soft);
 }
 
 .nora-product__title {
-  margin: 0 0 var(--nora-space-3);
+  margin: 0;
   font-family: var(--nora-font-display);
-  font-size: var(--nora-fs-xl);
-  line-height: 1.15;
+  font-size: clamp(1.85rem, 8vw, 2.85rem);
+  font-weight: 550;
+  letter-spacing: var(--nora-tracking-display);
+  line-height: 1.05;
 }
 
 .nora-product__lede {
-  margin: 0 0 var(--nora-space-4);
-  color: var(--nora-slate);
+  margin: 0;
+  color: var(--nora-ink-soft);
   font-size: var(--nora-fs-md);
-  line-height: 1.5;
+  line-height: 1.65;
+  max-width: 36ch;
 }
 
 .nora-product__meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--nora-space-3);
-  margin-bottom: var(--nora-space-5);
+  margin-top: var(--nora-space-1);
+  padding-top: var(--nora-space-4);
+  border-top: var(--nora-hairline);
 }
 
 .nora-product__hint {
   font-size: var(--nora-fs-xs);
-  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--nora-success);
+}
+
+.nora-product__back {
+  font-size: var(--nora-fs-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--nora-ink-soft);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition:
+    color var(--nora-fast) var(--nora-ease),
+    border-color var(--nora-fast) var(--nora-ease);
+}
+
+.nora-product__back:hover {
+  color: var(--nora-ink);
+  border-bottom-color: var(--nora-ink);
+}
+
+.nora-product__desk-cta {
+  display: none;
+  margin-top: var(--nora-space-3);
+  max-width: 22rem;
+}
+
+.nora-product__dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 25;
+  padding: var(--nora-space-3) var(--nora-shell-pad-x)
+    calc(var(--nora-space-3) + env(safe-area-inset-bottom, 0px));
+  background: color-mix(in srgb, var(--nora-bg) 90%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: var(--nora-hairline);
+  box-shadow: 0 -6px 24px rgba(34, 32, 30, 0.06);
+  animation: nora-sheet-up var(--nora-med) var(--nora-ease-out) both;
+}
+
+.nora-product__dock-inner {
+  width: min(100%, var(--nora-max-store));
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--nora-space-3);
+}
+
+.nora-product__dock-info {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.nora-product__dock-name {
+  font-family: var(--nora-font-display);
+  font-size: 1.05rem;
+  font-weight: 550;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nora-product__dock .nora-btn {
+  flex-shrink: 0;
+  padding-inline: 0.9rem;
+  font-size: 0.68rem;
+  max-width: 48%;
+}
+
+@media (min-width: 640px) {
+  .nora-product__hero {
+    aspect-ratio: 1 / 1;
+    max-width: min(100%, 28rem);
+    margin-inline: auto;
+    border-radius: var(--nora-radius-sm);
+  }
+}
+
+@media (min-width: 900px) {
+  .nora-product {
+    padding-bottom: var(--nora-space-6);
+  }
+
+  .nora-product__stage {
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.9fr);
+    align-items: center;
+    gap: clamp(1.5rem, 4vw, 3rem);
+    min-height: calc(100dvh - var(--nora-nav-h) - 2rem);
+    padding: var(--nora-space-4) var(--nora-shell-pad-x);
+    max-width: var(--nora-max-store);
+    margin: 0 auto;
+  }
+
+  .nora-product__hero {
+    max-width: none;
+    margin: 0;
+    max-height: min(72vh, 34rem);
+    border-radius: var(--nora-radius-md);
+  }
+
+  .nora-product__copy {
+    padding: 0;
+  }
+
+  .nora-product__desk-cta {
+    display: block;
+  }
+
+  .nora-product__dock {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nora-product__hero,
+  .nora-product__hero img,
+  .nora-product__dock {
+    animation: none !important;
+  }
 }

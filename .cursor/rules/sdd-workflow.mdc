@@ -1,0 +1,28 @@
+---
+description: Spec-Driven Development workflow — read spec/plan/tasks before coding
+alwaysApply: true
+---
+
+# Spec-Driven Development (SDD)
+
+Before writing or changing application code for a feature:
+
+1. Read `docs/current-state.md`
+2. Read relevant `docs/adr/*` (do not contradict without a new ADR)
+3. Read `specs/<feature>/spec.md` → `plan.md` → `tasks.md`
+4. Implement **one task** at a time; mark it done in `tasks.md`
+5. Commit with Conventional Commits + `refs specs/.../spec.md` + `task: T#`
+6. **Same turn:** update `CHANGELOG.md`, `docs/current-state.md`, and `tasks.md` (see `living-docs` rule). Update OpenAPI/README/ADR when those surfaces change.
+
+## Active feature
+
+Default feature folder: `specs/checkout-payment/`.
+
+## Do not
+
+- Skip the spec and invent acceptance criteria.
+- Put business logic in Nest controllers.
+- Add dependencies without an ADR.
+- Leave CHANGELOG, current-state, or OpenAPI/`docs/api` stale after changes.
+
+If spec gaps appear: ask the user, or record under **Supuestos** in `spec.md` before coding.

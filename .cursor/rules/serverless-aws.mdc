@@ -1,0 +1,13 @@
+---
+description: Single Serverless Framework HTTP API Gateway for all Nest Lambdas
+globs: "**/serverless.{ts,yml,yaml}"
+alwaysApply: false
+---
+
+# Serverless Framework 4 — API Gateway only
+
+- Root `serverless.ts` creates **one** HTTP API and routes to Nest Lambdas.
+- No custom gateway Node service.
+- `provider.logs.httpApi: true` for edge access logs.
+- Local: `serverless-offline` plugin (same paths as AWS).
+- Anti-pattern: per-service API Gateways or Express reverse-proxy “gateway” packages.

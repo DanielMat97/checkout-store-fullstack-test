@@ -1,0 +1,52 @@
+---
+description: Stack, scoring priorities, and hard constraints for this fullstack tech test
+alwaysApply: true
+---
+
+# Tech Test — Overview
+
+Build a product-purchase SPA with card checkout, delivery data, payment result, and stock update.
+
+## Locked stack (maximize score)
+
+| Layer | Choice |
+|---|---|
+| Frontend | React SPA + Redux (Flux) + TypeScript, mobile-first |
+| Backend | **NestJS** (brief-required) + Hexagonal + ROP; each domain = Nest app |
+| DB | DynamoDB via **ElectroDB** + seed products (no create-product endpoint) |
+| Observability | **Shared standardized logger** (`packages/shared`) — single call site facade |
+| Tests | Jest, **>80%** coverage FE and BE |
+| Deploy | Root `serverless.ts` = **one** HTTP API Gateway → Nest Lambdas; S3/CloudFront for web |
+
+## Scoring focus (100 to pass; 150 with bonus)
+
+### Base (must hit 100)
+
+| Pts | Criterion | Ruled by |
+|---|---|---|
+| 30 | Jest unit tests >80% FE **and** BE | `testing-jest` |
+| 20 | API working (stock, transactions, customers, deliveries + HTTP) | `api-domains` |
+| 20 | Full card-payment onboarding (5 screens) | `checkout-flow`, `checkout-validation` |
+| 20 | App + API deployed on cloud (AWS) | `serverless-aws` |
+| 5 | README complete (model, coverage, Swagger/Postman, URLs) | `readme-deliverables` |
+| 5 | Images fast + no UI overflow | `frontend-react-redux` |
+
+### Bonus (target all +50)
+
+| Pts | Criterion | Ruled by |
+|---|---|---|
+| 10 | Hexagonal Ports & Adapters | `backend-hexagonal-rop` |
+| 10 | Railway Oriented Programming | `backend-hexagonal-rop` |
+| 10 | Clean code | `clean-code` |
+| 10 | CSS skills (flex/grid, polished UI) | `frontend-react-redux` |
+| 5 | OWASP + HTTPS + security headers | `security-owasp`, `endpoint-owasp` |
+| 5 | Fully responsive + multi-browser | `frontend-react-redux` |
+
+Prioritize delivery order: **tests → API → onboarding → deploy → README/images**, while keeping Hexagonal/ROP/OWASP from day one (cheap to bake in, expensive to retrofit).
+
+## Hard constraints
+
+- Public GitHub repo must **never** contain the payment company brand name (any casing) in code, README, comments, package names, env var *names*, commit messages, or folder names. Use neutral terms: `payment-gateway`, `checkout`, `provider`.
+- Keep `docs/fullstack-test.md` and secrets out of the public repo (gitignore). Keys only in env / secret manager.
+- Feature branches + PRs preferred; meaningful incremental commits (no empty-history fraud risk).
+- Do not generate app code until architecture and API contracts are agreed; when coding, follow these rules strictly.

@@ -5,10 +5,11 @@
   min-width: 2.75rem;
   height: 1.5rem;
   padding: 0 0.4rem;
-  border-radius: 0.25rem;
+  border-radius: 0;
   font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .nora-card-brand--visa {
@@ -19,10 +20,10 @@
 .nora-card-brand--mastercard {
   background: linear-gradient(90deg, #eb001b 50%, #f79e1b 50%);
   color: #111;
-  text-shadow: 0 0 0 transparent;
 }
 
 .nora-card-brand--muted {
-  background: var(--nora-line);
-  color: var(--nora-slate);
+  background: var(--nora-bg-soft);
+  color: var(--nora-ink-soft);
+  border: var(--nora-hairline);
 }

@@ -1,17 +1,18 @@
 .nora-price {
-  font-family: var(--nora-font-display);
-  font-weight: 700;
+  font-family: var(--nora-font-body);
+  font-weight: 500;
+  letter-spacing: 0.02em;
   color: var(--nora-ink);
 }
 
 .nora-price--sm {
-  font-size: var(--nora-fs-md);
+  font-size: var(--nora-fs-sm);
 }
 
 .nora-price--md {
-  font-size: var(--nora-fs-lg);
+  font-size: var(--nora-fs-md);
 }
 
 .nora-price--lg {
-  font-size: var(--nora-fs-xl);
+  font-size: var(--nora-fs-lg);
 }

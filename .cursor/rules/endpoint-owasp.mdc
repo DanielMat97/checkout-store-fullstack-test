@@ -1,0 +1,37 @@
+---
+description: Maximum OWASP and security headers on every API endpoint
+globs: "**/services/**/*.{ts,js}"
+alwaysApply: false
+---
+
+# Endpoint Security (OWASP max)
+
+Apply on **every** endpoint in every microservice — no exceptions for “read-only” routes.
+
+## Baseline (every response)
+
+Set security headers via shared middleware/helper from `packages/shared` (one place), not copy-pasted per handler:
+
+- `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
+- `Content-Security-Policy` (API: restrictive default-src/'none' or API-appropriate; FE via CloudFront)
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: no-referrer`
+- `X-Frame-Options: DENY` / `Frame-Ancestors 'none'`
+- `Permissions-Policy` (disable unused browser features)
+- `Cache-Control: no-store` on responses with PII or payment data
+- Remove/omit `Server` / `X-Powered-By`
+
+## Request hardening
+
+- HTTPS only; reject or redirect HTTP at API Gateway / CloudFront.
+- CORS **allowlist** (FE origin only); no `*`.
+- Validate & sanitize **all** inputs (body, query, path); reject unknown fields when practical.
+- Encode outputs; never reflect raw input into errors.
+- Rate-limit / throttling on payment and write endpoints (API Gateway usage plans or equivalent).
+- Idempotency keys on payment/create-transaction where applicable.
+- Least-privilege IAM per microservice; no wildcard `*` on DynamoDB/secrets in prod.
+- Uniform error body (no stack traces, no internal IDs leakage beyond correlationId).
+
+## Checklist before merging an endpoint
+
+OWASP-minded: injection, broken authz (if any), sensitive data exposure, misconfig (headers/CORS), SSRF on provider URLs (fixed base URL from env), logging/monitoring via shared logger, CSRF not applicable to token APIs but keep CORS tight.

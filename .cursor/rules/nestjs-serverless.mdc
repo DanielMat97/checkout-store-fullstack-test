@@ -1,0 +1,29 @@
+---
+description: NestJS apps behind Serverless Framework API Gateway (no custom gateway service)
+alwaysApply: true
+---
+
+# NestJS + Serverless Framework 4
+
+| Tool | Role |
+|---|---|
+| **NestJS** | App framework per domain (required by brief) |
+| **Serverless Framework 4** | Creates **the** API Gateway + Lambdas (root `serverless.ts`) |
+
+```
+serverless.ts                 # ONLY HTTP API definition
+services/products/src/lambda.ts   # Nest + serverless-express handler
+services/customers/...
+services/deliveries/...
+services/transactions/...
+```
+
+Do not add `services/gateway` or any Express orchestrator — routing is API Gateway path → Lambda.
+
+```typescript
+// ✅ Lambda bootstrap
+const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
+app.setGlobalPrefix(process.env.SERVICE_PREFIX!);
+await app.init();
+return serverlessExpress({ app: expressApp });
+```

@@ -1,0 +1,33 @@
+---
+description: NestJS hexagonal architecture and Railway Oriented Programming per microservice
+globs: "**/services/**/*.{ts,js}"
+alwaysApply: false
+---
+
+# Backend — NestJS Hexagonal + ROP
+
+Every domain service is a **NestJS** application (brief-required framework). Serverless Framework only packages/deploys it.
+
+## Layers (Ports & Adapters inside Nest)
+
+```
+domain/          # entities, value objects, domain errors
+application/     # use-cases (ROP orchestration)
+ports/           # inbound/outbound interfaces
+adapters/
+  inbound/       # Nest controllers (thin) + filters/pipes
+  outbound/      # ElectroDB repos, payment-gateway HTTP client
+*.module.ts      # Nest DI wiring (ports → adapters)
+lambda.ts        # SF4 Lambda entry bootstrapping NestFactory
+```
+
+- Controllers: parse HTTP → call use-case → map `Result` to response. **No business logic.**
+- Use-cases are Nest injectable providers depending on **ports** only.
+
+## Railway Oriented Programming
+
+Prefer `Result<T, E>` (or neverthrow) pipelines in use-cases; map failures to HTTP in filters/interceptors — not thrown stacks for expected domain errors.
+
+## Data
+
+- DynamoDB via ElectroDB in outbound adapters only; seed dummy products; document keys in README.

@@ -1,0 +1,44 @@
+---
+description: DynamoDB persistence must go through ElectroDB entities and services
+globs: "**/services/**/*.{ts,js}"
+alwaysApply: false
+---
+
+# DynamoDB + ElectroDB
+
+## Mandatory
+
+- Persist all domain data in **DynamoDB**.
+- Interact with DynamoDB **only via ElectroDB** (`Entity` / `Service`). Do not call raw `GetItem`/`Query`/`PutItem` from use-cases; keep Document Client inside the ElectroDB adapter wiring.
+- Prefer **single-table** design with clear PK/SK and GSIs per access pattern.
+
+## Adapter boundary
+
+```
+ports/     → ProductRepository, TransactionRepository, …
+adapters/outbound/dynamodb/ → ElectroDB entities + repository implementations
+```
+
+- Use-cases depend on repository **ports**, never on ElectroDB types.
+- Map ElectroDB records ↔ domain entities inside the adapter.
+
+## Entities to cover
+
+Products (stock), customers, deliveries, transactions — aligned with API domains.
+
+## Seed & local
+
+- Idempotent seed script for dummy products (no create-product HTTP endpoint).
+- Document table name(s), indexes, and env (`AWS_REGION`, table name, credentials/profile).
+- Tests: mock repository ports; optionally integration-test ElectroDB against local/dev table.
+
+## Anti-patterns
+
+```typescript
+// ❌ BAD — ORM/SQL or raw SDK in use-case
+await prisma.product.update(...)
+await dynamo.send(new UpdateItemCommand(...))
+
+// ✅ GOOD — ElectroDB behind a port
+await productRepo.decrementStock({ productId, qty: 1 })
+```

@@ -1,0 +1,32 @@
+---
+description: React SPA, Redux, mobile-first UI conventions for the checkout app
+globs: "**/apps/web/**/*.{ts,tsx,js,jsx,css,scss}"
+alwaysApply: false
+---
+
+# Frontend — React + Redux
+
+## Mandatory
+
+- SPA only (**React** — Vue also allowed by brief; this project locks React). State via **Redux** (Flux).
+- Mobile-first responsive across breakpoints; reference min viewport iPhone SE 2020 (~375×667 CSS px). No overflow; interactions stay within viewport.
+- **Images (5 pts):** optimized (proper size/format), load fast, never cause layout overflow or CLS; use explicit dimensions or aspect-ratio.
+- **Multi-browser (bonus):** verify Chromium + Firefox + Safari (or WebKit); no browser-only APIs without fallback.
+- Persist checkout slice safely (redux-persist / selective `localStorage`).
+
+## UI flow mapping
+
+| Route/view | Responsibility |
+|---|---|
+| Product | Stock + price + description + Pay CTA |
+| Modal form | Card + delivery validation; optional brand logos |
+| Backdrop summary | Material Backdrop; totals (product + base fee + delivery) + confirm |
+| Status | Success/failure messaging |
+| Return | Product with updated stock |
+
+## Patterns
+
+- Presentational components + container/hooks; async via thunks or RTK Query.
+- **CSS (bonus 10):** intentional flexbox/grid, consistent spacing/typography; polished mobile UI — not default unstyled forms.
+- Button label for start checkout: **"Pay with credit card"**.
+- Unit-test components, reducers, validators with Jest (>80%).

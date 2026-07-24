@@ -1,31 +1,89 @@
 .nora-shell {
   min-height: 100vh;
+  min-height: 100dvh;
   background:
-    radial-gradient(900px 420px at 0% -10%, #d7e3f2, transparent),
-    var(--nora-mist);
+    radial-gradient(60% 42% at 100% 0%, rgba(196, 93, 69, 0.08) 0%, transparent 58%),
+    var(--nora-bg);
   color: var(--nora-ink);
   font-family: var(--nora-font-body);
+  overflow-x: hidden;
 }
 
 .nora-shell__mock {
+  position: sticky;
+  top: 0;
+  z-index: 50;
   margin: 0;
-  padding: var(--nora-space-2) var(--nora-space-4);
+  padding: 0.35rem var(--nora-shell-pad-x);
   text-align: center;
-  font-size: var(--nora-fs-xs);
+  font-size: 0.6rem;
   font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   background: var(--nora-ink);
-  color: var(--nora-citrus);
+  color: var(--nora-bg);
 }
 
 .nora-shell__frame {
+  position: relative;
   width: min(100%, var(--nora-max));
   margin: 0 auto;
-  padding: var(--nora-space-4) var(--nora-space-4) var(--nora-space-7);
+  padding: var(--nora-space-4) var(--nora-shell-pad-x) var(--nora-space-8);
+}
+
+.nora-shell--store .nora-shell__frame {
+  width: min(100%, var(--nora-max-store));
+  padding: 0 0 var(--nora-space-8);
+}
+
+.nora-shell--flow .nora-shell__frame {
+  width: min(100%, var(--nora-max-store));
+  max-width: 100%;
+  padding: 0;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
 }
 
 .nora-shell__header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--nora-space-4);
+  gap: var(--nora-space-3);
+  min-height: var(--nora-nav-h);
+  margin: 0 0 var(--nora-space-5);
+  padding: var(--nora-space-3) 0;
+  background: color-mix(in srgb, var(--nora-bg) 86%, transparent);
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  border-bottom: 1px solid transparent;
+  animation: nora-fade-up var(--nora-med) var(--nora-ease-out) both;
+}
+
+.nora-shell--store .nora-shell__header,
+.nora-shell--flow .nora-shell__header {
+  margin: 0;
+  padding-left: var(--nora-shell-pad-x);
+  padding-right: var(--nora-shell-pad-x);
+  border-bottom-color: color-mix(in srgb, var(--nora-line) 85%, transparent);
+}
+
+.nora-shell__brand-link {
+  text-decoration: none;
+  color: inherit;
+  transition: opacity var(--nora-fast) var(--nora-ease);
+}
+
+.nora-shell__brand-link:hover {
+  opacity: 0.7;
+}
+
+.nora-shell__trailing {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--nora-space-3);
+  min-width: 0;
 }

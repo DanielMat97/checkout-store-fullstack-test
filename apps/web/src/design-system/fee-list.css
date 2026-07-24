@@ -9,8 +9,8 @@
   justify-content: space-between;
   gap: var(--nora-space-4);
   padding: var(--nora-space-3) 0;
-  border-bottom: 1px solid var(--nora-line);
-  color: var(--nora-slate);
+  border-bottom: var(--nora-hairline);
+  color: var(--nora-ink-soft);
   font-size: var(--nora-fs-sm);
 }
 
@@ -18,6 +18,6 @@
   border-bottom: 0;
   color: var(--nora-ink);
   font-size: var(--nora-fs-md);
-  font-weight: 700;
+  font-weight: 600;
   padding-top: var(--nora-space-4);
 }

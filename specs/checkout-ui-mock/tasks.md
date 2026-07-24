@@ -27,3 +27,11 @@
 - [x] **U7 — Living docs**
   - Output: CHANGELOG, current-state, README mock flag
   - Aceptación: living-docs rule cumplida
+
+- [x] **U8 — Premium visual redesign (ADR 0007)**
+  - Output: tokens/fonts/motion, all screens restyled, `withViewTransition`
+  - Aceptación: parchment/charcoal + Cormorant/Manrope; visible choreography; reduced-motion OK
+
+- [x] **U9 — Catalog + delivery form fix**
+  - Output: `/` collection (4 products), `/product/:id` detail, single-column delivery (no H-scroll)
+  - Aceptación: elegir producto antes de pagar; stock por producto; modal sin overflow horizontal

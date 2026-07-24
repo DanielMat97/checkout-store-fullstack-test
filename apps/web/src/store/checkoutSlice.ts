@@ -1,8 +1,9 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { CardBrand } from '../features/checkout/card';
-import { MOCK_PRODUCT } from '../mocks/catalog';
+import { initialStockMap } from '../mocks/catalog';
 
 export type CheckoutStep =
+  | 'catalog'
   | 'product'
   | 'card-delivery'
   | 'summary'
@@ -31,18 +32,19 @@ export interface CheckoutState {
   cardMeta: CardMeta | null;
   transactionId: string | null;
   paymentStatus: 'idle' | 'PENDING' | 'APPROVED' | 'DECLINED' | 'ERROR';
-  mockStock: number;
+  /** Per-product mock stock (synced with mock service on pay). */
+  stocks: Record<string, number>;
   simulateDecline: boolean;
 }
 
 const initialState: CheckoutState = {
-  step: 'product',
-  productId: MOCK_PRODUCT.id,
+  step: 'catalog',
+  productId: null,
   delivery: null,
   cardMeta: null,
   transactionId: null,
   paymentStatus: 'idle',
-  mockStock: MOCK_PRODUCT.stock,
+  stocks: initialStockMap(),
   simulateDecline: false,
 };
 
@@ -52,6 +54,11 @@ const checkoutSlice = createSlice({
   reducers: {
     setStep(state, action: PayloadAction<CheckoutStep>) {
       state.step = action.payload;
+    },
+    selectProduct(state, action: PayloadAction<string>) {
+      state.productId = action.payload;
+      state.step = 'product';
+      state.paymentStatus = 'idle';
     },
     setProductId(state, action: PayloadAction<string>) {
       state.productId = action.payload;
@@ -71,14 +78,20 @@ const checkoutSlice = createSlice({
     ) {
       state.paymentStatus = action.payload;
     },
-    setMockStock(state, action: PayloadAction<number>) {
-      state.mockStock = action.payload;
+    setStocks(state, action: PayloadAction<Record<string, number>>) {
+      state.stocks = action.payload;
+    },
+    setProductStock(
+      state,
+      action: PayloadAction<{ productId: string; stock: number }>,
+    ) {
+      state.stocks[action.payload.productId] = action.payload.stock;
     },
     setSimulateDecline(state, action: PayloadAction<boolean>) {
       state.simulateDecline = action.payload;
     },
     resetCheckout(state) {
-      state.step = 'product';
+      state.step = state.productId ? 'product' : 'catalog';
       state.delivery = null;
       state.cardMeta = null;
       state.transactionId = null;
@@ -90,12 +103,14 @@ const checkoutSlice = createSlice({
 
 export const {
   setStep,
+  selectProduct,
   setProductId,
   setDelivery,
   setCardMeta,
   setTransactionId,
   setPaymentStatus,
-  setMockStock,
+  setStocks,
+  setProductStock,
   setSimulateDecline,
   resetCheckout,
 } = checkoutSlice.actions;

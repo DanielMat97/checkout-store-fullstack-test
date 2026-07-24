@@ -1,6 +1,7 @@
 .nora-backdrop {
   position: relative;
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   align-items: end;
 }
@@ -9,8 +10,15 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(11, 18, 32, 0.15), rgba(11, 18, 32, 0.55)),
-    radial-gradient(800px 400px at 80% -10%, #dfe8f4, var(--nora-mist));
+    linear-gradient(
+      180deg,
+      rgba(34, 32, 30, 0.25),
+      rgba(246, 243, 238, 0.94)
+    ),
+    url('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=60')
+      center / cover;
+  filter: saturate(0.85);
+  animation: nora-kenburns var(--nora-slow) var(--nora-ease) both;
 }
 
 .nora-backdrop__front {
@@ -18,38 +26,39 @@
   z-index: 1;
   width: min(100%, var(--nora-max));
   margin: 0 auto;
-  padding: var(--nora-space-5) var(--nora-space-4) var(--nora-space-6);
+  padding: var(--nora-space-5) var(--nora-shell-pad-x) var(--nora-space-7);
   background: var(--nora-paper);
   border-radius: var(--nora-radius-lg) var(--nora-radius-lg) 0 0;
-  box-shadow: var(--nora-shadow);
-  animation: nora-rise var(--nora-med) var(--nora-ease);
+  box-shadow: 0 -8px 32px rgba(34, 32, 30, 0.08);
+  animation: nora-sheet-up var(--nora-slow) var(--nora-ease-out) both;
 }
 
 .nora-backdrop__title {
-  margin: 0 0 var(--nora-space-4);
+  margin: var(--nora-space-3) 0 var(--nora-space-5);
   font-family: var(--nora-font-display);
-  font-size: var(--nora-fs-xl);
+  font-size: clamp(1.75rem, 7vw, var(--nora-fs-2xl));
+  font-weight: 600;
+  letter-spacing: var(--nora-tracking-display);
+  line-height: 1.05;
+  color: var(--nora-ink);
 }
 
 .nora-backdrop__footer {
-  margin-top: var(--nora-space-5);
+  margin-top: var(--nora-space-6);
   display: grid;
-  gap: var(--nora-space-3);
+  gap: var(--nora-space-4);
 }
 
-@keyframes nora-rise {
-  from {
-    opacity: 0;
-    transform: translateY(1rem);
+@media (min-width: 640px) {
+  .nora-backdrop {
+    align-items: center;
+    justify-items: center;
+    padding: var(--nora-space-6) var(--nora-shell-pad-x);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
-@media (prefers-reduced-motion: reduce) {
   .nora-backdrop__front {
-    animation: none;
+    width: min(100%, 26rem);
+    border-radius: var(--nora-radius-lg);
+    padding: var(--nora-space-6);
   }
 }

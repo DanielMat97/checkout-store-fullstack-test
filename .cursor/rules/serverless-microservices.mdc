@@ -1,0 +1,24 @@
+---
+description: NestJS microservices routed by a single Serverless Framework HTTP API
+alwaysApply: true
+---
+
+# NestJS + Serverless HTTP API
+
+## Split by domain
+
+| NestJS service | Serverless route |
+|---|---|
+| `services/products` | `/products/**` |
+| `services/customers` | `/customers/**` |
+| `services/deliveries` | `/deliveries/**` |
+| `services/transactions` | `/transactions/**` |
+
+Public HTTP is defined **only** in root `serverless.ts` (one API Gateway). Do **not** create a custom Express/Nest gateway service.
+
+## Rules
+
+- SF4 HTTP API events live only in root `serverless.ts`.
+- Each Nest app exposes `dist/lambda.handler` (serverless-express).
+- Access logs: API Gateway execution logs + `logHttpRequest` (`service: api-gateway`).
+- Local API: `npm run dev:api` → `serverless offline` on `:3000`.

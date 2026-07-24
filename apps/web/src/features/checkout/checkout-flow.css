@@ -1,0 +1,329 @@
+/* Split checkout — responsive product | form */
+
+.nora-flow {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.nora-flow__back {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: var(--nora-fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--nora-ink-soft);
+  min-height: var(--nora-touch);
+  cursor: pointer;
+  transition: color var(--nora-fast) var(--nora-ease);
+}
+
+.nora-flow__back:hover {
+  color: var(--nora-cta);
+}
+
+.nora-flow__product {
+  position: relative;
+  display: grid;
+  grid-template-columns: clamp(4.5rem, 22vw, 7rem) minmax(0, 1fr);
+  gap: var(--nora-space-3);
+  align-items: center;
+  padding: var(--nora-space-3) var(--nora-shell-pad-x);
+  background: var(--nora-bg-soft);
+  border-bottom: var(--nora-hairline);
+  animation: nora-product-dock-mobile var(--nora-slow) var(--nora-ease-emphasized) both;
+}
+
+.nora-flow__media {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--nora-radius-sm);
+  overflow: hidden;
+  background: var(--nora-paper);
+  box-shadow: var(--nora-shadow);
+}
+
+.nora-flow__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.nora-flow__media-glow {
+  display: none;
+}
+
+.nora-flow__product-copy {
+  min-width: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.nora-flow__kicker {
+  margin: 0;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--nora-cta);
+}
+
+.nora-flow__title {
+  margin: 0;
+  font-family: var(--nora-font-display);
+  font-size: clamp(1.1rem, 4vw, 1.35rem);
+  font-weight: 600;
+  letter-spacing: var(--nora-tracking-display);
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nora-flow__price-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--nora-space-2);
+}
+
+.nora-flow__stock {
+  font-size: var(--nora-fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--nora-ink-soft);
+}
+
+.nora-flow__blurb {
+  display: none;
+  margin: 0;
+  color: var(--nora-ink-soft);
+  font-size: var(--nora-fs-sm);
+  line-height: 1.55;
+}
+
+.nora-flow__panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--nora-paper);
+  border-radius: var(--nora-radius-lg) var(--nora-radius-lg) 0 0;
+  box-shadow: 0 -6px 28px rgba(34, 32, 30, 0.06);
+  animation: nora-form-rise var(--nora-slow) var(--nora-ease-emphasized) both;
+  animation-delay: 60ms;
+}
+
+.nora-flow__panel-head {
+  flex-shrink: 0;
+  padding: var(--nora-space-4) var(--nora-shell-pad-x) var(--nora-space-3);
+  border-bottom: var(--nora-hairline);
+}
+
+.nora-flow__step {
+  margin: 0 0 var(--nora-space-2);
+  display: inline-flex;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--nora-radius-soft);
+  background: var(--nora-accent-soft);
+  color: var(--nora-cta);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nora-flow__panel-title {
+  margin: 0;
+  font-family: var(--nora-font-display);
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-weight: 600;
+  letter-spacing: var(--nora-tracking-display);
+  line-height: 1.08;
+  color: var(--nora-ink);
+}
+
+.nora-flow__panel-lede {
+  margin: var(--nora-space-2) 0 0;
+  color: var(--nora-ink-soft);
+  font-size: var(--nora-fs-sm);
+}
+
+.nora-flow__panel .nora-checkout {
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--nora-space-4) var(--nora-shell-pad-x);
+  min-height: 0;
+}
+
+.nora-flow__footer {
+  flex-shrink: 0;
+  padding: var(--nora-space-3) var(--nora-shell-pad-x)
+    calc(var(--nora-space-4) + env(safe-area-inset-bottom, 0px));
+  border-top: var(--nora-hairline);
+  background: color-mix(in srgb, var(--nora-paper) 94%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+/* Large phones / small tablets: taller product strip */
+@media (min-width: 480px) and (max-width: 959px) {
+  .nora-flow__product {
+    grid-template-columns: 8rem minmax(0, 1fr);
+    padding-block: var(--nora-space-4);
+  }
+
+  .nora-flow__title {
+    white-space: normal;
+  }
+}
+
+/* Desktop split */
+@media (min-width: 960px) {
+  .nora-flow {
+    grid-template-columns: minmax(18rem, 0.4fr) minmax(0, 0.6fr);
+    grid-template-rows: 1fr;
+    min-height: calc(100dvh - var(--nora-nav-h));
+  }
+
+  .nora-flow__product {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    border-bottom: 0;
+    border-right: var(--nora-hairline);
+    min-height: 100%;
+    background: var(--nora-bg-soft);
+    animation: nora-product-slide-left var(--nora-slow) var(--nora-ease-emphasized)
+      both;
+  }
+
+  .nora-flow__media {
+    border-radius: 0;
+    aspect-ratio: auto;
+    height: 100%;
+    min-height: 100%;
+    box-shadow: none;
+  }
+
+  .nora-flow__product-copy {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: var(--nora-space-6);
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(34, 32, 30, 0.65) 48%,
+      rgba(34, 32, 30, 0.88) 100%
+    );
+    color: var(--nora-paper);
+    gap: var(--nora-space-2);
+  }
+
+  .nora-flow__kicker {
+    color: var(--nora-blush-deep);
+  }
+
+  .nora-flow__title {
+    font-size: clamp(1.6rem, 2.6vw, 2.35rem);
+    color: var(--nora-paper);
+    white-space: normal;
+  }
+
+  .nora-flow__price-row .nora-price {
+    color: var(--nora-paper);
+  }
+
+  .nora-flow__stock {
+    color: rgba(255, 252, 250, 0.72);
+  }
+
+  .nora-flow__blurb {
+    display: block;
+    color: rgba(255, 252, 250, 0.78);
+    max-width: 30ch;
+  }
+
+  .nora-flow__panel {
+    border-radius: 0;
+    box-shadow: none;
+    animation: nora-form-slide-right var(--nora-slow) var(--nora-ease-emphasized)
+      both;
+  }
+
+  .nora-flow__panel-head,
+  .nora-flow__panel .nora-checkout,
+  .nora-flow__footer {
+    padding-left: clamp(1.25rem, 3vw, 2.5rem);
+    padding-right: clamp(1.25rem, 3vw, 2.5rem);
+  }
+
+  .nora-flow__panel-head {
+    padding-top: var(--nora-space-6);
+  }
+
+  .nora-flow__footer {
+    padding-bottom: var(--nora-space-5);
+  }
+}
+
+@keyframes nora-product-dock-mobile {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes nora-product-slide-left {
+  from {
+    opacity: 0.35;
+    transform: translateX(18%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes nora-form-rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes nora-form-slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(36px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nora-flow__product,
+  .nora-flow__panel {
+    animation: none !important;
+  }
+}

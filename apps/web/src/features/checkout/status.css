@@ -1,69 +1,115 @@
 .nora-status {
-  min-height: 70vh;
+  position: relative;
+  min-height: 72vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: var(--nora-space-3);
-  animation: nora-fade-in var(--nora-med) var(--nora-ease);
+  gap: var(--nora-space-4);
+  animation: nora-fade-up var(--nora-slow) var(--nora-ease-out) both;
 }
 
 .nora-status h1 {
   margin: 0;
   font-family: var(--nora-font-display);
-  font-size: var(--nora-fs-xl);
+  font-size: clamp(2rem, 8vw, 2.5rem);
+  font-weight: 500;
+  letter-spacing: var(--nora-tracking-display);
+  line-height: 1.05;
 }
 
 .nora-status p {
   margin: 0;
-  color: var(--nora-slate);
-  line-height: 1.5;
+  color: var(--nora-ink-soft);
+  line-height: 1.65;
+  max-width: 32ch;
 }
 
 .nora-status__icon {
-  width: 3rem;
-  height: 3rem;
+  width: 3.25rem;
+  height: 3.25rem;
   display: grid;
   place-items: center;
-  border-radius: 999px;
-  font-size: 1.25rem;
-  font-weight: 800;
-  background: var(--nora-line);
+  border-radius: var(--nora-radius-none);
+  border: var(--nora-hairline);
+  font-family: var(--nora-font-display);
+  font-size: 1.35rem;
+  font-weight: 500;
+  background: transparent;
 }
 
 .nora-status--approved .nora-status__icon {
-  background: var(--nora-success-soft);
+  border-color: var(--nora-success);
   color: var(--nora-success);
+  animation: nora-scale-in var(--nora-med) var(--nora-ease-out) both;
 }
 
 .nora-status--declined .nora-status__icon,
 .nora-status--error .nora-status__icon {
-  background: var(--nora-danger-soft);
+  border-color: var(--nora-danger);
   color: var(--nora-danger);
+  animation: nora-shake var(--nora-med) var(--nora-ease) both;
 }
 
 .nora-status--pending .nora-status__icon {
-  background: var(--nora-warning-soft);
-  color: var(--nora-warning);
+  border-color: var(--nora-ink-soft);
+  color: var(--nora-ink-soft);
+}
+
+.nora-status__spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 1.5px solid var(--nora-line);
+  border-top-color: var(--nora-ink);
+  border-radius: 50%;
+  animation: nora-spin 0.9s linear infinite;
 }
 
 .nora-status__id {
   font-size: var(--nora-fs-xs) !important;
   font-family: ui-monospace, monospace;
+  letter-spacing: 0.04em;
 }
 
-@keyframes nora-fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(0.5rem);
-  }
+.nora-status__ambient {
+  position: absolute;
+  z-index: 0;
+  inset: auto 0 0 0;
+  height: 45%;
+  pointer-events: none;
+  background: radial-gradient(50% 80% at 50% 100%, var(--nora-blush) 0%, transparent 70%);
+  opacity: 0.7;
+  animation: nora-pulse-soft 4s var(--nora-ease) infinite;
+}
+
+.nora-status > *:not(.nora-status__ambient) {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes nora-spin {
   to {
-    opacity: 1;
-    transform: translateY(0);
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes nora-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nora-status {
-    animation: none;
+  .nora-status,
+  .nora-status__icon,
+  .nora-status__spinner,
+  .nora-status__ambient {
+    animation: none !important;
   }
 }

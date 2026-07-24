@@ -15,15 +15,25 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Shared logging: `createLogger`, `logHttpRequest` (`service: api-gateway`, `message: http.request`), Nest `AccessLogMiddleware`, `NestStandardLogger`.
 - OWASP security headers middleware on all Nest routes; OpenAPI stub in `docs/api/openapi.json` (Apidog-importable).
 - **NORA UI mock feature** (`specs/checkout-ui-mock/`): full 5-screen navigable mock + centralized design system.
-- Design system docs: `docs/design-system.md`; code in `apps/web/src/design-system/` (tokens, Button, TextField, Modal, Backdrop, etc.).
+- Design system docs: `docs/design-system.md`; code in `apps/web/src/design-system/` (tokens, Button, TextField, Modal, Backdrop, motion, etc.).
+- ADR 0007 — premium ecommerce visual system (Apple × Aesop × Glossier inspiration).
 - Mock checkout flow: product hero, card/delivery modal (Luhn + Visa/MC), summary backdrop with fees, status, stock update; `VITE_MOCK_MODE=true`.
+- Rubric autoevaluación vs brief: `docs/scorecard.md` (protocolo evaluador estricto hiring-bar; corte actual **32/150**).
+- Cursor rule `scorecard-evaluator.mdc`: always grade as harsh hiring panel (architect / TL / PO / security).
 
 ### Changed
 
 - Public HTTP entry is **only** Serverless Framework API Gateway (no custom Express/Nest gateway service).
 - Frontend env uses `VITE_API_BASE_URL` + `VITE_MOCK_MODE`.
 - Nest apps use `SERVICE_PREFIX` path prefixes aligned with API Gateway routes.
-- Web app brand identity: **NORA** (Syne + DM Sans, ink/mist/citrus).
+- Web visual system redesigned per ADR 0007: Apple × Aesop × Glossier (parchment/charcoal, Cormorant + Manrope, sharp geometry, blush ambient).
+- Premium motion language: staggered reveals, sheet/modal entrances, hero kenburns, status spinner/shake, `withViewTransition` on route changes; `prefers-reduced-motion` honored.
+- Checkout UX: catalog of 4 products → product detail → checkout; delivery form single-column (no horizontal scroll); per-product stock in Redux.
+- Storefront composition: featured hero + bento grid (not vertical stack), sticky nav/dock, shared view-transitions, kenburns ambient motion.
+- **NORA Pop** palette (coral/mint/cream, Fraunces+Outfit) + **split checkout** (product slides left, form from right; no pay modal). ADR 0008.
+- **NORA Soft** refine: muted clay accent, calmer surfaces; responsive layout pass (fluid padding, hero clamps, split ≥960px, summary centering).
+- Checkout form polish: title-case names, strict email, CO phone (+57 flag + mask), city/department suggest lists with browser autocomplete disabled.
+- CVV masked as password with eye toggle to reveal; max 3 digits; input sanitizers/limits per field.
 
 ### Removed
 
