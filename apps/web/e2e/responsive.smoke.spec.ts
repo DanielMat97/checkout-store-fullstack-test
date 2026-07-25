@@ -6,7 +6,10 @@ import { test, expect } from '@playwright/test';
  * refs docs/ux-evidence.md · specs/ux-quality-bar
  */
 test.describe('Responsive shell matrix', () => {
-  async function assertNoHorizontalOverflow(page: import('@playwright/test').Page, label: string) {
+  async function assertNoHorizontalOverflow(
+    page: import('@playwright/test').Page,
+    label: string,
+  ) {
     const overflowX = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );

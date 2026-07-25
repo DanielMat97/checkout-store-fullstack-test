@@ -5,6 +5,7 @@ import {
   InMemoryProductReader,
   InMemoryTransactionRepository,
 } from './test-fakes';
+import { err } from 'neverthrow';
 
 const product = {
   id: 'prod_1',
@@ -225,5 +226,82 @@ describe('RestoreTransactionStockUseCase', () => {
     const result = await useCase.execute('nope');
     expect(result.isErr()).toBe(true);
     if (result.isErr()) expect(result.error.type).toBe('NOT_FOUND');
+  });
+
+  it('handles already-cancelled delivery and missing deliveryId', async () => {
+    const { products, deliveries, transactions } = await seedApproved();
+    await deliveries.put({
+      ...(await deliveries.getById('del_1'))._unsafeUnwrap(),
+      status: 'CANCELLED',
+    });
+    const useCase = new RestoreTransactionStockUseCase(
+      transactions,
+      products,
+      deliveries,
+    );
+    const cancelled = await useCase.execute('tx_1');
+    expect(cancelled.isOk()).toBe(true);
+    if (cancelled.isOk()) expect(cancelled.value.deliveryStatus).toBe('CANCELLED');
+
+    const again = await seedApproved();
+    await again.transactions.update({
+      ...(await again.transactions.getById('tx_1'))._unsafeUnwrap(),
+      deliveryId: undefined,
+    });
+    const noDel = await new RestoreTransactionStockUseCase(
+      again.transactions,
+      again.products,
+      again.deliveries,
+    ).execute('tx_1');
+    expect(noDel.isOk()).toBe(true);
+    if (noDel.isOk()) expect(noDel.value.deliveryStatus).toBe('CANCELLED');
+  });
+
+  it('maps increment / cancel / update persistence failures', async () => {
+    const { products, deliveries, transactions } = await seedApproved();
+    const failingProducts = {
+      ...products,
+      getById: products.getById.bind(products),
+      incrementStock: async () =>
+        err({ type: 'NOT_FOUND' as const, entity: 'product', id: 'prod_1' }),
+    };
+    expect(
+      (
+        await new RestoreTransactionStockUseCase(
+          transactions,
+          failingProducts as never,
+          deliveries,
+        ).execute('tx_1')
+      )._unsafeUnwrapErr().type,
+    ).toBe('NOT_FOUND');
+
+    const { products: p2, deliveries: d2, transactions: t2 } = await seedApproved();
+    const failingPut = {
+      getById: d2.getById.bind(d2),
+      put: async () => err({ type: 'PERSISTENCE_ERROR' as const, message: 'put fail' }),
+    };
+    expect(
+      (
+        await new RestoreTransactionStockUseCase(t2, p2, failingPut as never).execute(
+          'tx_1',
+        )
+      )._unsafeUnwrapErr().type,
+    ).toBe('PERSISTENCE_ERROR');
+
+    const { products: p3, deliveries: d3, transactions: t3 } = await seedApproved();
+    const failingUpdate = {
+      getById: t3.getById.bind(t3),
+      put: t3.put.bind(t3),
+      update: async () =>
+        err({ type: 'PERSISTENCE_ERROR' as const, message: 'update fail' }),
+      listByCreatedAt: t3.listByCreatedAt.bind(t3),
+    };
+    expect(
+      (
+        await new RestoreTransactionStockUseCase(failingUpdate as never, p3, d3).execute(
+          'tx_1',
+        )
+      )._unsafeUnwrapErr().type,
+    ).toBe('PERSISTENCE_ERROR');
   });
 });

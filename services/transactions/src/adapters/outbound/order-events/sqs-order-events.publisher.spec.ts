@@ -25,4 +25,9 @@ describe('SqsOrderEventsPublisher', () => {
     expect(cmd.input.QueueUrl).toBe('https://sqs.example/queue');
     expect(JSON.parse(cmd.input.MessageBody)).toEqual(event);
   });
+
+  it('constructs a default SQS client when none is injected', () => {
+    const publisher = new SqsOrderEventsPublisher('https://sqs.example/queue');
+    expect(publisher).toBeInstanceOf(SqsOrderEventsPublisher);
+  });
 });

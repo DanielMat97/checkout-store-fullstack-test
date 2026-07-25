@@ -69,9 +69,7 @@ export class PayTransactionUseCase {
             customerEmail: customer.email,
           }),
         ).andThen((charge) =>
-          charge.isOk()
-            ? ok({ valid, tx, outcome: charge.value })
-            : err(charge.error),
+          charge.isOk() ? ok({ valid, tx, outcome: charge.value }) : err(charge.error),
         ),
       )
       .andThen(({ valid, tx, outcome }) => {

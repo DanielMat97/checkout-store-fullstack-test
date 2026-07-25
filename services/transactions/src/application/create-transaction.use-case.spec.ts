@@ -104,4 +104,43 @@ describe('CreateTransactionUseCase', () => {
       expect(result.error.type).toBe('INSUFFICIENT_STOCK');
     }
   });
+
+  it('validates payload and missing customer', async () => {
+    expect(
+      (
+        await useCase.execute({
+          productId: '',
+          customerId: '',
+          productAmount: 0,
+          baseFee: -1,
+          deliveryFee: -1,
+          delivery: { address: 'a', city: 'b', region: 'c' },
+        })
+      )._unsafeUnwrapErr().type,
+    ).toBe('VALIDATION');
+    expect(
+      (
+        await useCase.execute({
+          productId: 'prod_aura_quiet',
+          customerId: 'cust_1',
+          productAmount: 1000,
+          baseFee: 0,
+          deliveryFee: 0,
+          delivery: { address: '', city: '', region: '' },
+        })
+      )._unsafeUnwrapErr().type,
+    ).toBe('VALIDATION');
+    expect(
+      (
+        await useCase.execute({
+          productId: 'prod_aura_quiet',
+          customerId: 'missing',
+          productAmount: 1000,
+          baseFee: 0,
+          deliveryFee: 0,
+          delivery: { address: 'a', city: 'b', region: 'c' },
+        })
+      )._unsafeUnwrapErr().type,
+    ).toBe('NOT_FOUND');
+  });
 });

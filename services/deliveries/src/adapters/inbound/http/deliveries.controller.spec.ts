@@ -103,4 +103,32 @@ describe('DeliveriesController', () => {
       module.get(DeliveriesController).patch('del_1', { status: 'FULFILLED' }),
     ).resolves.toMatchObject({ status: 'FULFILLED' });
   });
+
+  it('maps patch domain errors', async () => {
+    const update = {
+      execute: jest
+        .fn()
+        .mockResolvedValueOnce(err({ type: 'NOT_FOUND', id: 'x' }))
+        .mockResolvedValueOnce(err({ type: 'VALIDATION', message: 'bad' }))
+        .mockResolvedValueOnce(err({ type: 'INVALID_STATE', message: 'state' }))
+        .mockResolvedValueOnce(err({ type: 'PERSISTENCE_ERROR', message: 'down' })),
+    };
+    const module = await Test.createTestingModule({
+      controllers: [DeliveriesController],
+      providers: providers({ update }),
+    }).compile();
+    const controller = module.get(DeliveriesController);
+    await expect(controller.patch('x', { status: 'FULFILLED' })).rejects.toMatchObject({
+      status: 404,
+    });
+    await expect(controller.patch('x', { status: 'FULFILLED' })).rejects.toMatchObject({
+      status: 400,
+    });
+    await expect(controller.patch('x', { status: 'FULFILLED' })).rejects.toMatchObject({
+      status: 422,
+    });
+    await expect(controller.patch('x', { status: 'FULFILLED' })).rejects.toMatchObject({
+      status: 500,
+    });
+  });
 });

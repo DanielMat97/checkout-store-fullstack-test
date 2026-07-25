@@ -35,4 +35,23 @@ describe('GetTransactionUseCase', () => {
     const missing = await uc.execute('x');
     expect(missing.isErr() && missing.error.type).toBe('NOT_FOUND');
   });
+
+  it('maps persistence failures', async () => {
+    const uc = new GetTransactionUseCase({
+      getById: jest
+        .fn()
+        .mockResolvedValueOnce(err({ type: 'PERSISTENCE_ERROR', message: 'down' }))
+        .mockResolvedValueOnce(err({ type: 'OTHER' as never })),
+    } as never);
+    const a = await uc.execute('a');
+    expect(a.isErr() && a.error.type).toBe('PERSISTENCE_ERROR');
+    if (a.isErr() && a.error.type === 'PERSISTENCE_ERROR') {
+      expect(a.error.message).toBe('down');
+    }
+    const b = await uc.execute('b');
+    expect(b.isErr() && b.error.type).toBe('PERSISTENCE_ERROR');
+    if (b.isErr() && b.error.type === 'PERSISTENCE_ERROR') {
+      expect(b.error.message).toBe('OTHER');
+    }
+  });
 });

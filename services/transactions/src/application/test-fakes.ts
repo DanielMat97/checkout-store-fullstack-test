@@ -133,6 +133,7 @@ export class InMemoryCustomerReader implements CustomerRepositoryPort {
   private readonly items = new Map<string, CustomerRecord>();
 
   seed(customers: CustomerRecord[]): void {
+    this.items.clear();
     for (const c of customers) {
       this.items.set(c.id, { ...c });
     }

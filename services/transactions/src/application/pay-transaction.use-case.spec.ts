@@ -1,3 +1,4 @@
+import { err } from 'neverthrow';
 import { FakePaymentGateway } from '../adapters/outbound/payment/fake-payment.gateway';
 import { InProcessOrderEventsPublisher } from '../adapters/outbound/order-events/in-process-order-events.publisher';
 import { ApplyPaymentApprovedEffectsUseCase } from './apply-payment-approved-effects.use-case';
@@ -137,5 +138,89 @@ describe('PayTransactionUseCase', () => {
       expect(result.value.transaction.status).toBe('ERROR');
     }
     expect(products.decrementCalls).toEqual([]);
+  });
+
+  it('validates ids and card fields', async () => {
+    const pay = payUseCase(new FakePaymentGateway('APPROVED'));
+    expect(
+      (
+        await pay.execute({
+          transactionId: '',
+          deliveryId: '',
+          card,
+        })
+      )._unsafeUnwrapErr().type,
+    ).toBe('VALIDATION');
+    expect(
+      (
+        await pay.execute({
+          transactionId: 'tx_1',
+          deliveryId: 'del_1',
+          card: { ...card, number: '' },
+        })
+      )._unsafeUnwrapErr().type,
+    ).toBe('VALIDATION');
+  });
+
+  it('rejects non-PENDING and missing customer', async () => {
+    const pending = await seedPending();
+    await transactions.update({
+      ...pending.transaction,
+      status: 'APPROVED',
+    });
+    const pay = payUseCase(new FakePaymentGateway('APPROVED'));
+    expect(
+      (
+        await pay.execute({
+          transactionId: pending.transaction.id,
+          deliveryId: pending.deliveryId,
+          card,
+        })
+      )._unsafeUnwrapErr().type,
+    ).toBe('INVALID_STATE');
+
+    const fresh = await seedPending();
+    customers.seed([]);
+    expect(
+      (
+        await pay.execute({
+          transactionId: fresh.transaction.id,
+          deliveryId: fresh.deliveryId,
+          card,
+        })
+      )._unsafeUnwrapErr().type,
+    ).toBe('NOT_FOUND');
+  });
+
+  it('falls back to saved tx when reload after publish fails', async () => {
+    const pending = await seedPending();
+    const publisher = {
+      publishPaymentApproved: jest.fn().mockResolvedValue(undefined),
+    };
+    const pay = new PayTransactionUseCase(
+      transactions,
+      customers,
+      new FakePaymentGateway('APPROVED'),
+      publisher,
+    );
+    const originalGet = transactions.getById.bind(transactions);
+    let getCalls = 0;
+    jest.spyOn(transactions, 'getById').mockImplementation(async (id) => {
+      getCalls += 1;
+      if (getCalls === 1) return originalGet(id);
+      return err({ type: 'PERSISTENCE_ERROR', message: 'reload failed' });
+    });
+
+    const result = await pay.execute({
+      transactionId: pending.transaction.id,
+      deliveryId: pending.deliveryId,
+      card,
+    });
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.paymentStatus).toBe('APPROVED');
+      expect(result.value.transaction.id).toBe(pending.transaction.id);
+    }
+    expect(publisher.publishPaymentApproved).toHaveBeenCalled();
   });
 });

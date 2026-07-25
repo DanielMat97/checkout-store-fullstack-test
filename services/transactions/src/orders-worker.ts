@@ -60,6 +60,8 @@ export async function processOrdersSqsEvent(
   }
 }
 
+/** Lambda entry — composition root (core loop covered via processOrdersSqsEvent). */
+/* istanbul ignore next */
 export const handler: SQSHandler = async (event: SQSEvent) => {
   const persistence = createPersistence();
   const applyEffects = new ApplyPaymentApprovedEffectsUseCase(

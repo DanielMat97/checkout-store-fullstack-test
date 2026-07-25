@@ -55,27 +55,26 @@ export class ApplyPaymentApprovedEffectsUseCase {
         return fromRepoResult(
           this.products.decrementStock(event.productId, event.qty),
         ).andThen((product) =>
-          fromRepoResult(this.deliveries.getById(event.deliveryId)).andThen(
-            (delivery) =>
+          fromRepoResult(this.deliveries.getById(event.deliveryId)).andThen((delivery) =>
+            fromRepoResult(
+              this.deliveries.put({
+                ...delivery,
+                status: 'FULFILLABLE',
+              }),
+            ).andThen((updatedDelivery) =>
               fromRepoResult(
-                this.deliveries.put({
-                  ...delivery,
-                  status: 'FULFILLABLE',
+                this.transactions.update({
+                  ...tx,
+                  status: 'APPROVED',
+                  effectsApplied: true,
+                  deliveryId: event.deliveryId,
                 }),
-              ).andThen((updatedDelivery) =>
-                fromRepoResult(
-                  this.transactions.update({
-                    ...tx,
-                    status: 'APPROVED',
-                    effectsApplied: true,
-                    deliveryId: event.deliveryId,
-                  }),
-                ).map((marked) => ({
-                  transaction: marked,
-                  delivery: updatedDelivery,
-                  product,
-                })),
-              ),
+              ).map((marked) => ({
+                transaction: marked,
+                delivery: updatedDelivery,
+                product,
+              })),
+            ),
           ),
         );
       },

@@ -14,7 +14,13 @@ export type HttpDomainError =
   | { type: 'VALIDATION'; message: string }
   | { type: 'PAYMENT_FAILED'; message: string }
   | { type: 'PERSISTENCE_ERROR'; message: string }
-  | { type: string; message?: string; id?: string; entity?: string; [key: string]: unknown };
+  | {
+      type: string;
+      message?: string;
+      id?: string;
+      entity?: string;
+      [key: string]: unknown;
+    };
 
 /** Inbound adapter: domain Result errors → HTTP. No business rules here. */
 export function domainErrorToHttp(error: HttpDomainError): HttpException {
@@ -42,10 +48,7 @@ export function domainErrorToHttp(error: HttpDomainError): HttpException {
         message: error.message,
       });
     case 'PAYMENT_FAILED':
-      return new HttpException(
-        { error: error.type, message: error.message },
-        502,
-      );
+      return new HttpException({ error: error.type, message: error.message }, 502);
     case 'PERSISTENCE_ERROR':
       return new HttpException(
         { error: 'PERSISTENCE_ERROR', message: error.message },

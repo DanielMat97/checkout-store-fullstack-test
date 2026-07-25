@@ -105,7 +105,6 @@ export function CheckoutPage() {
 
   const units = stocks[product.id] ?? product.stock;
 
-
   const close = () => {
     dispatch(setStep('product'));
     withViewTransition(() => navigate(`/product/${product.id}`));

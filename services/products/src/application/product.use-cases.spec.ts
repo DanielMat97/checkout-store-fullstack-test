@@ -58,5 +58,27 @@ describe('Product use-cases (ROP)', () => {
       'PERSISTENCE_ERROR',
     );
     expect((await listFail.execute())._unsafeUnwrapErr().type).toBe('PERSISTENCE_ERROR');
+
+    const weirdGet = {
+      ...failing,
+      getById: async () =>
+        err({
+          type: 'INSUFFICIENT_STOCK' as const,
+          productId: 'p',
+          stock: 0,
+          requested: 1,
+        }),
+      listAll: async () => err({ type: 'PERSISTENCE_ERROR' as const, message: 'list' }),
+    };
+    const weirdResult = await new GetProductUseCase(weirdGet as never).execute('p');
+    expect(weirdResult.isErr() && weirdResult.error.type).toBe('PERSISTENCE_ERROR');
+    if (weirdResult.isErr() && weirdResult.error.type === 'PERSISTENCE_ERROR') {
+      expect(weirdResult.error.message).toBe('INSUFFICIENT_STOCK');
+    }
+    const listWeird = await new ListProductsUseCase(weirdGet as never).execute();
+    expect(listWeird.isErr() && listWeird.error.type).toBe('PERSISTENCE_ERROR');
+    if (listWeird.isErr() && listWeird.error.type === 'PERSISTENCE_ERROR') {
+      expect(listWeird.error.message).toBe('list');
+    }
   });
 });
