@@ -7,7 +7,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- **Dependabot + npm audit autofix (ADR 0017)**: `.github/dependabot.yml` (npm + Actions weekly); workflow `security-audit-autofix.yml` + `scripts/ci/npm-audit-autofix.cjs` (`fix/<slug>` → auto-merge); `dependabot-automerge.yml` for Dependabot PRs. Documented in README (calidad + pipelines), [`docs/ci-cd.md`](docs/ci-cd.md), [`docs/security.md`](docs/security.md).
+- **CloudWatch panel screenshot** in README (`docs/images/cloudwatch-panel.png`) under the observability section for evaluators.
+- **Dependabot + npm audit autofix (ADR 0017)**: `.github/dependabot.yml` (npm + Actions weekly, **patch/minor only** — majors ignored so TS/Vite jumps don’t break CI); workflow `security-audit-autofix.yml` + `scripts/ci/npm-audit-autofix.cjs` (`fix/<slug>` → auto-merge); `dependabot-automerge.yml` for Dependabot PRs. Documented in README (calidad + pipelines), [`docs/ci-cd.md`](docs/ci-cd.md), [`docs/security.md`](docs/security.md).
 
 ### Changed
 

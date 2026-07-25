@@ -166,6 +166,12 @@ Después de `serverless deploy`, cada stage deja:
 Logs JSON enriquecidos (`domain`, `layer`, `operation`, `statusClass`, `coldStart`, …) + métricas EMF `Checkout/API`.  
 Verificar: `npm run ops:observability -- --stage=prod` · guía [`docs/observability.md`](docs/observability.md) · ADR [0014](docs/adr/0014-observability-cloudwatch.md).
 
+### Pantallazo — `checkout-api-prod-ops`
+
+Dashboard prod (API · Lambda · EMF · SQS), vista ~3h:
+
+![CloudWatch dashboard checkout-api-prod-ops — API 4xx/5xx, latency, EMF RequestCount/LatencyMs, Lambda errors/duration/invocations, SQS depth](docs/images/cloudwatch-panel.png)
+
 ### Acceso evaluador (solo lectura del panel ops)
 
 Usuario IAM limitado a **un único** dashboard (`checkout-api-prod-ops`). El resto de AWS / otros dashboards → Access Denied.
@@ -337,7 +343,7 @@ El gate `npm run audit` del CI **falla cerrado** si hay high+/critical (con allo
 
 | Pieza | Qué hace | Archivo |
 |---|---|---|
-| **Dependabot** | Cada semana abre PRs de bumps npm + Actions | [`.github/dependabot.yml`](.github/dependabot.yml) |
+| **Dependabot** | Cada semana abre PRs de bumps npm + Actions (**solo patch/minor**; majors se ignoran a propósito) | [`.github/dependabot.yml`](.github/dependabot.yml) |
 | **Audit autofix** | `npm audit fix` (sin `--force`) → rama `fix/<slug>` → PR → auto-merge squash | [`security-audit-autofix.yml`](.github/workflows/security-audit-autofix.yml) + [`npm-audit-autofix.cjs`](scripts/ci/npm-audit-autofix.cjs) |
 | **Dependabot auto-merge** | En PRs de `dependabot[bot]`, pide auto-merge squash | [`dependabot-automerge.yml`](.github/workflows/dependabot-automerge.yml) |
 
