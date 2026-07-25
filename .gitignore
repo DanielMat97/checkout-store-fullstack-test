@@ -16,6 +16,10 @@ skills-lock.json
 dist/
 *.tsbuildinfo
 coverage/
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
 .serverless/
 .webpack/
 .esbuild/

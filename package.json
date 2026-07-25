@@ -19,6 +19,7 @@
     "audit:all": "npm audit --audit-level=high",
     "test": "npm run test --workspaces --if-present",
     "test:cov": "npm run test:cov --workspaces --if-present",
+    "test:e2e": "npm run test:e2e -w @app/web",
     "ci": "npm run validate && npm run format:check && npm run lint && npm run audit && npm run build:shared && npm test && npm run test:cov",
     "ci:local": "npm run ci",
     "dev": "concurrently -n api,web -c green,cyan \"npm:dev:api\" \"npm:dev:web\"",

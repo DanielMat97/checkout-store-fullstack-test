@@ -30,6 +30,7 @@ permissions:
   contents: read
   id-token: write
   pull-requests: write
+  actions: read
 
 env:
   AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
@@ -51,7 +52,7 @@ jobs:
     outputs:
       stage: ${{ steps.meta.outputs.stage }}
       api_url: ${{ steps.api.outputs.api_url }}
-      amplify_url: ${{ steps.amplify.outputs.amplify_url }}
+      amplify_url: ${{ steps.amplify.outputs.amplify_url || steps.cors.outputs.amplify_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -203,3 +204,112 @@ jobs:
             echo "npx serverless remove --stage ${{ steps.meta.outputs.stage }}"
             echo "\`\`\`"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  smoke:
+    name: Feature post-deploy smoke
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: ${{ always() && needs.deploy.result == 'success' && (needs.deploy.outputs.amplify_url != '' || needs.deploy.outputs.api_url != '') }}
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+        working-directory: apps/web
+      - name: Wait API
+        run: node scripts/ci/wait-http-ready.cjs "${{ needs.deploy.outputs.api_url }}/products" 600 10
+      - name: Wait FE
+        if: needs.deploy.outputs.amplify_url != ''
+        run: node scripts/ci/wait-http-ready.cjs "${{ needs.deploy.outputs.amplify_url }}" 900 15
+      - name: Playwright E2E
+        if: needs.deploy.outputs.amplify_url != ''
+        working-directory: apps/web
+        env:
+          FE_BASE_URL: ${{ needs.deploy.outputs.amplify_url }}
+          API_BASE_URL: ${{ needs.deploy.outputs.api_url }}
+          CI: true
+        run: npx playwright test
+      - name: API-only Playwright
+        if: needs.deploy.outputs.amplify_url == ''
+        working-directory: apps/web
+        env:
+          FE_BASE_URL: http://127.0.0.1:9
+          API_BASE_URL: ${{ needs.deploy.outputs.api_url }}
+          CI: true
+        run: npx playwright test e2e/api.smoke.spec.ts
+      - name: OWASP ZAP baseline (API)
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: ${{ needs.deploy.outputs.api_url }}/products
+          fail_action: true
+          allow_issue_writing: false
+          cmd_options: '-a -I'
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-feature
+          path: apps/web/playwright-report
+          if-no-files-found: ignore
+
+  rollback:
+    name: Rollback feature API on smoke failure
+    runs-on: ubuntu-latest
+    needs: [smoke, deploy]
+    if: ${{ always() && needs.deploy.result == 'success' && needs.smoke.result == 'failure' }}
+    environment: feature
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Resolve previous SHA on this ref
+        id: prev
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          WORKFLOW_FILE: deploy-feature.yml
+        run: |
+          RESULT=$(node scripts/ci/resolve-last-good-sha.cjs)
+          SHA=$(echo "$RESULT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const j=JSON.parse(d);console.log(j.previousSha||'')})")
+          echo "previous_sha=$SHA" >> "$GITHUB_OUTPUT"
+      - name: Redeploy last-good
+        env:
+          PREV: ${{ steps.prev.outputs.previous_sha }}
+          STAGE: ${{ needs.deploy.outputs.stage }}
+          GH_PAYMENT_API_URL: ${{ secrets.PAYMENT_API_URL }}
+          GH_PAYMENT_PUBLIC_KEY: ${{ secrets.PAYMENT_PUBLIC_KEY }}
+          GH_PAYMENT_PRIVATE_KEY: ${{ secrets.PAYMENT_PRIVATE_KEY }}
+          GH_PAYMENT_INTEGRITY_KEY: ${{ secrets.PAYMENT_INTEGRITY_KEY }}
+          GH_PAYMENT_GATEWAY_MODE: ${{ vars.PAYMENT_GATEWAY_MODE_FEATURE || vars.PAYMENT_GATEWAY_MODE || 'fake' }}
+        run: |
+          {
+            echo "PAYMENT_API_URL=$GH_PAYMENT_API_URL"
+            echo "PAYMENT_PUBLIC_KEY=$GH_PAYMENT_PUBLIC_KEY"
+            echo "PAYMENT_PRIVATE_KEY=$GH_PAYMENT_PRIVATE_KEY"
+            echo "PAYMENT_INTEGRITY_KEY=$GH_PAYMENT_INTEGRITY_KEY"
+            echo "PAYMENT_GATEWAY_MODE=$GH_PAYMENT_GATEWAY_MODE"
+            echo "DYNAMODB_TABLE_NAME=checkout-store-$STAGE"
+            echo "DYNAMODB_ENDPOINT="
+          } >> "$GITHUB_ENV"
+          chmod +x scripts/ci/rollback-api.sh
+          if [ -z "$PREV" ]; then
+            echo "No prior feature deploy SHA — cannot rollback" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          scripts/ci/rollback-api.sh "$PREV" "$STAGE"

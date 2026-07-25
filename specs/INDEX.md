@@ -20,14 +20,15 @@
 | Seguridad | `security-hardening/` | **done** | B1 |
 | Hex + ROP | `architecture-hex-rop/` | **done** | B5–6 |
 | UX quality | `ux-quality-bar/` | **ready** | B2–4 |
-| **SQS post-pay** | `sqs-orchestration/` | **done** | Arch enhancement (ADR 0011) |
-| **Orders console** | `orders-console/` | **done** | Ops + brief §5–6 stock |
+| SQS post-pay | `sqs-orchestration/` | **done** | Arch enhancement (ADR 0011) |
+| Orders console | `orders-console/` | **done** | Ops + brief §5–6 stock |
+| **Deploy smoke + rollback** | `deploy-smoke-rollback/` | **done** | CI E2E/ZAP/SAST (ADR 0012) |
 
 ## Orden reciente
 
 ```
-… → cloud-deploy → security-hardening →
-sqs-orchestration → orders-console → ux-quality-bar
+… → sqs-orchestration → orders-console →
+deploy-smoke-rollback → ux-quality-bar
 ```
 
 ## Reglas
@@ -35,3 +36,4 @@ sqs-orchestration → orders-console → ux-quality-bar
 1. Leer gap analysis + ADR 0011 antes de tocar pay path.
 2. Sin marca de pasarela en source público.
 3. Living docs en el mismo cambio.
+4. Pipeline post-deploy: ver ADR 0012 + [`docs/ci-cd.md`](../docs/ci-cd.md).

@@ -16,6 +16,11 @@ const SERVICE_DIRS = {
   transactions: 'services/transactions/',
 };
 
+/** When transactions package changes, also redeploy SQS worker (same package). */
+const FUNCTION_ALIASES = {
+  transactions: ['transactions', 'ordersWorker'],
+};
+
 const FULL_STACK_PATTERNS = [
   /^serverless\.(ts|js|yml|yaml)$/,
   /^package(-lock)?\.json$/,
@@ -54,6 +59,10 @@ const functions = Object.entries(SERVICE_DIRS)
   .filter(([, prefix]) => files.some((f) => f.startsWith(prefix)))
   .map(([name]) => name);
 
+const expanded = [
+  ...new Set(functions.flatMap((name) => FUNCTION_ALIASES[name] ?? [name])),
+];
+
 let mode = 'none';
 if (hitFull || functions.length >= 3) {
   mode = 'full';
@@ -68,7 +77,9 @@ if (hitFull || functions.length >= 3) {
 
 const result = {
   mode: hitFull ? 'full' : mode,
-  functions: hitFull ? Object.keys(SERVICE_DIRS) : functions,
+  functions: hitFull
+    ? [...Object.keys(SERVICE_DIRS), 'ordersWorker']
+    : expanded,
   files,
 };
 process.stdout.write(`${JSON.stringify(result)}\n`);

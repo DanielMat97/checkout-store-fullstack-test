@@ -1,7 +1,9 @@
 name: CI
 
-# Quality gates (ordered): validate → prettier → lint → audit → test → coverage → quality-ok
+# Quality gates (ordered): validate → prettier → lint → audit → test → coverage
+# + CodeQL (+ SonarCloud if SONAR_TOKEN) → quality-ok
 # Deploy workflows MUST call this via workflow_call and need: quality (fail-closed).
+# refs specs/deploy-smoke-rollback/spec.md · ADR 0012
 on:
   pull_request:
   push:
@@ -19,6 +21,8 @@ concurrency:
 
 permissions:
   contents: read
+  security-events: write
+  actions: read
 
 jobs:
   validate:
@@ -60,7 +64,7 @@ jobs:
       - run: npm run lint
 
   audit:
-    name: Audit
+    name: Audit (OWASP deps)
     runs-on: ubuntu-latest
     needs: validate
     steps:
@@ -109,12 +113,64 @@ jobs:
             **/coverage/coverage-final.json
           if-no-files-found: ignore
 
+  codeql:
+    name: CodeQL (SAST)
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          queries: security-extended
+      - uses: github/codeql-action/autobuild@v3
+      - uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:javascript-typescript'
+
+  sonar:
+    name: SonarCloud (optional)
+    runs-on: ubuntu-latest
+    needs: coverage
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Decide Sonar
+        id: sonar
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          if [ -n "${SONAR_TOKEN:-}" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "SonarCloud skipped (no SONAR_TOKEN) — free OSS optional per ADR 0012" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: SonarCloud Scan
+        if: steps.sonar.outputs.run == 'true'
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
+            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
+            -Dsonar.sources=apps,services,packages
+            -Dsonar.exclusions=**/dist/**,**/coverage/**,**/node_modules/**,**/*.spec.ts,**/*.spec.tsx,**/e2e/**
+
   # Single success signal for deploy workflows (needs: quality → this job).
   quality-ok:
     name: Quality OK
     runs-on: ubuntu-latest
-    needs: coverage
-    if: ${{ needs.coverage.result == 'success' }}
+    needs: [coverage, codeql, sonar]
+    if: ${{ always() && needs.coverage.result == 'success' && needs.codeql.result == 'success' && needs.sonar.result == 'success' }}
     outputs:
       result: ${{ steps.mark.outputs.result }}
     steps:
@@ -122,4 +178,4 @@ jobs:
         run: |
           echo "result=success" >> "$GITHUB_OUTPUT"
           echo "### Quality pipeline passed" >> "$GITHUB_STEP_SUMMARY"
-          echo "validate → prettier → lint → audit → test → coverage" >> "$GITHUB_STEP_SUMMARY"
+          echo "validate → prettier → lint → audit → test → coverage → CodeQL → Sonar(optional skip-as-success)" >> "$GITHUB_STEP_SUMMARY"

@@ -137,6 +137,8 @@ Total 135 / 150
 
 **Nota arquitectura (fuera de rúbrica brief):** SQS post-pay + Orders console (`specs/sqs-orchestration`, `specs/orders-console`, ADR 0011) son enhancement de orquestación/ops — **no** suben el score del brief hasta evidencia de cola en cloud + demos; el brief no exige SQS.
 
+**CI enhancement (ADR 0012):** post-deploy Playwright + ZAP + CodeQL (+ SonarCloud opcional) refuerza base #6 / bonus B1; evidencia en Actions runs tras el próximo deploy a `master`.
+
 ---
 
 ## 6. Proyección (no cuenta para “hoy”)

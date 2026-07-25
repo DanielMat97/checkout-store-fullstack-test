@@ -1,6 +1,6 @@
 # Current state
 
-> Last updated: **2026-07-25** (SQS orchestration + Orders console implemented; base PASS unchanged)
+> Last updated: **2026-07-25** (deploy smoke + CodeQL/ZAP + rollback; SQS/orders already in)
 
 ## Score (rúbrica brief — modo evaluador estricto)
 
@@ -29,8 +29,9 @@ Ver **`docs/scorecard.md`**.
 | `checkout-payment` | **done** (E2E sandbox cloud; post-pay sync fallback o SQS) |
 | `readme-deliverables` | **done** |
 | `security-hardening` | **done** (headers FE/API + `docs/security.md`) |
-| `sqs-orchestration` | **done** (ADR 0011; deploy crea cola) |
+| `sqs-orchestration` | **done** (ADR 0011) |
 | `orders-console` | **done** (`/orders` ops demo) |
+| `deploy-smoke-rollback` | **done** (ADR 0012 — Playwright + ZAP + CodeQL + rollback) |
 | `ux-quality-bar` | ready (bonus responsive matrix) |
 
 ## Deploy (live)
@@ -42,5 +43,6 @@ Ver **`docs/scorecard.md`**.
 | OpenAPI | https://master.dw2i8myh0xumx.amplifyapp.com/openapi.json |
 | Payment mode | `sandbox` |
 | Security | [`docs/security.md`](security.md) |
+| CI/CD | [`docs/ci-cd.md`](ci-cd.md) — pre: CodeQL (+Sonar opc.); post: Playwright + ZAP; fail → API rollback |
 | Gap analysis | [`docs/brief-gap-analysis.md`](brief-gap-analysis.md) |
 | Post-pay | SQS `checkout-orders-events-{stage}` + worker; local sync fallback |

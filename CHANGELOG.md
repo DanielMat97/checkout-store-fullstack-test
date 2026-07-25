@@ -7,6 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Post-deploy smoke + rollback (ADR 0012)**: Playwright E2E + OWASP ZAP after prod/feature deploy; CodeQL (+ optional SonarCloud) in CI quality gate; API rollback to last-good SHA on smoke failure. Specs: `specs/deploy-smoke-rollback/`. Docs: [`docs/ci-cd.md`](docs/ci-cd.md).
 - **SQS post-pay orchestration (ADR 0011)**: `PaymentApproved` queue + `ordersWorker`; sync in-process fallback when queue URL empty/offline. Ops console `/orders` (list APPROVED, restore stock, mark fulfilled). APIs: `GET /transactions`, `POST /transactions/:id/restore`, `PATCH /deliveries/:id`. Gap analysis: [`docs/brief-gap-analysis.md`](docs/brief-gap-analysis.md).
 
 ### Changed
@@ -15,6 +16,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Prod API: `PAYMENT_GATEWAY_MODE=sandbox` + keys en Lambda/GitHub Secrets (profile `stonestore` / `gh`).
 - Security: `applySecuritySurface` (strip `X-Powered-By` + OWASP headers); Amplify `customHeaders`; [`docs/security.md`](docs/security.md).
 - Bonus note: SQS + ops console = arquitectura enhancement (no ítem brief); hexagonal/ROP score unchanged until cloud SQS proven in scorecard evidence.
+- CI: quality gate includes CodeQL; deploy-api runs post-deploy Playwright/ZAP with automatic Serverless rollback.
 ### Added
 
 - **Prod live (AWS profile `stonestore`)**: Amplify FE https://master.dw2i8myh0xumx.amplifyapp.com · API https://qo9kbfxew8.execute-api.us-east-1.amazonaws.com. GitHub Actions secrets/vars (`AWS_*`, `AMPLIFY_APP_ID`, `CORS_ORIGIN`, …) configurados vía `gh` + profile `stonestore`.

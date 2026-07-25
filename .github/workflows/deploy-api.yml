@@ -1,8 +1,10 @@
 name: Deploy API (prod)
 
 # Deploys only changed Lambdas on main/master. Full stack when shared/serverless change.
-# HARD REQUIREMENT: the reusable CI workflow (validate→…→coverage) must succeed first.
+# HARD REQUIREMENT: the reusable CI workflow (validate→…→coverage→CodeQL) must succeed first.
+# Post-deploy: Playwright E2E + OWASP ZAP; on failure → rollback to last-good SHA.
 # Frontend production is owned by AWS Amplify (configure the Amplify app separately).
+# refs specs/deploy-smoke-rollback/spec.md · ADR 0012
 on:
   push:
     branches: [main, master]
@@ -12,7 +14,11 @@ on:
       - 'serverless.ts'
       - 'package.json'
       - 'package-lock.json'
+      - 'apps/web/e2e/**'
+      - 'apps/web/playwright.config.ts'
       - '.github/workflows/deploy-api.yml'
+      - '.github/workflows/ci.yml'
+      - 'scripts/ci/**'
   workflow_dispatch:
     inputs:
       mode:
@@ -25,6 +31,11 @@ on:
         description: 'Comma list when mode=functions (e.g. products,transactions)'
         required: false
         default: ''
+      skip_smoke:
+        description: 'Skip post-deploy Playwright/ZAP (emergency only)'
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: deploy-api-prod
@@ -33,18 +44,42 @@ concurrency:
 permissions:
   contents: read
   id-token: write
+  actions: read
+  security-events: write
 
 env:
   STAGE: ${{ vars.SERVERLESS_STAGE || 'prod' }}
   AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+  FE_BASE_URL: ${{ vars.FE_BASE_URL || 'https://master.dw2i8myh0xumx.amplifyapp.com' }}
 
 jobs:
-  # REQUIRED: full CI must succeed before any deploy work.
-  # If validate/prettier/lint/audit/test/coverage fails, detect+deploy are skipped.
   quality:
     name: Quality gate (required)
     uses: ./.github/workflows/ci.yml
     secrets: inherit
+
+  baseline:
+    name: Capture last-good SHA
+    runs-on: ubuntu-latest
+    needs: quality
+    if: ${{ needs.quality.result == 'success' }}
+    outputs:
+      previous_sha: ${{ steps.prev.outputs.previous_sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Resolve previous successful deploy SHA
+        id: prev
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          WORKFLOW_FILE: deploy-api.yml
+        run: |
+          RESULT=$(node scripts/ci/resolve-last-good-sha.cjs)
+          echo "result=$RESULT"
+          SHA=$(echo "$RESULT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const j=JSON.parse(d);console.log(j.previousSha||'')})")
+          echo "previous_sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "Last-good SHA: ${SHA:-none}" >> "$GITHUB_STEP_SUMMARY"
 
   detect:
     name: Detect changed services
@@ -67,14 +102,12 @@ jobs:
             MODE="${{ inputs.mode }}"
             if [ "$MODE" = "functions" ] && [ -n "${{ inputs.functions }}" ]; then
               FUNCS='${{ inputs.functions }}'
-              # JSON array from comma list
               JSON=$(node -e "const a=process.argv[1].split(',').map(s=>s.trim()).filter(Boolean); console.log(JSON.stringify(a))" "$FUNCS")
             else
-              JSON='["products","customers","deliveries","transactions"]'
+              JSON='["products","customers","deliveries","transactions","ordersWorker"]'
             fi
           else
             BEFORE="${{ github.event.before }}"
-            # Fix empty before SHA on first push / force-push
             if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
               BEFORE="HEAD~1"
             fi
@@ -90,9 +123,12 @@ jobs:
   deploy:
     name: Deploy Serverless
     runs-on: ubuntu-latest
-    needs: [quality, detect]
+    needs: [quality, detect, baseline]
     if: ${{ needs.quality.result == 'success' && needs.detect.result == 'success' && needs.detect.outputs.mode != 'none' }}
     environment: production
+    outputs:
+      api_url: ${{ steps.url.outputs.api_url }}
+      deployed: ${{ steps.mark.outputs.deployed }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -117,8 +153,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-          # Prefer OIDC when role is configured:
-          # role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
 
       - name: Fallback fill missing env from GitHub Secrets
         env:
@@ -169,3 +203,127 @@ jobs:
           AWS_REGION: ${{ env.AWS_REGION }}
         run: |
           npm run seed || echo "Seed skipped/failed — run manually if table already seeded"
+
+      - id: mark
+        run: echo "deployed=true" >> "$GITHUB_OUTPUT"
+
+  smoke:
+    name: Post-deploy E2E + ZAP
+    runs-on: ubuntu-latest
+    needs: [deploy, baseline]
+    if: ${{ always() && needs.deploy.result == 'success' && needs.deploy.outputs.deployed == 'true' && (github.event_name != 'workflow_dispatch' || inputs.skip_smoke != true) }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+        working-directory: apps/web
+
+      - name: Wait for API ready
+        run: node scripts/ci/wait-http-ready.cjs "${{ needs.deploy.outputs.api_url }}/products" 600 10
+
+      - name: Wait for FE ready
+        run: node scripts/ci/wait-http-ready.cjs "${{ env.FE_BASE_URL }}" 900 15
+
+      - name: Playwright E2E
+        working-directory: apps/web
+        env:
+          FE_BASE_URL: ${{ env.FE_BASE_URL }}
+          API_BASE_URL: ${{ needs.deploy.outputs.api_url }}
+          CI: true
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-prod
+          path: apps/web/playwright-report
+          if-no-files-found: ignore
+
+      - name: OWASP ZAP baseline (API)
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: ${{ needs.deploy.outputs.api_url }}/products
+          fail_action: true
+          allow_issue_writing: false
+          cmd_options: '-a -I'
+
+      - name: OWASP ZAP baseline (FE)
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: ${{ env.FE_BASE_URL }}
+          fail_action: true
+          allow_issue_writing: false
+          cmd_options: '-a -I'
+
+  rollback:
+    name: Rollback API on smoke failure
+    runs-on: ubuntu-latest
+    needs: [smoke, baseline, deploy]
+    if: ${{ always() && needs.deploy.result == 'success' && needs.smoke.result == 'failure' }}
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Load secrets for rollback deploy
+        uses: ./.github/actions/load-vault-secrets
+        with:
+          stage: ${{ env.STAGE }}
+          vault_addr: ${{ secrets.VAULT_ADDR }}
+          role_id: ${{ secrets.VAULT_ROLE_ID }}
+          secret_id: ${{ secrets.VAULT_SECRET_ID }}
+          required: ${{ vars.VAULT_REQUIRED || 'false' }}
+      - name: Fallback payment env
+        env:
+          GH_PAYMENT_API_URL: ${{ secrets.PAYMENT_API_URL }}
+          GH_PAYMENT_PUBLIC_KEY: ${{ secrets.PAYMENT_PUBLIC_KEY }}
+          GH_PAYMENT_PRIVATE_KEY: ${{ secrets.PAYMENT_PRIVATE_KEY }}
+          GH_PAYMENT_INTEGRITY_KEY: ${{ secrets.PAYMENT_INTEGRITY_KEY }}
+          GH_PAYMENT_GATEWAY_MODE: ${{ vars.PAYMENT_GATEWAY_MODE || 'sandbox' }}
+          GH_CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
+        run: |
+          {
+            [ -n "${PAYMENT_API_URL:-}" ] || echo "PAYMENT_API_URL=$GH_PAYMENT_API_URL"
+            [ -n "${PAYMENT_PUBLIC_KEY:-}" ] || echo "PAYMENT_PUBLIC_KEY=$GH_PAYMENT_PUBLIC_KEY"
+            [ -n "${PAYMENT_PRIVATE_KEY:-}" ] || echo "PAYMENT_PRIVATE_KEY=$GH_PAYMENT_PRIVATE_KEY"
+            [ -n "${PAYMENT_INTEGRITY_KEY:-}" ] || echo "PAYMENT_INTEGRITY_KEY=$GH_PAYMENT_INTEGRITY_KEY"
+            [ -n "${PAYMENT_GATEWAY_MODE:-}" ] || echo "PAYMENT_GATEWAY_MODE=$GH_PAYMENT_GATEWAY_MODE"
+            [ -n "${CORS_ORIGIN:-}" ] || echo "CORS_ORIGIN=$GH_CORS_ORIGIN"
+            echo "DYNAMODB_ENDPOINT="
+          } >> "$GITHUB_ENV"
+      - name: Redeploy last-good SHA
+        env:
+          PREV: ${{ needs.baseline.outputs.previous_sha }}
+        run: |
+          chmod +x scripts/ci/rollback-api.sh
+          if [ -z "$PREV" ]; then
+            echo "### Rollback skipped — no prior successful deploy SHA" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          scripts/ci/rollback-api.sh "$PREV" "$STAGE"
+          echo "### Rolled back API to \`$PREV\`" >> "$GITHUB_STEP_SUMMARY"
+      - name: Best-effort Amplify rollback job
+        if: ${{ vars.AMPLIFY_APP_ID != '' && needs.baseline.outputs.previous_sha != '' }}
+        env:
+          APP: ${{ vars.AMPLIFY_APP_ID }}
+          SHA: ${{ needs.baseline.outputs.previous_sha }}
+        run: |
+          echo "Amplify FE rollback is best-effort. Prefer re-running Amplify build for commit $SHA on master."
+          echo "API was reverted; FE may briefly mismatch until Amplify rebuilds from a fixed commit." >> "$GITHUB_STEP_SUMMARY"

@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "jest --config jest.config.cjs",
     "test:cov": "jest --config jest.config.cjs --coverage",
+    "test:e2e": "playwright test",
     "lint": "oxlint src"
   },
   "dependencies": {
@@ -20,6 +21,7 @@
     "redux-persist": "^6.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.51.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.13.10",
     "@types/react": "^19.2.17",
