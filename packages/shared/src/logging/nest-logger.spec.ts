@@ -48,4 +48,12 @@ describe('NestStandardLogger', () => {
     logger.log(circular);
     expect(writes[0]).toContain('[object Object]');
   });
+
+  it('errors without a stack trace omit the trace field', () => {
+    const logger = new NestStandardLogger('api');
+    logger.error('oops');
+    const line = writes.find((w) => w.includes('"level":"error"'));
+    expect(line).toBeDefined();
+    expect(line).not.toContain('"trace"');
+  });
 });

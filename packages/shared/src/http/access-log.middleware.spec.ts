@@ -68,4 +68,79 @@ describe('AccessLogMiddleware', () => {
     instance.use(req, res, jest.fn());
     expect(headers['x-correlation-id']).toBe('corr_fixed');
   });
+
+  it('logs content-length, user-agent, and amzn request id', () => {
+    const writes: string[] = [];
+    const original = process.stdout.write.bind(process.stdout);
+    process.stdout.write = ((chunk: string | Uint8Array) => {
+      writes.push(String(chunk));
+      return true;
+    }) as typeof process.stdout.write;
+
+    const Middleware = AccessLogMiddleware('transactions');
+    const instance = new Middleware();
+    const headers: Record<string, string | undefined> = {
+      'content-length': '128',
+      'user-agent': 'jest-agent',
+      'x-amzn-requestid': 'amzn-req-1',
+    };
+    const req = {
+      method: 'POST',
+      url: '/transactions',
+      headers,
+    } as unknown as Request;
+
+    let finish: (() => void) | undefined;
+    const res = {
+      statusCode: 200,
+      setHeader: jest.fn(),
+      on: (event: string, cb: () => void) => {
+        if (event === 'finish') finish = cb;
+      },
+    } as unknown as Response;
+
+    instance.use(req, res, jest.fn());
+    finish?.();
+    process.stdout.write = original;
+
+    expect(writes.some((w) => w.includes('"contentLength":128'))).toBe(true);
+    expect(writes.some((w) => w.includes('"userAgent":"jest-agent"'))).toBe(true);
+    expect(writes.some((w) => w.includes('"requestId":"amzn-req-1"'))).toBe(true);
+  });
+
+  it('ignores non-finite content-length and non-string user-agent', () => {
+    const writes: string[] = [];
+    const original = process.stdout.write.bind(process.stdout);
+    process.stdout.write = ((chunk: string | Uint8Array) => {
+      writes.push(String(chunk));
+      return true;
+    }) as typeof process.stdout.write;
+
+    const Middleware = AccessLogMiddleware('products');
+    const instance = new Middleware();
+    const headers: Record<string, unknown> = {
+      'content-length': '',
+      'user-agent': ['not-a-string'],
+    };
+    const req = {
+      method: 'GET',
+      url: '/products',
+      headers,
+    } as unknown as Request;
+
+    let finish: (() => void) | undefined;
+    const res = {
+      statusCode: 200,
+      setHeader: jest.fn(),
+      on: (event: string, cb: () => void) => {
+        if (event === 'finish') finish = cb;
+      },
+    } as unknown as Response;
+
+    instance.use(req, res, jest.fn());
+    finish?.();
+    process.stdout.write = original;
+
+    expect(writes.some((w) => w.includes('contentLength'))).toBe(false);
+  });
 });

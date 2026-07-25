@@ -74,4 +74,26 @@ describe('createLogger', () => {
     expect(writes[0].chunk).toContain('"requestId":"r9"');
     expect(writes[0].chunk).toContain('"layer":"adapter"');
   });
+
+  it('includes Lambda runtime context when env is set', () => {
+    process.env.AWS_LAMBDA_FUNCTION_NAME = 'checkout-api-prod-products';
+    process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_nodejs20.x';
+    process.env.SERVICE_NAME = 'products';
+    createLogger('products').info('boot');
+    const line = writes[0].chunk;
+    expect(line).toContain('"functionName":"checkout-api-prod-products"');
+    expect(line).toContain('"runtime":"AWS_Lambda_nodejs20.x"');
+    expect(line).toContain('"serviceNameEnv":"products"');
+    delete process.env.AWS_LAMBDA_FUNCTION_NAME;
+    delete process.env.AWS_EXECUTION_ENV;
+    delete process.env.SERVICE_NAME;
+  });
+
+  it('falls back to NODE_ENV when STAGE is unset', () => {
+    delete process.env.STAGE;
+    process.env.NODE_ENV = 'development';
+    createLogger('api').info('local');
+    expect(writes[0].chunk).toContain('"stage":"development"');
+    delete process.env.NODE_ENV;
+  });
 });

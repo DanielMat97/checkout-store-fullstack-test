@@ -94,4 +94,50 @@ describe('ElectroDbTransactionRepository', () => {
     });
     expect((await repo.update(record))._unsafeUnwrapErr().type).toBe('PERSISTENCE_ERROR');
   });
+
+  it('listByCreatedAt filters by status and limit', async () => {
+    const rows = [
+      { ...row, transactionId: 'txn_2', status: 'APPROVED' as const },
+      { ...row, transactionId: 'txn_1', status: 'PENDING' as const },
+      { ...row, transactionId: 'txn_3', status: 'APPROVED' as const },
+    ];
+    const entities = {
+      transactions: {
+        get: jest.fn(),
+        put: jest.fn(),
+        query: {
+          byType: jest.fn().mockReturnValue({
+            go: jest.fn().mockResolvedValue({ data: rows }),
+          }),
+        },
+      },
+    };
+    const repo = new ElectroDbTransactionRepository(entities as never);
+
+    const all = await repo.listByCreatedAt();
+    expect(all._unsafeUnwrap()).toHaveLength(3);
+
+    const approved = await repo.listByCreatedAt({ status: 'APPROVED', limit: 1 });
+    expect(approved._unsafeUnwrap()).toEqual([
+      expect.objectContaining({ id: 'txn_2', status: 'APPROVED' }),
+    ]);
+  });
+
+  it('listByCreatedAt maps persistence errors', async () => {
+    const entities = {
+      transactions: {
+        get: jest.fn(),
+        put: jest.fn(),
+        query: {
+          byType: jest.fn().mockReturnValue({
+            go: jest.fn().mockRejectedValue(new Error('query-fail')),
+          }),
+        },
+      },
+    };
+    const repo = new ElectroDbTransactionRepository(entities as never);
+    expect((await repo.listByCreatedAt())._unsafeUnwrapErr().type).toBe(
+      'PERSISTENCE_ERROR',
+    );
+  });
 });

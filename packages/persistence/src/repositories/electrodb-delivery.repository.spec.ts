@@ -75,4 +75,41 @@ describe('ElectroDbDeliveryRepository', () => {
       )._unsafeUnwrapErr().type,
     ).toBe('PERSISTENCE_ERROR');
   });
+
+  it('listByTransaction returns mapped rows', async () => {
+    const entities = {
+      deliveries: {
+        get: jest.fn(),
+        put: jest.fn(),
+        query: {
+          byTransaction: jest.fn().mockReturnValue({
+            go: jest.fn().mockResolvedValue({ data: [row] }),
+          }),
+        },
+      },
+    };
+    const repo = new ElectroDbDeliveryRepository(entities as never);
+    const listed = await repo.listByTransaction('txn_1');
+    expect(listed._unsafeUnwrap()).toEqual([
+      expect.objectContaining({ id: 'del_1', transactionId: 'txn_1' }),
+    ]);
+  });
+
+  it('listByTransaction maps persistence errors', async () => {
+    const entities = {
+      deliveries: {
+        get: jest.fn(),
+        put: jest.fn(),
+        query: {
+          byTransaction: jest.fn().mockReturnValue({
+            go: jest.fn().mockRejectedValue('list-fail'),
+          }),
+        },
+      },
+    };
+    const repo = new ElectroDbDeliveryRepository(entities as never);
+    expect((await repo.listByTransaction('txn_1'))._unsafeUnwrapErr().type).toBe(
+      'PERSISTENCE_ERROR',
+    );
+  });
 });

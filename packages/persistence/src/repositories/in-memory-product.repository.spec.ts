@@ -70,4 +70,22 @@ describe('InMemoryProductRepository (port contract)', () => {
     const got = await repo.getById('prod_aura_quiet');
     expect(got._unsafeUnwrap().stock).toBe(99);
   });
+
+  it('updateStock / incrementStock cover missing and qty guards', async () => {
+    expect((await repo.updateStock('missing', 1))._unsafeUnwrapErr().type).toBe(
+      'NOT_FOUND',
+    );
+    expect((await repo.decrementStock('missing', 1))._unsafeUnwrapErr().type).toBe(
+      'NOT_FOUND',
+    );
+    expect((await repo.incrementStock('missing', 1))._unsafeUnwrapErr().type).toBe(
+      'NOT_FOUND',
+    );
+    expect(
+      (await repo.incrementStock('prod_aura_quiet', 0))._unsafeUnwrapErr().type,
+    ).toBe('PERSISTENCE_ERROR');
+
+    const bumped = await repo.incrementStock('prod_aura_quiet', 2);
+    expect(bumped._unsafeUnwrap().stock).toBe(10);
+  });
 });

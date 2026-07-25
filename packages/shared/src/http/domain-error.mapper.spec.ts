@@ -26,4 +26,21 @@ describe('domainErrorToHttp', () => {
     ).toBe(500);
     expect(domainErrorToHttp({ type: 'OTHER', message: 'x' }).getStatus()).toBe(500);
   });
+
+  it('fills defaults for NOT_FOUND and unknown errors without message', () => {
+    const missing = domainErrorToHttp({ type: 'NOT_FOUND' } as never);
+    expect(missing.getStatus()).toBe(404);
+    expect(missing.getResponse()).toMatchObject({
+      error: 'NOT_FOUND',
+      entity: 'resource',
+      id: '',
+    });
+
+    const unknown = domainErrorToHttp({ type: 'WEIRD' });
+    expect(unknown.getStatus()).toBe(500);
+    expect(unknown.getResponse()).toMatchObject({
+      error: 'WEIRD',
+      message: 'Unexpected error',
+    });
+  });
 });

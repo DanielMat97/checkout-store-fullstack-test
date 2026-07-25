@@ -109,4 +109,66 @@ describe('ElectroDbProductRepository', () => {
     const updated = await repo.updateStock('prod_a', 1);
     expect(updated.isErr() && updated.error.type).toBe('NOT_FOUND');
   });
+
+  it('incrementStock happy path and guards', async () => {
+    const entities = {
+      products: {
+        get: jest
+          .fn()
+          .mockReturnValueOnce(chainGo(productRow))
+          .mockReturnValueOnce(chainGo({ ...productRow, stock: 6 }))
+          .mockReturnValueOnce(chainGo(null))
+          .mockReturnValueOnce(chainGo(productRow)),
+        update: jest.fn().mockReturnValue({
+          set: jest.fn().mockReturnValue(chainGo({ ...productRow, stock: 6 })),
+        }),
+        query: { byType: jest.fn() },
+        put: jest.fn(),
+      },
+    };
+    const repo = new ElectroDbProductRepository(entities as never);
+
+    await expect(repo.incrementStock('prod_a', 1)).resolves.toMatchObject({
+      value: { stock: 6 },
+    });
+
+    const missing = await repo.incrementStock('missing', 1);
+    expect(missing.isErr() && missing.error.type).toBe('NOT_FOUND');
+
+    const badQty = await repo.incrementStock('prod_a', 0);
+    expect(badQty.isErr() && badQty.error.type).toBe('PERSISTENCE_ERROR');
+  });
+
+  it('propagates getById errors from updateStock and decrementStock', async () => {
+    const entities = {
+      products: {
+        get: jest.fn().mockReturnValue(chainGo(null)),
+        update: jest.fn(),
+        query: { byType: jest.fn() },
+        put: jest.fn(),
+      },
+    };
+    const repo = new ElectroDbProductRepository(entities as never);
+    expect((await repo.updateStock('x', 1))._unsafeUnwrapErr().type).toBe('NOT_FOUND');
+    expect((await repo.decrementStock('x', 1))._unsafeUnwrapErr().type).toBe('NOT_FOUND');
+  });
+
+  it('maps updateStock throw to PERSISTENCE_ERROR', async () => {
+    const entities = {
+      products: {
+        get: jest.fn().mockReturnValue(chainGo(productRow)),
+        update: jest.fn().mockReturnValue({
+          set: jest.fn().mockReturnValue({
+            go: jest.fn().mockRejectedValue(new Error('upd')),
+          }),
+        }),
+        query: { byType: jest.fn() },
+        put: jest.fn(),
+      },
+    };
+    const repo = new ElectroDbProductRepository(entities as never);
+    expect((await repo.updateStock('prod_a', 1))._unsafeUnwrapErr().type).toBe(
+      'PERSISTENCE_ERROR',
+    );
+  });
 });

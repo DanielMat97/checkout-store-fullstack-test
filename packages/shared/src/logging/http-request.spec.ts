@@ -73,12 +73,43 @@ describe('logHttpRequest', () => {
     });
     expect(writes.some((w) => w.includes('"level":"error"'))).toBe(true);
   });
+
+  it('records contentLength and classifies 3xx / other statuses', () => {
+    resetColdStartForTests(false);
+    logHttpRequest({
+      method: 'GET',
+      path: '/redirect',
+      statusCode: 302,
+      durationMs: 2,
+      correlationId: 'c',
+      contentLength: 42,
+    });
+    expect(writes.some((w) => w.includes('"statusClass":"3xx"'))).toBe(true);
+    expect(writes.some((w) => w.includes('"contentLength":42'))).toBe(true);
+
+    writes.length = 0;
+    logHttpRequest({
+      method: 'GET',
+      path: '/odd',
+      statusCode: 100,
+      durationMs: 1,
+      correlationId: 'c',
+    });
+    expect(writes.some((w) => w.includes('"statusClass":"other"'))).toBe(true);
+  });
 });
 
 describe('normalizeRoute', () => {
   it('replaces entity ids', () => {
     expect(normalizeRoute('/transactions/tx_abc-123/pay')).toBe(
       '/transactions/:transactionId/pay',
+    );
+    expect(normalizeRoute('/deliveries/del_xyz/status')).toBe(
+      '/deliveries/:deliveryId/status',
+    );
+    expect(normalizeRoute('/customers/cus_1')).toBe('/customers/:customerId');
+    expect(normalizeRoute('/items/550e8400-e29b-41d4-a716-446655440000')).toBe(
+      '/items/:uuid',
     );
   });
 });
