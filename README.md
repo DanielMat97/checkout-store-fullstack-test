@@ -65,19 +65,104 @@ Trabajamos **Spec-Driven**: cada feature vive en `specs/<nombre>/` → plan → 
 
 ---
 
-## 🏗️ Cómo está armado (mapa mental)
+## 🏗️ Cómo está armado (mapa visual)
 
-```
-Amplify (React + Redux)
-        │  VITE_API_BASE_URL
-        ▼
- API Gateway HTTP API  ──► Lambdas Nest (4 dominios)
-        │
-        ├── DynamoDB checkout-store-<stage>
-        └── SQS orders-events ──► ordersWorker (stock + delivery)
+### Sistema completo — FE ↔ BE ↔ AWS
+
+```mermaid
+flowchart TB
+  Browser["Browser mobile-first"]
+
+  subgraph FE["Frontend — Amplify"]
+    SPA["React SPA + Redux · apps/web"]
+    Pages["Pages · hooks · design system"]
+    Persist["redux-persist sin PAN/CVV"]
+  end
+
+  APIGW["API Gateway HTTP API · serverless.ts"]
+
+  subgraph BE["Backend — Nest Lambdas"]
+    Products["/products"]
+    Customers["/customers"]
+    Deliveries["/deliveries"]
+    Transactions["/transactions"]
+  end
+
+  subgraph Data["Datos y async"]
+    DDB[("DynamoDB ElectroDB")]
+    SQS["SQS orders-events"]
+    Worker["ordersWorker"]
+    Gateway["Payment sandbox"]
+  end
+
+  Browser --> SPA
+  SPA --> Pages
+  SPA --> Persist
+  SPA -->|"VITE_API_BASE_URL"| APIGW
+  APIGW --> Products
+  APIGW --> Customers
+  APIGW --> Deliveries
+  APIGW --> Transactions
+  Products --> DDB
+  Customers --> DDB
+  Deliveries --> DDB
+  Transactions --> DDB
+  Transactions -->|"charge"| Gateway
+  Transactions -->|"APPROVED"| SQS
+  SQS --> Worker
+  Worker --> DDB
 ```
 
-Código: `apps/web`, `services/*`, `packages/shared` (logger + headers OWASP), `packages/persistence`, `serverless.ts`, `infra/observability-resources.cjs`.
+### Frontend — capas
+
+```mermaid
+flowchart LR
+  subgraph UI["UI"]
+    R["Routes / pages"]
+    DS["Design system"]
+  end
+
+  subgraph State["Estado Flux"]
+    Redux["Redux store"]
+    Hooks["Feature hooks"]
+    Card["cardSession memoria"]
+  end
+
+  Client["API client · 1 base URL"]
+  GW["API Gateway"]
+
+  R --> Hooks
+  R --> DS
+  Hooks --> Redux
+  Hooks --> Card
+  Hooks --> Client
+  Client -->|"HTTPS"| GW
+```
+
+### Backend — Hexagonal + ROP por dominio
+
+```mermaid
+flowchart TB
+  Ctrl["Controller HTTP · DTOs"]
+  UC["Use-cases · neverthrow"]
+  Ports["Ports"]
+  Adapters["Adapters ElectroDB / sandbox"]
+  DDB[("DynamoDB")]
+  Pay["Payment sandbox"]
+  Shared["@app/shared logger + OWASP"]
+
+  Ctrl --> UC
+  UC --> Ports
+  Ports --> Adapters
+  Adapters --> DDB
+  Adapters --> Pay
+  Shared -.-> Ctrl
+  Shared -.-> UC
+```
+
+**Rutas públicas** (un solo gateway): `/products/**` · `/customers/**` · `/deliveries/**` · `/transactions/**`.
+
+Código: `apps/web`, `services/*`, `packages/shared`, `packages/persistence`, `serverless.ts`, `infra/observability-resources.cjs`.
 
 ---
 
@@ -407,5 +492,17 @@ Logger compartido + headers: `@app/shared`. Env de ejemplo: [`.env.example`](.en
 4. Mirá Dependabot / **Security audit autofix** (PRs `fix/*` o bumps semanales).  
 5. Mirá el dashboard CloudWatch (y ojalá los pantallazos de arriba).  
 6. Ojeá el scorecard — **PASS**.
+
+---
+
+## 🧭 Trade-offs honestos (por qué no “más serverless / más red”)
+
+Dos decisiones conscientes, no olvidos:
+
+**1. NestJS en Lambda en lugar de handlers “puros” serverless**  
+El brief exige **Nest.js** (o Grappe/Sinatra). Entre esas opciones, **Nest es donde más experiencia tengo**, así que lo usé de verdad: módulos, DI, ValidationPipe, apps por dominio. Eso implica cold starts y un runtime más pesado que un handler mínimo de Lambda, pero gana claridad, Hexagonal/ROP testeable y un stack que puedo operar y defender en entrevista. La pieza serverless de AWS sigue ahí (API Gateway + Lambda + DynamoDB + SQS + Amplify); lo que **no** busqué fue reescribir todo como Lambdas “naked” sin framework.
+
+**2. Networking “de libro” (VPC, security groups, IPs privadas, NAT, etc.)**  
+No armé una topología de red completa (API en subnets privadas, SG por servicio, endpoints VPC hacia DynamoDB, etc.). En esta prueba el costo y la complejidad de mi cuenta AWS no lo justificaban: NAT gateways, interfaces y basura de red se comen el free tier / presupuesto de demo sin mejorar el score del brief. La superficie pública se endureció por otro lado: **HTTPS**, headers OWASP, CSP, ZAP en CI, secrets fuera de git, sin PAN en disco. Si esto fuera un producto con compliance estricto de red, el siguiente paso sería meter Lambdas en VPC + SG least-privilege — acá prioricé entregable evaluable y costos controlados.
 
 Si algo no cierra, escribime… o abrí el ADR correspondiente: casi siempre ya pelearon esa decisión por vos. 😄🛍️
