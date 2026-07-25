@@ -76,7 +76,7 @@ jobs:
     outputs:
       previous_sha: ${{ steps.prev.outputs.previous_sha }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Resolve previous successful deploy SHA
         id: prev
         env:
@@ -100,7 +100,7 @@ jobs:
       mode: ${{ steps.detect.outputs.mode }}
       functions: ${{ steps.detect.outputs.functions }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v4
@@ -141,7 +141,7 @@ jobs:
       amplify_url: ${{ steps.amplify_sync.outputs.amplify_url }}
       deployed: ${{ steps.mark.outputs.deployed }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -255,7 +255,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -280,7 +280,7 @@ jobs:
     if: ${{ always() && needs.deploy.result == 'success' && needs.deploy.outputs.deployed == 'true' && (github.event_name != 'workflow_dispatch' || inputs.skip_smoke != true) }}
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -342,7 +342,7 @@ jobs:
     continue-on-error: true
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -383,7 +383,7 @@ jobs:
     if: ${{ always() && needs.deploy.result == 'success' && needs.smoke.result == 'failure' }}
     environment: production
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v4
