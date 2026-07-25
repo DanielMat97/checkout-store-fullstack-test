@@ -5,8 +5,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Dependabot + npm audit autofix (ADR 0017)**: `.github/dependabot.yml` (npm + Actions weekly); workflow `security-audit-autofix.yml` + `scripts/ci/npm-audit-autofix.cjs` (`fix/<slug>` → auto-merge); `dependabot-automerge.yml` for Dependabot PRs. Documented in README (calidad + pipelines), [`docs/ci-cd.md`](docs/ci-cd.md), [`docs/security.md`](docs/security.md).
+
 ### Changed
 
+- **Scorecard re-eval envío (2026-07-25)**: rúbrica sigue **150/150** con evidencia live (FE/API/OpenAPI 200); **envío bloqueado** hasta scrub de marca en GitHub repo `description`. Sección embebida en `docs/fullstack-test.md` alineada a 150 (antes stale 135).
 - **README principal**: tono conversacional para el evaluador (menos tablas); Vault cableado pero **opcional por costo**; slots para pantallazos CloudWatch; cada stage de cada pipeline con su razón de ser; sección explícita de unitarios / E2E / OWASP+ZAP / SAST (CodeQL+Sonar opc.) / stress Artillery.
 - **Coverage `@app/shared` + `@app/persistence`**: specs extra (logger EMF/cold-start/access-log/domain errors; repos `listBy*` / `incrementStock` / guards); gate branches persistence alineado a **80%**. Snapshot en [`docs/coverage.md`](docs/coverage.md).
 - **Auditoría aplicada**: repo GitHub renombrado a `checkout-store-fullstack-test` (sin marca del proveedor); docs/specs sin el slug viejo; smoke FE/API + `VITE_MOCK_MODE=false` verificado en Amplify; huecos de coverage FE/BE cerrados; [`docs/auditoria.md`](docs/auditoria.md) actualizado (ítem historial/PRs omitido a propósito).

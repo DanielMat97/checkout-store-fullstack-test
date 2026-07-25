@@ -1,6 +1,6 @@
 ---
 feature: dependabot-audit-autofix
-status: draft
+status: done
 owner: devops
 rubric: [B1]
 ---

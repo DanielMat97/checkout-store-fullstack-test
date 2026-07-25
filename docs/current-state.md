@@ -1,6 +1,6 @@
 # Current state
 
-> Last updated: **2026-07-24** (auditoría aplicada: repo `checkout-store-fullstack-test`; coverage FE/BE reforzada; Apidog + OpenAPI AWS; score **150/150**)
+> Last updated: **2026-07-25** (Dependabot + audit autofix documentado en README; rúbrica 150/150; scrub marca GitHub description pendiente)
 
 ## Score (rúbrica brief — modo evaluador estricto)
 
@@ -12,6 +12,7 @@ Ver **`docs/scorecard.md`**.
 | Bonus | **50 / 50** |
 | **Total** | **150 / 150** |
 | Aprueba (≥100 base) | **Sí — PASS** |
+| Lista para enviar link | **No** — scrub `description` del repo (`prueba tecnica de …`) |
 
 ## Specs
 
@@ -40,7 +41,7 @@ Ver **`docs/scorecard.md`**.
 | `openapi-complete-responses` | **done** (OpenAPI 1.0.0 — all endpoint success/error bodies) |
 | `feature-env-urls-teardown` | **done** (ADR 0016 — URL comments, Amplify VITE sync, Destroy workflow) |
 | `apidog-portal-aws-server` | **done** (Apidog UI docs + OpenAPI default server = AWS) |
-| `dependabot-audit-autofix` | **draft** (ADR 0017 — Dependabot + audit fix → `fix/*` auto-merge) |
+| `dependabot-audit-autofix` | **done** (ADR 0017 — Dependabot + audit fix → `fix/*` auto-merge; README + CI docs) |
 
 ## Deploy (live)
 

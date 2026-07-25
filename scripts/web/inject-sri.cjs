@@ -22,7 +22,10 @@ function integrityFor(relUrl) {
   if (!fs.existsSync(filePath)) {
     throw new Error(`inject-sri: asset not found ${filePath}`);
   }
-  const hash = crypto.createHash('sha384').update(fs.readFileSync(filePath)).digest('base64');
+  const hash = crypto
+    .createHash('sha384')
+    .update(fs.readFileSync(filePath))
+    .digest('base64');
   return `sha384-${hash}`;
 }
 

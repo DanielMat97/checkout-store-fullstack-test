@@ -39,3 +39,10 @@ Post-deploy smoke uses `zaproxy/action-baseline` with `.zap/rules.tsv` (ignore C
 ## Sandbox payment (live)
 
 `POST /transactions/{id}/pay` with `PAYMENT_GATEWAY_MODE=sandbox` → `paymentStatus: APPROVED`, `providerRef` from provider (not `fake_*`), stock decremented.
+
+## Dependency remediation (Dependabot + audit autofix)
+
+- CI `npm run audit` remains **fail-closed** (`scripts/ci/audit-gate.cjs`).
+- Weekly **Dependabot** (npm + Actions) + scheduled **`npm audit fix`** PRs on `fix/<slug>` with auto-merge after quality gate (ADR [0017](adr/0017-dependabot-audit-autofix.md)).
+- Enable in repo Settings: Dependabot alerts, security updates, **Allow auto-merge**.
+- See README section *Dependabot + security audit autofix* and [`docs/ci-cd.md`](ci-cd.md).

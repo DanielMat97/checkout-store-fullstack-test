@@ -1,0 +1,110 @@
+# Dependabot companion: npm audit fix → fix/<slug> → auto-merge master when CI green.
+# refs specs/dependabot-audit-autofix/spec.md · ADR 0017
+name: Security audit autofix
+
+on:
+  schedule:
+    # Mondays 09:00 UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      allow_force:
+        description: 'Allow npm audit fix --force (semver-breaking; use sparingly)'
+        type: boolean
+        default: false
+
+concurrency:
+  group: security-audit-autofix
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  audit-fix:
+    name: npm audit fix → PR fix/*
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Apply npm audit fix
+        id: fix
+        run: |
+          ARGS=""
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.allow_force }}" = "true" ]; then
+            ARGS="--force"
+          fi
+          node scripts/ci/npm-audit-autofix.cjs $ARGS
+
+      - name: Open or update fix/* PR
+        if: steps.fix.outputs.dirty == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SLUG: ${{ steps.fix.outputs.slug }}
+          SUMMARY: ${{ steps.fix.outputs.summary }}
+        run: |
+          set -euo pipefail
+          BRANCH="fix/${SLUG}"
+          TITLE="fix: npm audit (${SLUG})"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+            git fetch origin "$BRANCH"
+            git checkout "$BRANCH"
+            git merge origin/master --no-edit || true
+          else
+            git checkout -b "$BRANCH"
+          fi
+
+          git add package-lock.json package.json
+          if git diff --cached --quiet; then
+            echo "No staged changes after checkout — nothing to push."
+            exit 0
+          fi
+
+          git commit -m "$(cat <<EOF
+          fix: npm audit remediations (${SLUG})
+
+          ${SUMMARY}
+
+          refs specs/dependabot-audit-autofix/spec.md
+          EOF
+          )"
+
+          git push -u origin HEAD
+
+          BODY="$(cat <<EOF
+          ## Summary
+          Automated \`npm audit fix\` (no \`--force\` unless dispatched with \`allow_force\`).
+
+          ${SUMMARY}
+
+          ## Merge
+          Auto-merge (squash) enabled once the CI quality gate is green.
+
+          refs \`specs/dependabot-audit-autofix/spec.md\` · ADR 0017
+          EOF
+          )"
+
+          EXISTING="$(gh pr list --head "$BRANCH" --base master --json number --jq '.[0].number // empty')"
+          if [ -n "$EXISTING" ]; then
+            echo "Updating existing PR #$EXISTING"
+            gh pr edit "$EXISTING" --title "$TITLE" --body "$BODY"
+            gh pr merge "$EXISTING" --auto --squash || true
+          else
+            gh pr create --base master --head "$BRANCH" --title "$TITLE" --body "$BODY"
+            gh pr merge --auto --squash || true
+          fi

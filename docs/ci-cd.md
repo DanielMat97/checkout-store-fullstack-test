@@ -66,3 +66,15 @@ AMPLIFY_APP_ID=dxxx AMPLIFY_BRANCH=master GITHUB_SHA=<sha> npm run ci:amplify-wa
 
 Spec: [`specs/amplify-build-gate/`](../specs/amplify-build-gate/spec.md), [`specs/feature-env-urls-teardown/`](../specs/feature-env-urls-teardown/spec.md).
 
+## Dependabot + npm audit autofix (ADR 0017)
+
+| Pieza | Trigger | Comportamiento |
+|---|---|---|
+| [`.github/dependabot.yml`](../.github/dependabot.yml) | Weekly | PRs npm + github-actions |
+| [`security-audit-autofix.yml`](../.github/workflows/security-audit-autofix.yml) | Cron Mon 09:00 UTC + `workflow_dispatch` | `npm audit fix` → `fix/<slug>` → auto-merge squash si CI verde |
+| [`dependabot-automerge.yml`](../.github/workflows/dependabot-automerge.yml) | PR de `dependabot[bot]` | `gh pr merge --auto --squash` |
+
+Script: [`scripts/ci/npm-audit-autofix.cjs`](../scripts/ci/npm-audit-autofix.cjs). Sin diff de lockfile → no PR. `--force` solo con input `allow_force=true`.
+
+Repo settings (manual): Dependabot alerts + security updates, **Allow auto-merge**. Spec: [`specs/dependabot-audit-autofix/`](../specs/dependabot-audit-autofix/spec.md).
+

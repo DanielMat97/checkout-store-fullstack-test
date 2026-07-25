@@ -1,7 +1,7 @@
 # Scorecard — evaluación estricta (hiring bar)
 
 > Fuente rúbrica: `docs/fullstack-test.md` (100 base + 50 bonus).  
-> Última evaluación: **2026-07-25** (UX matrix multi-browser live + hex/ROP polish)  
+> Última evaluación: **2026-07-25** (re-check envío: live URLs + brand scrub)  
 > Modo: **evaluador técnico de la empresa contratante** (no autoelogio del candidato).
 
 ---
@@ -53,7 +53,7 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 | Líder técnico | Matriz UX ejecutable + tokens; Modal muerto eliminado; tests verdes en 4 servicios + web. |
 | Product Owner | Journey 5.x live + ops `/orders`; shell sin overflow en 375/768/1280. |
 | Security | HTTPS + headers FE/API; keys fuera de git. |
-| Hiring bar | **PASS total 150/150** — bonus cerrado con evidencia ejecutable. |
+| Hiring bar | Rúbrica **150/150 PASS**, pero **no entregar** hasta scrub de marca en GitHub description. |
 
 | | Puntos (modo estricto) |
 |---|---|
@@ -61,6 +61,7 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 | **Bonus** | **50 / 50** |
 | **Total** | **150 / 150** |
 | **¿Aprueba (≥100 base)?** | **Sí** |
+| **¿Lista para enviar el link?** | **No** — description del repo = `prueba tecnica de wompi` |
 
 ### Evidencia citada (cloud)
 
@@ -129,12 +130,12 @@ Total 150 / 150
 
 **Resultado hiring:** **PASS** (base ≥ 100). Bonus cerrado con evidencia ejecutable.
 
-### Gaps restantes (excelencia fuera de rúbrica)
+### Gaps restantes
 
 | Prioridad | Trabajo |
 |---|---|
+| **P0** | **Scrub marca en GitHub repo description** (`gh repo edit --description "…"`). Brief: invalida si aparece la marca en el repo público. Código limpio; metadata no. |
 | P3 | Dominio custom Amplify |
-| P3 | Redeploy FE para CSS/tokens nuevos en Amplify (matrix overflow ya green en live shell) |
 
 **Nota arquitectura (fuera de rúbrica brief):** SQS post-pay + Orders console (ADR 0011) — enhancement ops.  
 **CI (ADR 0012 / 0013):** Playwright + ZAP + CodeQL; Artillery opcional.

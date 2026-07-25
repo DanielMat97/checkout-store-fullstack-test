@@ -1,6 +1,6 @@
 # ADR 0017 — Dependabot + npm audit autofix (`fix/*` → auto-merge master)
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-07-25
 
 ## Context

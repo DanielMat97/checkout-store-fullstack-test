@@ -30,7 +30,7 @@
 | **OpenAPI complete** | `openapi-complete-responses/` | **done** | All endpoint responses + error schemas |
 | **Feature URLs + teardown** | `feature-env-urls-teardown/` | **done** | PR/commit URLs + Amplify VITE sync + Destroy button (ADR 0016) |
 | **Apidog portal + AWS server** | `apidog-portal-aws-server/` | **done** | Portal docs + OpenAPI default = AWS HttpApi |
-| **Dependabot + audit autofix** | `dependabot-audit-autofix/` | **draft** | Dependabot + `npm audit fix` → PR `fix/*` → auto-merge master (ADR 0017) |
+| **Dependabot + audit autofix** | `dependabot-audit-autofix/` | **done** | Dependabot + `npm audit fix` → PR `fix/*` → auto-merge master (ADR 0017) |
 
 ## Orden reciente
 

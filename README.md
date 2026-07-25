@@ -126,11 +126,21 @@ No es “tenemos tests en la carpeta”: el pipeline **exige** la batería antes
 
 **E2E (Playwright)** — journey real post-deploy: catálogo → checkout → pay → status (y smoke de API). También la matriz responsive multi-browser (Chromium / Firefox / WebKit + iPhone SE) contra Amplify → [`docs/ux-evidence.md`](docs/ux-evidence.md). Local: `FE_BASE_URL=… API_BASE_URL=… npm run test:e2e`.
 
-**OWASP** — dos capas: (1) **superficie HTTP** — HTTPS + headers (CSP-minded, `X-Content-Type-Options`, etc.), sin `X-Powered-By`, en FE (Amplify `customHeaders`) y API (`applySecuritySurface`); (2) **OWASP ZAP baseline** en el smoke post-deploy, bloqueante. Si ZAP se queja fuerte, no hay “deploy feliz”.
+**OWASP** — no es un checklist de PowerPoint: el pipeline **escanea el ambiente live** después de cada deploy.
+
+1. **Superficie HTTP (defensa en profundidad)** — headers OWASP en API (`applySecuritySurface` / `@app/shared`) y FE Amplify ([`customHttp.yml`](customHttp.yml)): HSTS, CSP, `X-Frame-Options`, `nosniff`, CORP/COOP/COEP, `Cache-Control`, sin `X-Powered-By`.  
+2. **Detección: OWASP ZAP baseline** — job post-deploy (`zaproxy/action-baseline`) contra el **FE Amplify** y la **API** reales. FAIL bloquea el smoke (y puede disparar rollback). Los reportes quedan como artifacts (`zap-scan-fe-*` / `zap-scan-api-*`). Reglas conscientes en [`.zap/rules.tsv`](.zap/rules.tsv) solo para ruido que no se puede fijar en app (ej. header `Server` de CloudFront).  
+3. **Ejemplo real de valor del pipeline** — ZAP marcó WARN en prod (CSP incompleta / sin fallbacks, falta de COOP-COEP-CORP, HTML cacheable, `robots.txt`/`sitemap.xml` 404, SRI ausente, HSTS ausente en 404 de API Gateway fuera de `/products`). Eso **no lo ve un `npm test` local**. Lo corregimos en el mismo ciclo: CSP reforzada + COOP/COEP/CORP + `no-store` en HTML, `robots.txt`/`sitemap.xml`, SRI en el build Vite (`scripts/web/inject-sri.cjs`), catch-all `/` + `/{proxy+}` para que los 404 de la API también lleven HSTS/CORP. Evidencia y tabla de headers: [`docs/security.md`](docs/security.md).
 
 **Análisis estático (SAST)** — **CodeQL** obligatorio en el quality gate (no es decoración). **SonarCloud** está cableado pero **opcional** (solo si hay `SONAR_TOKEN`): misma idea que Vault — listo, sin forzar un SaaS de pago para la prueba. Además: Prettier, ESLint y `npm audit` en CI.
 
-**Dependabot + audit autofix** — Dependabot vigila **npm** y **GitHub Actions** (schedule semanal). Cuando `npm audit fix` (sin `--force`) puede remediar high+, un workflow abre un PR en la rama `fix/<nombre-de-la-solucion>`, espera el quality gate y **auto-mergea a `master`** (squash). Sin diff → no hay PR. `--force` solo con input explícito en `workflow_dispatch`. Spec: [`specs/dependabot-audit-autofix/`](specs/dependabot-audit-autofix/spec.md) · ADR [0017](docs/adr/0017-dependabot-audit-autofix.md).
+**Dependabot + audit autofix** — dos capas para no vivir de “CI rojo y a mano”:
+
+1. **Dependabot** ([`.github/dependabot.yml`](.github/dependabot.yml)) — cada semana propone bumps de **npm** (raíz del monorepo) y de **GitHub Actions**. Labels `dependencies` / `github-actions`.  
+2. **Security audit autofix** ([`security-audit-autofix.yml`](.github/workflows/security-audit-autofix.yml)) — cron semanal + botón `workflow_dispatch`: corre `npm audit fix` **sin** `--force`, y si el lockfile cambia abre (o actualiza) un PR desde `fix/<slug>` → `master`, habilita **auto-merge squash** y deja que el quality gate decida. Sin diff → no hay PR. `--force` solo si disparás el workflow a mano con `allow_force=true`.  
+3. **Dependabot auto-merge** ([`dependabot-automerge.yml`](.github/workflows/dependabot-automerge.yml)) — los PRs del bot también piden auto-merge squash cuando CI está verde.
+
+Detalle abajo en [Pipelines → Dependabot](#dependabot--security-audit-autofix) · ADR [0017](docs/adr/0017-dependabot-audit-autofix.md) · [`specs/dependabot-audit-autofix/`](specs/dependabot-audit-autofix/spec.md).
 
 **Stress / carga (Artillery)** — escenario liviano sobre `GET /products` después del deploy (`load/artillery-products.yml`). Da señal de latencia/errores bajo concurrencia suave. Es **opcional y no bloqueante** (`continue-on-error`): no dispara rollback falso (ADR [0013](docs/adr/0013-artillery-stress-optional.md)). Local: `API_BASE_URL=… npm run test:stress`.
 
@@ -138,9 +148,9 @@ No es “tenemos tests en la carpeta”: el pipeline **exige** la batería antes
 
 1. **Antes de AWS:** unitarios + coverage + lint/audit + CodeQL (+ Sonar si hay token).  
 2. **Después del deploy:** Playwright E2E + ZAP (bloquean; si fallan → rollback al last-good).  
-3. **Al costado:** Artillery stress (informativo) + Dependabot/audit autofix (PRs `fix/*` → master cuando CI verde).  
+3. **Al costado:** Artillery stress (informativo) + Dependabot / PRs `fix/*` (auto-merge a master cuando CI verde).  
 
-En una frase para el evaluador: *probamos la lógica, el journey, la superficie OWASP, el código estático y un poco de carga — no solo “compiló”.*
+En una frase para el evaluador: *probamos la lógica, el journey, la superficie OWASP, el código estático y un poco de carga — y las vulns de deps no esperan a que alguien abra el IDE.*
 
 ---
 
@@ -190,6 +200,9 @@ flowchart TD
   path -->|"apps/web / amplify.yml / shared"| AmpGate["Amplify build gate"]
   path -->|"branch fb-*"| Feat["Deploy feature"]
   path -->|"Actions - Destroy feature"| Destroy["Destroy feature stack"]
+
+  cron["Cron / Dependabot / audit autofix"] --> Deps["PRs dependencies o fix/*"]
+  Deps --> CI
 
   DeployAPI --> CIReuse["Reusa CI completo"]
   Feat --> CIReuse2["Reusa CI completo"]
@@ -320,12 +333,46 @@ Borra el stack Serverless y el branch Amplify. No toca prod (ADR [0016](docs/adr
 
 ### Dependabot + security audit autofix
 
-1. **Dependabot** (`.github/dependabot.yml`) — PRs semanales de npm y GitHub Actions.  
-2. **Workflow audit autofix** (schedule / `workflow_dispatch`) — `npm audit fix` sin force → rama `fix/<slug>` → PR → **auto-merge** squash a `master` si CI verde.  
-3. Si no hay cambios en el lockfile, no abre PR.  
-Detalle: ADR [0017](docs/adr/0017-dependabot-audit-autofix.md) · [`specs/dependabot-audit-autofix/`](specs/dependabot-audit-autofix/spec.md).
+El gate `npm run audit` del CI **falla cerrado** si hay high+/critical (con allowlist documentada en `scripts/ci/audit-gate.cjs`). Eso evita mergear basura… pero **no remedia**. Por eso hay un circuito de remediación automática (ADR [0017](docs/adr/0017-dependabot-audit-autofix.md)):
+
+| Pieza | Qué hace | Archivo |
+|---|---|---|
+| **Dependabot** | Cada semana abre PRs de bumps npm + Actions | [`.github/dependabot.yml`](.github/dependabot.yml) |
+| **Audit autofix** | `npm audit fix` (sin `--force`) → rama `fix/<slug>` → PR → auto-merge squash | [`security-audit-autofix.yml`](.github/workflows/security-audit-autofix.yml) + [`npm-audit-autofix.cjs`](scripts/ci/npm-audit-autofix.cjs) |
+| **Dependabot auto-merge** | En PRs de `dependabot[bot]`, pide auto-merge squash | [`dependabot-automerge.yml`](.github/workflows/dependabot-automerge.yml) |
+
+**Flujo del autofix (en criollo)**
+
+1. Cron lunes 09:00 UTC (o Actions → **Security audit autofix** → Run).  
+2. Checkout `master` → `npm ci` → `node scripts/ci/npm-audit-autofix.cjs`.  
+3. Si el `package-lock.json` **no** cambió → job verde, sin PR.  
+4. Si cambió → rama `fix/<paquete-fecha>`, commit `fix: npm audit…`, PR a `master`, `gh pr merge --auto --squash`.  
+5. El **CI quality gate** tiene que ponerse verde; si falla, el PR queda abierto (no se mergea a ciegas).
+
+**Convención de ramas**
+
+- `fix/<nombre-de-la-solucion>` = solo el workflow de audit (slug kebab, ≤50 chars).  
+- Las ramas de Dependabot siguen el naming de GitHub (`dependabot/npm_and_yarn/…`); **no** las renombramos.
+
+**Settings del repo (una vez, manual)**
+
+En GitHub → Settings del repo público:
+
+1. **Dependabot** → alerts + security updates ON.  
+2. **Allow auto-merge** ON.  
+3. Si hay branch protection con required reviews: excepción para `github-actions[bot]` / Dependabot en `fix/**`, o reviews = 0 en este repo de prueba.
+
+**Probar a mano**
+
+```bash
+# En Actions: Security audit autofix → Run workflow
+# (allow_force=false por defecto — no rompe semver a lo loco)
+```
+
+Spec: [`specs/dependabot-audit-autofix/`](specs/dependabot-audit-autofix/spec.md) · runbook: [`docs/ci-cd.md`](docs/ci-cd.md) · seguridad: [`docs/security.md`](docs/security.md).
 
 ---
+
 
 ## 🌿 Features `fb-*` en criollo
 
@@ -351,7 +398,8 @@ Logger compartido + headers: `@app/shared`. Env de ejemplo: [`.env.example`](.en
 1. Abrí el FE y pagá (sandbox).  
 2. Pegale a `/products` desde [Apidog](https://7j6npb6n4w.apidog.io).  
 3. En Actions: mirá CI (Jest/coverage/CodeQL) y el smoke post-deploy (Playwright + ZAP; Artillery si está on).  
-4. Mirá el dashboard CloudWatch (y ojalá los pantallazos de arriba).  
-5. Ojeá el scorecard — **PASS**.
+4. Mirá Dependabot / **Security audit autofix** (PRs `fix/*` o bumps semanales).  
+5. Mirá el dashboard CloudWatch (y ojalá los pantallazos de arriba).  
+6. Ojeá el scorecard — **PASS**.
 
 Si algo no cierra, escribime… o abrí el ADR correspondiente: casi siempre ya pelearon esa decisión por vos. 😄🛍️
