@@ -1,11 +1,6 @@
 #!/usr/bin/env node
 const assert = require('node:assert/strict');
-const {
-  normalizeStage,
-  logicalPath,
-  kvDataPath,
-  fieldToEnv,
-} = require('./lib.cjs');
+const { normalizeStage, logicalPath, kvDataPath, fieldToEnv } = require('./lib.cjs');
 
 assert.equal(normalizeStage('fb-42/add-fees'), 'feature');
 assert.equal(normalizeStage('prod'), 'prod');

@@ -6,6 +6,5 @@
 const { normalizeStage, vaultActionSecretLines } = require('./lib.cjs');
 
 const stageArg =
-  process.argv.find((a) => a.startsWith('--stage='))?.slice('--stage='.length) ||
-  'prod';
+  process.argv.find((a) => a.startsWith('--stage='))?.slice('--stage='.length) || 'prod';
 process.stdout.write(`${vaultActionSecretLines(normalizeStage(stageArg))}\n`);

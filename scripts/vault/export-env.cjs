@@ -11,11 +11,7 @@
  */
 const { execSync } = require('node:child_process');
 const fs = require('node:fs');
-const {
-  normalizeStage,
-  logicalPath,
-  fieldToEnv,
-} = require('./lib.cjs');
+const { normalizeStage, logicalPath, fieldToEnv } = require('./lib.cjs');
 
 function parseArgs(argv) {
   let stage = 'dev';

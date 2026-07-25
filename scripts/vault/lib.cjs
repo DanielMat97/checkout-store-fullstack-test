@@ -5,9 +5,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const PATHS = JSON.parse(
-  fs.readFileSync(path.join(__dirname, 'paths.json'), 'utf8'),
-);
+const PATHS = JSON.parse(fs.readFileSync(path.join(__dirname, 'paths.json'), 'utf8'));
 
 function normalizeStage(stage) {
   const s = String(stage || 'dev').trim();

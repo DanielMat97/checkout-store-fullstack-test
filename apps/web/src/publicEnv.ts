@@ -18,7 +18,15 @@ export function setPublicEnv(env: PublicEnv): void {
 export function readPublicEnv(key: keyof PublicEnv, fallback = ''): string {
   const value = globalThis.__NORA_PUBLIC_ENV__?.[key];
   if (value != null && String(value).trim() !== '') return String(value).trim();
-  const fromProcess = process.env[key];
+  const fromProcess = readProcessEnv(key);
   if (fromProcess != null && fromProcess.trim() !== '') return fromProcess.trim();
   return fallback;
+}
+
+/** Jest / Node fallback without requiring @types/node in the Vite app tsconfig. */
+function readProcessEnv(key: string): string | undefined {
+  const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } })
+    .process;
+  const value = proc?.env?.[key];
+  return typeof value === 'string' ? value : undefined;
 }

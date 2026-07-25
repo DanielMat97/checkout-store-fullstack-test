@@ -70,7 +70,7 @@ jobs:
             fi
           else
             BEFORE="${{ github.event.before }}"
-# Fix empty before SHA on first push / force-push
+            # Fix empty before SHA on first push / force-push
             if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
               BEFORE="HEAD~1"
             fi
