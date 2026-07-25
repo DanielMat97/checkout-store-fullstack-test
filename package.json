@@ -48,7 +48,7 @@
     "test:feature-env": "node scripts/ci/feature-env-urls.spec.cjs"
   },
   "devDependencies": {
-    "@serverless/typescript": "^3.38.0",
+    "@serverless/typescript": "^4.30.0",
     "@types/node": "^24.13.3",
     "artillery": "^2.0.21",
     "concurrently": "^9.1.2",
