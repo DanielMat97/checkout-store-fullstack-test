@@ -4,17 +4,17 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Inject,
   Param,
   Post,
   Query,
 } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import type { TransactionRepositoryPort, TransactionStatus } from '@app/persistence';
+import type { TransactionStatus } from '@app/persistence';
 import { CreateTransactionUseCase } from '../../../application/create-transaction.use-case';
+import { GetTransactionUseCase } from '../../../application/get-transaction.use-case';
+import { ListTransactionsUseCase } from '../../../application/list-transactions.use-case';
 import { PayTransactionUseCase } from '../../../application/pay-transaction.use-case';
 import { RestoreTransactionStockUseCase } from '../../../application/restore-transaction-stock.use-case';
-import { TRANSACTION_REPOSITORY } from '../../../ports/injection.tokens';
 import { domainErrorToHttp } from './domain-error.mapper';
 import { CreateTransactionDto, PayTransactionDto } from './dto';
 
@@ -25,8 +25,8 @@ export class TransactionsController {
     private readonly createTransaction: CreateTransactionUseCase,
     private readonly payTransaction: PayTransactionUseCase,
     private readonly restoreStock: RestoreTransactionStockUseCase,
-    @Inject(TRANSACTION_REPOSITORY)
-    private readonly transactions: TransactionRepositoryPort,
+    private readonly getTransaction: GetTransactionUseCase,
+    private readonly listTransactions: ListTransactionsUseCase,
   ) {}
 
   @Post()
@@ -49,32 +49,22 @@ export class TransactionsController {
     @Query('limit') limitRaw?: string,
   ) {
     const limit = limitRaw ? Number(limitRaw) : 50;
-    const result = await this.transactions.listByCreatedAt({
+    const result = await this.listTransactions.execute({
       status,
       limit: Number.isFinite(limit) ? limit : 50,
     });
     if (result.isErr()) {
-      throw domainErrorToHttp({
-        type: 'PERSISTENCE_ERROR',
-        message:
-          result.error.type === 'PERSISTENCE_ERROR'
-            ? result.error.message
-            : result.error.type,
-      });
+      throw domainErrorToHttp(result.error);
     }
-    return { items: result.value };
+    return result.value;
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get transaction by id' })
   async get(@Param('id') id: string) {
-    const result = await this.transactions.getById(id);
+    const result = await this.getTransaction.execute(id);
     if (result.isErr()) {
-      throw domainErrorToHttp({
-        type: 'NOT_FOUND',
-        entity: 'transaction',
-        id,
-      });
+      throw domainErrorToHttp(result.error);
     }
     return result.value;
   }

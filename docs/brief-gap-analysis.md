@@ -45,8 +45,8 @@
 | Ítem | Status | Spec |
 |---|---|---|
 | React SPA + Redux | **done** | |
-| Mobile-first | **partial** | `ux-quality-bar` still ready (matrix) |
-| Nest + Hex + ROP | **done** | `architecture-hex-rop` |
+| Mobile-first | **done** | `ux-quality-bar` + [`docs/ux-evidence.md`](ux-evidence.md) |
+| Nest + Hex + ROP | **done** | `architecture-hex-rop` + `bonus-hex-rop-polish` |
 | DynamoDB seed | **done** | `persistence-seed` |
 | Jest >80% FE+BE | **done** | `testing-coverage` |
 | Cloud deploy | **done** | `cloud-deploy` |
@@ -56,8 +56,7 @@
 ## Gaps explícitos (brief)
 
 1. **Resilience:** full page reload mid-checkout loses PAN (acceptable PCI); delivery/meta restore OK.
-2. **Responsive matrix / multi-browser evidence:** `ux-quality-bar` still open (bonus).
-3. **Post-pay effects** were sync inside transactions service — weak boundary for “microservices”; addressed by **SQS** (team enhancement).
+2. **Post-pay effects** were sync inside transactions service — weak boundary for “microservices”; addressed by **SQS** (team enhancement).
 
 ## Enhancements (not in brief) — this delivery
 
@@ -65,10 +64,12 @@
 |---|---|---|
 | SQS post-pay orchestration | `sqs-orchestration` | Cross-service stock + delivery without coupling in HTTP pay path |
 | Store ops Orders console | `orders-console` | List purchases, restore stock, mark fulfilled |
+| UX quality + hex/ROP polish | `ux-quality-bar`, `bonus-hex-rop-polish` | Close bonus B2–B6 to 150/150 |
 
 ## Definition of done for this delivery
 
-- [ ] Gap doc + specs + ADR 0011 merged into INDEX
-- [ ] SQS queue + worker + sync fallback
-- [ ] List/restore/fulfill APIs + OpenAPI
-- [ ] FE `/orders` + shell button + stock poll after APPROVED
+- [x] Gap doc + specs + ADR 0011 merged into INDEX
+- [x] SQS queue + worker + sync fallback
+- [x] List/restore/fulfill APIs + OpenAPI
+- [x] FE `/orders` + shell button + stock poll after APPROVED
+- [x] UX matrix + hex/ROP polish (scorecard 150/150)

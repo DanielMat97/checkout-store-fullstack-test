@@ -39,9 +39,22 @@
 | `--nora-bg` | Warm stone | `#f6f3ee` |
 | `--nora-bg-soft` | Soft wash | `#ebe6df` |
 | `--nora-ink` | Text | `#22201e` |
+| `--nora-ink-muted` | Secondary copy | `#6b6560` |
 | `--nora-cta` | Muted clay | `#c45d45` |
 | `--nora-success` | Sage | `#5f7d6b` |
 | `--nora-line` | Dividers | `#ddd6cc` |
+| `--nora-paper-*` / `--nora-ink-veil-*` | Overlay alphas | `color-mix` tokens |
+
+### Breakpoints
+
+| Token | Width |
+|---|---|
+| `--nora-bp-se` | 375px |
+| `--nora-bp-tablet` | 768px |
+| `--nora-bp-desktop` | 1280px |
+
+Evidence matrix: [`docs/ux-evidence.md`](ux-evidence.md).
+
 
 ### Typography
 

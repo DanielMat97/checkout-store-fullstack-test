@@ -86,8 +86,8 @@
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(34, 32, 30, 0.05) 0%,
-    rgba(34, 32, 30, 0.55) 100%
+    var(--nora-ink-veil-05) 0%,
+    var(--nora-ink-veil-55) 100%
   );
   pointer-events: none;
 }
@@ -106,7 +106,7 @@
 }
 
 .nora-catalog__hero-copy .nora-catalog__eyebrow {
-  color: rgba(255, 252, 250, 0.72);
+  color: var(--nora-paper-72);
 }
 
 .nora-catalog__hero-title {
@@ -121,7 +121,7 @@
   font-size: var(--nora-fs-sm);
   line-height: 1.6;
   max-width: 32ch;
-  color: rgba(255, 252, 250, 0.82);
+  color: var(--nora-paper-82);
 }
 
 .nora-catalog__hero-meta {
@@ -172,11 +172,11 @@
 .nora-catalog__state {
   margin: var(--nora-space-6) var(--nora-shell-pad-x) 0;
   font-size: var(--nora-fs-sm);
-  color: var(--nora-ink-muted, #6b6560);
+  color: var(--nora-ink-muted);
 }
 
 .nora-catalog__state--error {
-  color: var(--nora-danger, #a33b2c);
+  color: var(--nora-danger);
 }
 
 .nora-catalog__edit {

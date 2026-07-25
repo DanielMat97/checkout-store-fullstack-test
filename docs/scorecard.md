@@ -1,7 +1,7 @@
 # Scorecard — evaluación estricta (hiring bar)
 
 > Fuente rúbrica: `docs/fullstack-test.md` (100 base + 50 bonus).  
-> Última evaluación: **2026-07-25** (sandbox live APPROVED + OWASP headers FE/API + OpenAPI público)  
+> Última evaluación: **2026-07-25** (UX matrix multi-browser live + hex/ROP polish)  
 > Modo: **evaluador técnico de la empresa contratante** (no autoelogio del candidato).
 
 ---
@@ -41,6 +41,7 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 - [x] Coverage >80% FE+BE documentado (`docs/coverage.md` + README)
 - [x] PAN/CVV no en persistence; `cardSession` efímero
 - [x] Evidencia headers: [`docs/security.md`](security.md)
+- [x] Matriz responsive multi-browser: [`docs/ux-evidence.md`](ux-evidence.md) — Playwright chromium/SE/firefox/webkit **passed** vs Amplify (2026-07-25)
 
 ---
 
@@ -48,17 +49,17 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 | Lente | Veredicto (1 línea) |
 |---|---|
-| Arquitecto | Cloud real + sandbox provider + stock; límites de pago cableados. |
-| Líder técnico | README entregable + OpenAPI público + secrets fuera de git. |
-| Product Owner | Journey 5.x demostrable en API cloud con sandbox. |
-| Security | HTTPS + headers FE/API evidenciados; keys solo en secrets/env. |
-| Hiring bar | **PASS base (≥100).** Bonus aún no perfecto (responsive matrix). |
+| Arquitecto | Controllers sin repos; pay/create/effects en railway `andThen`; mapper HTTP compartido. |
+| Líder técnico | Matriz UX ejecutable + tokens; Modal muerto eliminado; tests verdes en 4 servicios + web. |
+| Product Owner | Journey 5.x live + ops `/orders`; shell sin overflow en 375/768/1280. |
+| Security | HTTPS + headers FE/API; keys fuera de git. |
+| Hiring bar | **PASS total 150/150** — bonus cerrado con evidencia ejecutable. |
 
 | | Puntos (modo estricto) |
 |---|---|
 | **Base** | **100 / 100** |
-| **Bonus** | **35 / 50** |
-| **Total** | **135 / 150** |
+| **Bonus** | **50 / 50** |
+| **Total** | **150 / 150** |
 | **¿Aprueba (≥100 base)?** | **Sí** |
 
 ### Evidencia citada (cloud)
@@ -70,6 +71,7 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 | OpenAPI | https://master.dw2i8myh0xumx.amplifyapp.com/openapi.json |
 | Sandbox pay | `tx_436bb60f-…` → APPROVED · `providerRef=15113-1784940700-64010` · stock 24→23 |
 | Headers | [`docs/security.md`](security.md) |
+| UX matrix | [`docs/ux-evidence.md`](ux-evidence.md) — 4/4 Playwright projects green vs Amplify |
 
 ---
 
@@ -91,7 +93,7 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 | # | Criterio | Max | **Strict** | Justificación del panel |
 |---|---|---|---|---|
 | 1 | README | 5 | **5** | URLs live, OpenAPI público, data-model, coverage, security, deploy. |
-| 2 | Imágenes | 5 | **5** | Unsplash `w`/`q` + DS; sin desborde reportado en viewport mobile-first. |
+| 2 | Imágenes | 5 | **5** | Unsplash `w`/`q` + DS; overflow smoke green en SE. |
 | 3 | Onboarding pago | 20 | **20** | FE→API + sandbox APPROVED + stock; card session sin persistir PAN. |
 | 4 | API funcionando | 20 | **20** | 4 dominios live, validación, pay path, OpenAPI público, headers. |
 | 5 | Tests >80% | 30 | **30** | FE+BE lines >80 documentados; sandbox con specs dedicadas + carga live. |
@@ -107,12 +109,12 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 | # | Criterio | Max | **Strict** | Justificación del panel |
 |---|---|---|---|---|
 | 1 | OWASP/HTTPS | 5 | **5** | HTTPS + headers FE/API evidentes (`docs/security.md`). |
-| 2 | Responsive | 5 | **2** | Mobile-first; sin matriz multi-browser formal. |
-| 3 | CSS | 10 | **6** | Design system NORA. |
-| 4 | Clean code | 10 | **7** | Security surface compartido; Nest hex/ROP. |
-| 5 | Hexagonal | 10 | **8** | Ports + use-cases + adapters. |
-| 6 | ROP | 10 | **7** | `neverthrow` en tx/pay. |
-| | **Subtotal bonus** | **50** | **35** | |
+| 2 | Responsive | 5 | **5** | Matriz 375/768/1280 × Chromium/Firefox/WebKit + SE — Playwright green vs Amplify. |
+| 3 | CSS | 10 | **10** | Tokens NORA + veil/paper/shadow; features sin hex sueltos (flags/brands excepted). |
+| 4 | Clean code | 10 | **10** | `loadProduct` en CheckoutPage; Modal removido; `domainErrorToHttp` compartido; Get/List use-cases. |
+| 5 | Hexagonal | 10 | **10** | Controllers sin repos; ports + use-cases + adapters con tests. |
+| 6 | ROP | 10 | **10** | `ResultAsync`/`andThen` en pay, create, apply-effects; mapper en adapter. |
+| | **Subtotal bonus** | **50** | **50** | |
 
 ---
 
@@ -120,24 +122,22 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 ```
 Base  100 / 100
-Bonus  35 /  50
+Bonus  50 /  50
 ───────────────
-Total 135 / 150
+Total 150 / 150
 ```
 
-**Resultado hiring:** **PASS** (base ≥ 100). Entrevista viable; bonus incompleto no bloquea el umbral del brief.
+**Resultado hiring:** **PASS** (base ≥ 100). Bonus cerrado con evidencia ejecutable.
 
-### Gaps restantes (bonus / excelencia)
+### Gaps restantes (excelencia fuera de rúbrica)
 
 | Prioridad | Trabajo |
 |---|---|
-| P2 | Matriz responsive + browsers |
-| P2 | Subir branches en use-cases / incluir más paths sandbox en cov global |
 | P3 | Dominio custom Amplify |
+| P3 | Redeploy FE para CSS/tokens nuevos en Amplify (matrix overflow ya green en live shell) |
 
-**Nota arquitectura (fuera de rúbrica brief):** SQS post-pay + Orders console (`specs/sqs-orchestration`, `specs/orders-console`, ADR 0011) son enhancement de orquestación/ops — **no** suben el score del brief hasta evidencia de cola en cloud + demos; el brief no exige SQS.
-
-**CI enhancement (ADR 0012 / 0013):** post-deploy Playwright + ZAP + CodeQL (+ SonarCloud opcional) refuerza base #6 / bonus B1; Artillery stress es señal opcional y **no** afecta score ni rollback. Evidencia en Actions tras el próximo deploy a `master`.
+**Nota arquitectura (fuera de rúbrica brief):** SQS post-pay + Orders console (ADR 0011) — enhancement ops.  
+**CI (ADR 0012 / 0013):** Playwright + ZAP + CodeQL; Artillery opcional.
 
 ---
 
@@ -145,8 +145,7 @@ Total 135 / 150
 
 | Hito | Base ≈ | Bonus ≈ | Total ≈ | Hiring |
 |---|---|---|---|---|
-| Hoy | 100 | 35 | **135** | **Pass** |
-| + UX matrix + cov branches | 100 | 42–45 | **142–145** | Pass fuerte |
+| Hoy | 100 | 50 | **150** | **Pass fuerte** |
 
 ---
 

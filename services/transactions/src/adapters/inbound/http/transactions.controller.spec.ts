@@ -2,9 +2,10 @@ import { Test } from '@nestjs/testing';
 import { ok, err } from 'neverthrow';
 import { TransactionsController } from './transactions.controller';
 import { CreateTransactionUseCase } from '../../../application/create-transaction.use-case';
+import { GetTransactionUseCase } from '../../../application/get-transaction.use-case';
+import { ListTransactionsUseCase } from '../../../application/list-transactions.use-case';
 import { PayTransactionUseCase } from '../../../application/pay-transaction.use-case';
 import { RestoreTransactionStockUseCase } from '../../../application/restore-transaction-stock.use-case';
-import { TRANSACTION_REPOSITORY } from '../../../ports/injection.tokens';
 
 describe('TransactionsController', () => {
   const tx = {
@@ -32,7 +33,8 @@ describe('TransactionsController', () => {
     create?: { execute: jest.Mock };
     pay?: { execute: jest.Mock };
     restore?: { execute: jest.Mock };
-    transactions?: { getById: jest.Mock; listByCreatedAt?: jest.Mock };
+    get?: { execute: jest.Mock };
+    list?: { execute: jest.Mock };
   }) {
     const module = await Test.createTestingModule({
       controllers: [TransactionsController],
@@ -50,10 +52,13 @@ describe('TransactionsController', () => {
           useValue: overrides?.restore ?? { execute: jest.fn() },
         },
         {
-          provide: TRANSACTION_REPOSITORY,
-          useValue: overrides?.transactions ?? {
-            getById: jest.fn(),
-            listByCreatedAt: jest.fn().mockResolvedValue(ok([])),
+          provide: GetTransactionUseCase,
+          useValue: overrides?.get ?? { execute: jest.fn() },
+        },
+        {
+          provide: ListTransactionsUseCase,
+          useValue: overrides?.list ?? {
+            execute: jest.fn().mockResolvedValue(ok({ items: [] })),
           },
         },
       ],
@@ -83,15 +88,15 @@ describe('TransactionsController', () => {
   });
 
   it('gets transaction and maps not found', async () => {
-    const transactions = {
-      getById: jest
+    const get = {
+      execute: jest
         .fn()
         .mockResolvedValueOnce(ok(tx))
         .mockResolvedValueOnce(
           err({ type: 'NOT_FOUND', entity: 'transaction', id: 'x' }),
         ),
     };
-    const controller = await build({ transactions });
+    const controller = await build({ get });
     await expect(controller.get('txn_1')).resolves.toEqual(tx);
     await expect(controller.get('x')).rejects.toMatchObject({ status: 404 });
   });
@@ -141,12 +146,12 @@ describe('TransactionsController', () => {
   });
 
   it('lists transactions', async () => {
-    const transactions = {
-      getById: jest.fn(),
-      listByCreatedAt: jest.fn().mockResolvedValue(ok([tx])),
+    const list = {
+      execute: jest.fn().mockResolvedValue(ok({ items: [tx] })),
     };
-    const controller = await build({ transactions });
+    const controller = await build({ list });
     await expect(controller.list('APPROVED', '10')).resolves.toEqual({ items: [tx] });
+    expect(list.execute).toHaveBeenCalledWith({ status: 'APPROVED', limit: 10 });
   });
 
   it('restores stock', async () => {
@@ -168,9 +173,8 @@ describe('TransactionsController', () => {
   });
 
   it('maps list persistence errors and restore errors', async () => {
-    const transactions = {
-      getById: jest.fn(),
-      listByCreatedAt: jest
+    const list = {
+      execute: jest
         .fn()
         .mockResolvedValue(err({ type: 'PERSISTENCE_ERROR', message: 'down' })),
     };
@@ -179,7 +183,7 @@ describe('TransactionsController', () => {
         .fn()
         .mockResolvedValue(err({ type: 'INVALID_STATE', message: 'already' })),
     };
-    const controller = await build({ transactions, restore });
+    const controller = await build({ list, restore });
     await expect(controller.list()).rejects.toMatchObject({ status: 500 });
     await expect(controller.restore('txn_1')).rejects.toMatchObject({ status: 422 });
   });

@@ -129,7 +129,7 @@
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-top: var(--nora-hairline);
-  box-shadow: 0 -6px 24px rgba(34, 32, 30, 0.06);
+  box-shadow: var(--nora-shadow-dock);
   animation: nora-sheet-up var(--nora-med) var(--nora-ease-out) both;
 }
 

@@ -50,7 +50,7 @@
 }
 
 .nora-orders__state--error {
-  color: var(--nora-danger, #9b3b2e);
+  color: var(--nora-danger);
 }
 
 .nora-orders__list {
@@ -88,6 +88,9 @@
   font-size: var(--nora-fs-xs);
   color: var(--nora-ink-soft);
   letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 .nora-orders__actions {

@@ -44,7 +44,7 @@
 .nora-btn--primary:hover:not(:disabled) {
   background: var(--nora-cta-hover);
   border-color: var(--nora-cta-hover);
-  box-shadow: 0 10px 24px rgba(196, 93, 69, 0.22);
+  box-shadow: var(--nora-shadow-cta);
 }
 
 .nora-btn--primary:active:not(:disabled) {
@@ -65,5 +65,5 @@
 .nora-btn--danger {
   background: var(--nora-danger);
   border-color: var(--nora-danger);
-  color: #fff;
+  color: var(--nora-cta-text);
 }

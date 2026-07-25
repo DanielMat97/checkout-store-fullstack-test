@@ -19,7 +19,8 @@
 | README | `readme-deliverables/` | **done** | Base #1 |
 | Seguridad | `security-hardening/` | **done** | B1 |
 | Hex + ROP | `architecture-hex-rop/` | **done** | B5–6 |
-| UX quality | `ux-quality-bar/` | **ready** | B2–4 |
+| UX quality | `ux-quality-bar/` | **done** | B2–4 |
+| Hex + ROP polish | `bonus-hex-rop-polish/` | **done** | B4–6 |
 | SQS post-pay | `sqs-orchestration/` | **done** | Arch enhancement (ADR 0011) |
 | Orders console | `orders-console/` | **done** | Ops + brief §5–6 stock |
 | **Deploy smoke + rollback** | `deploy-smoke-rollback/` | **done** | CI E2E/ZAP/SAST (ADR 0012) |
@@ -28,7 +29,7 @@
 
 ```
 … → sqs-orchestration → orders-console →
-deploy-smoke-rollback → ux-quality-bar
+deploy-smoke-rollback → ux-quality-bar → bonus-hex-rop-polish
 ```
 
 ## Reglas

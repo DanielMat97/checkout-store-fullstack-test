@@ -33,13 +33,13 @@
 
 .nora-field__control:focus-within {
   border-color: var(--nora-cta);
-  box-shadow: 0 0 0 3px rgba(196, 93, 69, 0.14);
-  background: #fff;
+  box-shadow: 0 0 0 3px var(--nora-cta-ring);
+  background: var(--nora-paper);
 }
 
 .nora-field__control--error {
   border-color: var(--nora-danger);
-  box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12);
+  box-shadow: 0 0 0 3px var(--nora-danger-ring);
 }
 
 .nora-field__input {
@@ -125,7 +125,7 @@
 .nora-co-flag svg {
   display: block;
   border-radius: 2px;
-  box-shadow: 0 0 0 1px rgba(34, 32, 30, 0.08);
+  box-shadow: 0 0 0 1px var(--nora-ink-veil-08);
 }
 
 .nora-co-flag__code {

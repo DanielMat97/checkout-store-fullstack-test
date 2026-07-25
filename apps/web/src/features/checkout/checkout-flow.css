@@ -77,13 +77,24 @@
 .nora-flow__title {
   margin: 0;
   font-family: var(--nora-font-display);
-  font-size: clamp(1.1rem, 4vw, 1.35rem);
+  font-size: clamp(1.05rem, 3.8vw, 1.35rem);
   font-weight: 600;
   letter-spacing: var(--nora-tracking-display);
   line-height: 1.15;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@media (max-width: 379px) {
+  .nora-flow__panel-title {
+    font-size: clamp(1.35rem, 7vw, 1.65rem);
+  }
+
+  .nora-product__dock .nora-btn {
+    max-width: 46%;
+    padding-inline: 0.65rem;
+    font-size: 0.62rem;
+  }
 }
 
 .nora-flow__price-row {
@@ -115,7 +126,7 @@
   min-height: 0;
   background: var(--nora-paper);
   border-radius: var(--nora-radius-lg) var(--nora-radius-lg) 0 0;
-  box-shadow: 0 -6px 28px rgba(34, 32, 30, 0.06);
+  box-shadow: var(--nora-shadow-panel);
   animation: nora-form-rise var(--nora-slow) var(--nora-ease-emphasized) both;
   animation-delay: 60ms;
 }
@@ -223,8 +234,8 @@
     background: linear-gradient(
       180deg,
       transparent 0%,
-      rgba(34, 32, 30, 0.65) 48%,
-      rgba(34, 32, 30, 0.88) 100%
+      var(--nora-ink-veil-65) 48%,
+      var(--nora-ink-veil-88) 100%
     );
     color: var(--nora-paper);
     gap: var(--nora-space-2);
@@ -245,12 +256,12 @@
   }
 
   .nora-flow__stock {
-    color: rgba(255, 252, 250, 0.72);
+    color: var(--nora-paper-72);
   }
 
   .nora-flow__blurb {
     display: block;
-    color: rgba(255, 252, 250, 0.78);
+    color: var(--nora-paper-78);
     max-width: 30ch;
   }
 

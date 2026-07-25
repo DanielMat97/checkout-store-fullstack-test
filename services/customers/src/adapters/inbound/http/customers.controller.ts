@@ -4,13 +4,11 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  NotFoundException,
   Param,
   Post,
-  BadRequestException,
-  HttpException,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { domainErrorToHttp } from '@app/shared';
 import {
   CreateCustomerUseCase,
   GetCustomerUseCase,
@@ -31,10 +29,7 @@ export class CustomersController {
   async create(@Body() body: CreateCustomerDto) {
     const result = await this.createCustomer.execute(body);
     if (result.isErr()) {
-      if (result.error.type === 'VALIDATION') {
-        throw new BadRequestException(result.error);
-      }
-      throw new HttpException({ error: result.error }, 500);
+      throw domainErrorToHttp(result.error);
     }
     return result.value;
   }
@@ -44,7 +39,7 @@ export class CustomersController {
   async get(@Param('id') id: string) {
     const result = await this.getCustomer.execute(id);
     if (result.isErr()) {
-      throw new NotFoundException(result.error);
+      throw domainErrorToHttp(result.error);
     }
     return result.value;
   }

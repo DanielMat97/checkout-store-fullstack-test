@@ -1,5 +1,6 @@
-import { Controller, Get, HttpException, NotFoundException, Param } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { domainErrorToHttp } from '@app/shared';
 import {
   GetProductUseCase,
   ListProductsUseCase,
@@ -18,7 +19,7 @@ export class ProductsController {
   async list() {
     const result = await this.listProducts.execute();
     if (result.isErr()) {
-      throw new HttpException({ error: result.error }, 500);
+      throw domainErrorToHttp(result.error);
     }
     return { items: result.value };
   }
@@ -29,7 +30,7 @@ export class ProductsController {
   async stock(@Param('id') id: string) {
     const result = await this.getProduct.execute(id);
     if (result.isErr()) {
-      throw new NotFoundException(result.error);
+      throw domainErrorToHttp(result.error);
     }
     return {
       productId: result.value.id,
@@ -43,7 +44,7 @@ export class ProductsController {
   async get(@Param('id') id: string) {
     const result = await this.getProduct.execute(id);
     if (result.isErr()) {
-      throw new NotFoundException(result.error);
+      throw domainErrorToHttp(result.error);
     }
     return result.value;
   }

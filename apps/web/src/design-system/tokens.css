@@ -4,12 +4,28 @@
   --nora-bg-soft: #ebe6df;
   --nora-ink: #22201e;
   --nora-ink-soft: #6f6a64;
+  --nora-ink-muted: #6b6560;
   --nora-charcoal: #2f2c29;
   --nora-line: #ddd6cc;
   --nora-blush: #efd5cc;
   --nora-blush-deep: #e0b8ac;
   --nora-accent-soft: #f3e4de;
   --nora-paper: #fffcfa;
+  --nora-paper-72: color-mix(in srgb, var(--nora-paper) 72%, transparent);
+  --nora-paper-78: color-mix(in srgb, var(--nora-paper) 78%, transparent);
+  --nora-paper-82: color-mix(in srgb, var(--nora-paper) 82%, transparent);
+  --nora-ink-veil-05: color-mix(in srgb, var(--nora-ink) 5%, transparent);
+  --nora-ink-veil-08: color-mix(in srgb, var(--nora-ink) 8%, transparent);
+  --nora-ink-veil-10: color-mix(in srgb, var(--nora-ink) 10%, transparent);
+  --nora-ink-veil-25: color-mix(in srgb, var(--nora-ink) 25%, transparent);
+  --nora-ink-veil-55: color-mix(in srgb, var(--nora-ink) 55%, transparent);
+  --nora-ink-veil-65: color-mix(in srgb, var(--nora-ink) 65%, transparent);
+  --nora-ink-veil-88: color-mix(in srgb, var(--nora-ink) 88%, transparent);
+  --nora-bg-94: color-mix(in srgb, var(--nora-bg) 94%, transparent);
+  --nora-cta-glow: color-mix(in srgb, var(--nora-cta) 22%, transparent);
+  --nora-cta-ring: color-mix(in srgb, var(--nora-cta) 14%, transparent);
+  --nora-danger-ring: color-mix(in srgb, var(--nora-danger) 12%, transparent);
+  --nora-scrim: color-mix(in srgb, var(--nora-charcoal) 35%, transparent);
   --nora-focus: #c45d45;
   --nora-danger: #b42318;
   --nora-danger-soft: #f8e8e6;
@@ -54,8 +70,17 @@
   --nora-radius-lg: 1.15rem;
   --nora-radius-soft: 999px;
 
-  --nora-shadow-image: 0 18px 40px rgba(34, 32, 30, 0.1);
-  --nora-shadow: 0 10px 28px rgba(34, 32, 30, 0.06);
+  --nora-shadow-image: 0 18px 40px var(--nora-ink-veil-10);
+  --nora-shadow: 0 10px 28px color-mix(in srgb, var(--nora-ink) 6%, transparent);
+  --nora-shadow-dock: 0 -6px 24px color-mix(in srgb, var(--nora-ink) 6%, transparent);
+  --nora-shadow-panel: 0 -6px 28px color-mix(in srgb, var(--nora-ink) 6%, transparent);
+  --nora-shadow-sheet: 0 -8px 32px var(--nora-ink-veil-08);
+  --nora-shadow-cta: 0 10px 24px var(--nora-cta-glow);
+
+  /* Breakpoints (documentation / media query alignment) */
+  --nora-bp-se: 375px;
+  --nora-bp-tablet: 768px;
+  --nora-bp-desktop: 1280px;
 
   /* Motion */
   --nora-ease: cubic-bezier(0.4, 0, 0.2, 1);

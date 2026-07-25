@@ -32,10 +32,10 @@ import {
   toTitleCase,
 } from './textFormat';
 import { ColombiaFlag } from './ColombiaFlag';
-import { getProductById } from '../../mocks/catalog';
 import { isMockMode } from '../../mocks/checkoutService';
 import { setPendingCard, splitExpiry } from './cardSession';
 import { seedCheckoutForm } from './seedCheckoutForm';
+import { loadProduct, type Product } from './checkoutApi';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setCardMeta, setDelivery, setStep } from '../../store/checkoutSlice';
 import './checkout-flow.css';
@@ -52,7 +52,6 @@ const offAutocomplete = {
 
 export function CheckoutPage() {
   const { productId = '' } = useParams();
-  const product = getProductById(productId);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const stocks = useAppSelector((s) => s.checkout.stocks);
@@ -62,6 +61,8 @@ export function CheckoutPage() {
     delivery: savedDelivery,
     cardMeta: savedCardMeta,
   });
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
   const [card, setCard] = useState<CardFormValues>(seeded.card);
   const [delivery, setDeliveryForm] = useState<DeliveryFormValues>(seeded.delivery);
   const [cardErrors, setCardErrors] = useState<FormErrors<CardFormValues>>({});
@@ -74,12 +75,36 @@ export function CheckoutPage() {
   const brand = useMemo(() => detectCardBrand(card.number), [card.number]);
 
   useEffect(() => {
-    if (!product) navigate('/', { replace: true });
-  }, [product, navigate]);
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const loaded = await loadProduct(productId);
+      if (cancelled) return;
+      if (!loaded) {
+        navigate('/', { replace: true });
+        return;
+      }
+      setProduct(loaded);
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [productId, navigate]);
 
-  if (!product) return null;
+  if (loading || !product) {
+    return (
+      <AppShell layout="flow" mockBanner={isMockMode()}>
+        <ShellHeader home />
+        <main className="nora-flow">
+          <p className="nora-flow__panel-lede">Loading…</p>
+        </main>
+      </AppShell>
+    );
+  }
 
   const units = stocks[product.id] ?? product.stock;
+
 
   const close = () => {
     dispatch(setStep('product'));

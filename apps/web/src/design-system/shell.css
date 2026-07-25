@@ -2,7 +2,7 @@
   min-height: 100vh;
   min-height: 100dvh;
   background:
-    radial-gradient(60% 42% at 100% 0%, rgba(196, 93, 69, 0.08) 0%, transparent 58%),
+    radial-gradient(60% 42% at 100% 0%, color-mix(in srgb, var(--nora-cta) 8%, transparent) 0%, transparent 58%),
     var(--nora-bg);
   color: var(--nora-ink);
   font-family: var(--nora-font-body);

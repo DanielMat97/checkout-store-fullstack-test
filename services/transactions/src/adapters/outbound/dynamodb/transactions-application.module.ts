@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { createPersistence } from '@app/persistence';
 import { CreateTransactionUseCase } from '../../../application/create-transaction.use-case';
+import { GetTransactionUseCase } from '../../../application/get-transaction.use-case';
+import { ListTransactionsUseCase } from '../../../application/list-transactions.use-case';
 import { PayTransactionUseCase } from '../../../application/pay-transaction.use-case';
 import { ApplyPaymentApprovedEffectsUseCase } from '../../../application/apply-payment-approved-effects.use-case';
 import { RestoreTransactionStockUseCase } from '../../../application/restore-transaction-stock.use-case';
@@ -88,6 +90,8 @@ function createOrderEventsPublisher(
       inject: [ApplyPaymentApprovedEffectsUseCase],
     },
     CreateTransactionUseCase,
+    GetTransactionUseCase,
+    ListTransactionsUseCase,
     PayTransactionUseCase,
     RestoreTransactionStockUseCase,
   ],

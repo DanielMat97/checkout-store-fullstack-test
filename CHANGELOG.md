@@ -7,16 +7,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **UX quality bar (B2–B4)**: tokens/veil shadows, overflow SE fixes, Playwright matrix Chromium/Firefox/WebKit + iPhone SE, `docs/ux-evidence.md`. CheckoutPage uses `loadProduct`; unused Modal removed.
+- **Hex + ROP polish (B4–B6)**: `GetTransaction`/`ListTransactions` use-cases (controller sin repo); shared `domainErrorToHttp` in `@app/shared`; pay/create/apply-effects railways con `ResultAsync.andThen`.
 - **Optional Artillery stress (ADR 0013)**: post-deploy mild load on `GET /products` with `continue-on-error` — never blocks deploy/rollback. Scenario: `load/artillery-products.yml`.
 - **Post-deploy smoke + rollback (ADR 0012)**: Playwright E2E + OWASP ZAP after prod/feature deploy; CodeQL (+ optional SonarCloud) in CI quality gate; API rollback to last-good SHA on smoke failure. Specs: `specs/deploy-smoke-rollback/`. Docs: [`docs/ci-cd.md`](docs/ci-cd.md).
 - **SQS post-pay orchestration (ADR 0011)**: `PaymentApproved` queue + `ordersWorker`; sync in-process fallback when queue URL empty/offline. Ops console `/orders` (list APPROVED, restore stock, mark fulfilled). APIs: `GET /transactions`, `POST /transactions/:id/restore`, `PATCH /deliveries/:id`. Gap analysis: [`docs/brief-gap-analysis.md`](docs/brief-gap-analysis.md).
 
 ### Changed
 
-- Scorecard **2026-07-25**: base **100/100**, bonus **35/50**, total **135/150** — **PASS**. Evidencia: sandbox pay APPROVED (`providerRef` real), OWASP headers FE+API, OpenAPI público, README completo.
+- Scorecard **2026-07-25**: base **100/100**, bonus **50/50**, total **150/150** — **PASS**. Evidencia: sandbox pay + OWASP + OpenAPI + UX matrix Playwright 4/4 green vs Amplify + hex/ROP polish.
 - Prod API: `PAYMENT_GATEWAY_MODE=sandbox` + keys en Lambda/GitHub Secrets (profile `stonestore` / `gh`).
-- Security: `applySecuritySurface` (strip `X-Powered-By` + OWASP headers); Amplify `customHeaders`; [`docs/security.md`](docs/security.md).
-- Bonus note: SQS + ops console = arquitectura enhancement (no ítem brief); hexagonal/ROP score unchanged until cloud SQS proven in scorecard evidence.
+- Security: `applySecuritySurface` (strip `X-Powered-By` + OWASP headers); Amplify `customHeaders`; [`docs/security.md`](security.md).
 - CI: quality gate includes CodeQL; deploy-api runs post-deploy Playwright/ZAP with automatic Serverless rollback.
 ### Added
 
