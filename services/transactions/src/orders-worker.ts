@@ -6,7 +6,9 @@ import type { PaymentApprovedEvent } from './ports/order-events.port';
 
 const logger = createLogger('orders-worker');
 
-function isPaymentApprovedEvent(value: unknown): value is PaymentApprovedEvent {
+export function isPaymentApprovedEvent(
+  value: unknown,
+): value is PaymentApprovedEvent {
   if (!value || typeof value !== 'object') return false;
   const e = value as Record<string, unknown>;
   return (
@@ -18,14 +20,15 @@ function isPaymentApprovedEvent(value: unknown): value is PaymentApprovedEvent {
   );
 }
 
-export const handler: SQSHandler = async (event: SQSEvent) => {
-  const persistence = createPersistence();
-  const applyEffects = new ApplyPaymentApprovedEffectsUseCase(
-    persistence.transactions,
-    persistence.products,
-    persistence.deliveries,
-  );
+export type OrdersWorkerDeps = {
+  applyEffects: Pick<ApplyPaymentApprovedEffectsUseCase, 'execute'>;
+};
 
+/** Testable core loop used by the Lambda handler. */
+export async function processOrdersSqsEvent(
+  event: SQSEvent,
+  deps: OrdersWorkerDeps,
+): Promise<void> {
   for (const record of event.Records) {
     let parsed: unknown;
     try {
@@ -40,7 +43,7 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
       throw new Error(`Invalid PaymentApproved event ${record.messageId}`);
     }
 
-    const result = await applyEffects.execute(parsed);
+    const result = await deps.applyEffects.execute(parsed);
     if (result.isErr()) {
       logger.error('orders_worker.apply_failed', {
         messageId: record.messageId,
@@ -57,4 +60,14 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
       effectsApplied: result.value.transaction.effectsApplied,
     });
   }
+}
+
+export const handler: SQSHandler = async (event: SQSEvent) => {
+  const persistence = createPersistence();
+  const applyEffects = new ApplyPaymentApprovedEffectsUseCase(
+    persistence.transactions,
+    persistence.products,
+    persistence.deliveries,
+  );
+  await processOrdersSqsEvent(event, { applyEffects });
 };

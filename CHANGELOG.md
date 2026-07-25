@@ -24,6 +24,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- CI coverage gate for `@app/transactions`: unit tests for orders-worker, in-process publisher, apply/restore error paths (lines were ~75% after SQS/ops).
 - Amplify build: removed `AMPLIFY_MONOREPO_APP_ROOT` (error “Monorepo spec without applications”).
 - Lambda Node 24: upgraded `@codegenie/serverless-express@5` + async-only handlers (callback handlers rejected by runtime).
 - Serverless Outputs: dropped custom `HttpApiUrl` that collided with Framework-generated output (invalid CFN Value map).

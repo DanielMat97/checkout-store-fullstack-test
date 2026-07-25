@@ -166,4 +166,21 @@ describe('TransactionsController', () => {
       transactionStatus: 'REFUNDED',
     });
   });
+
+  it('maps list persistence errors and restore errors', async () => {
+    const transactions = {
+      getById: jest.fn(),
+      listByCreatedAt: jest
+        .fn()
+        .mockResolvedValue(err({ type: 'PERSISTENCE_ERROR', message: 'down' })),
+    };
+    const restore = {
+      execute: jest
+        .fn()
+        .mockResolvedValue(err({ type: 'INVALID_STATE', message: 'already' })),
+    };
+    const controller = await build({ transactions, restore });
+    await expect(controller.list()).rejects.toMatchObject({ status: 500 });
+    await expect(controller.restore('txn_1')).rejects.toMatchObject({ status: 422 });
+  });
 });
