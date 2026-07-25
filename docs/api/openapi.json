@@ -54,10 +54,7 @@
   "paths": {
     "/products/health": {
       "get": {
-        "tags": [
-          "health",
-          "products"
-        ],
+        "tags": ["health", "products"],
         "summary": "products health check",
         "operationId": "productsHealth",
         "responses": {
@@ -89,10 +86,7 @@
     },
     "/customers/health": {
       "get": {
-        "tags": [
-          "health",
-          "customers"
-        ],
+        "tags": ["health", "customers"],
         "summary": "customers health check",
         "operationId": "customersHealth",
         "responses": {
@@ -124,10 +118,7 @@
     },
     "/deliveries/health": {
       "get": {
-        "tags": [
-          "health",
-          "deliveries"
-        ],
+        "tags": ["health", "deliveries"],
         "summary": "deliveries health check",
         "operationId": "deliveriesHealth",
         "responses": {
@@ -159,10 +150,7 @@
     },
     "/transactions/health": {
       "get": {
-        "tags": [
-          "health",
-          "transactions"
-        ],
+        "tags": ["health", "transactions"],
         "summary": "transactions health check",
         "operationId": "transactionsHealth",
         "responses": {
@@ -194,9 +182,7 @@
     },
     "/products": {
       "get": {
-        "tags": [
-          "products"
-        ],
+        "tags": ["products"],
         "summary": "List seeded products",
         "operationId": "listProducts",
         "responses": {
@@ -257,9 +243,7 @@
     },
     "/products/{id}": {
       "get": {
-        "tags": [
-          "products"
-        ],
+        "tags": ["products"],
         "summary": "Get product by id",
         "operationId": "getProduct",
         "parameters": [
@@ -351,9 +335,7 @@
     },
     "/products/{id}/stock": {
       "get": {
-        "tags": [
-          "products"
-        ],
+        "tags": ["products"],
         "summary": "Get product stock only",
         "operationId": "getProductStock",
         "parameters": [
@@ -434,9 +416,7 @@
     },
     "/customers": {
       "post": {
-        "tags": [
-          "customers"
-        ],
+        "tags": ["customers"],
         "summary": "Create customer (no card data)",
         "operationId": "createCustomer",
         "requestBody": {
@@ -530,9 +510,7 @@
     },
     "/customers/{id}": {
       "get": {
-        "tags": [
-          "customers"
-        ],
+        "tags": ["customers"],
         "summary": "Get customer by id",
         "operationId": "getCustomer",
         "parameters": [
@@ -620,9 +598,7 @@
     },
     "/deliveries": {
       "post": {
-        "tags": [
-          "deliveries"
-        ],
+        "tags": ["deliveries"],
         "summary": "Create delivery (standalone; pay flow also creates one)",
         "operationId": "createDelivery",
         "requestBody": {
@@ -723,9 +699,7 @@
     },
     "/deliveries/{id}": {
       "get": {
-        "tags": [
-          "deliveries"
-        ],
+        "tags": ["deliveries"],
         "summary": "Get delivery by id",
         "operationId": "getDelivery",
         "parameters": [
@@ -810,9 +784,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "deliveries"
-        ],
+        "tags": ["deliveries"],
         "summary": "Update delivery status (ops fulfill / cancel)",
         "description": "Body status FULFILLED|CANCELLED. FULFILLED requires current status FULFILLABLE (else 422). CANCELLED does not require FULFILLABLE.",
         "operationId": "patchDeliveryStatus",
@@ -970,9 +942,7 @@
     },
     "/transactions": {
       "get": {
-        "tags": [
-          "transactions"
-        ],
+        "tags": ["transactions"],
         "summary": "List transactions (ops console)",
         "operationId": "listTransactions",
         "parameters": [
@@ -982,13 +952,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": [
-                "PENDING",
-                "APPROVED",
-                "DECLINED",
-                "ERROR",
-                "REFUNDED"
-              ]
+              "enum": ["PENDING", "APPROVED", "DECLINED", "ERROR", "REFUNDED"]
             }
           },
           {
@@ -1062,9 +1026,7 @@
         }
       },
       "post": {
-        "tags": [
-          "transactions"
-        ],
+        "tags": ["transactions"],
         "summary": "Create PENDING transaction + delivery",
         "operationId": "createTransaction",
         "requestBody": {
@@ -1213,9 +1175,7 @@
     },
     "/transactions/{id}": {
       "get": {
-        "tags": [
-          "transactions"
-        ],
+        "tags": ["transactions"],
         "summary": "Get transaction by id",
         "operationId": "getTransaction",
         "parameters": [
@@ -1328,9 +1288,7 @@
     },
     "/transactions/{id}/pay": {
       "post": {
-        "tags": [
-          "transactions"
-        ],
+        "tags": ["transactions"],
         "summary": "Pay PENDING transaction",
         "description": "HTTP **200** always when the railway succeeds — inspect `paymentStatus`. DECLINED/ERROR update the transaction but are not HTTP 4xx/5xx. HTTP 502 only when the payment adapter returns Result err PAYMENT_FAILED (e.g. sandbox hard outage).",
         "operationId": "payTransaction",
@@ -1556,9 +1514,7 @@
     },
     "/transactions/{id}/restore": {
       "post": {
-        "tags": [
-          "transactions"
-        ],
+        "tags": ["transactions"],
         "summary": "Ops: restore stock, cancel delivery, mark REFUNDED",
         "description": "Only APPROVED transactions without stockRestoredAt. Increments product stock +1, cancels delivery when present, sets transaction REFUNDED.",
         "operationId": "restoreTransactionStock",
@@ -1737,9 +1693,7 @@
       },
       "ProductListResponse": {
         "type": "object",
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "properties": {
           "items": {
             "type": "array",
@@ -1765,10 +1719,7 @@
       },
       "ProductStockResponse": {
         "type": "object",
-        "required": [
-          "productId",
-          "stock"
-        ],
+        "required": ["productId", "stock"],
         "properties": {
           "productId": {
             "type": "string"
@@ -1784,35 +1735,21 @@
       },
       "HealthResponse": {
         "type": "object",
-        "required": [
-          "status",
-          "service"
-        ],
+        "required": ["status", "service"],
         "properties": {
           "status": {
             "type": "string",
-            "enum": [
-              "ok"
-            ]
+            "enum": ["ok"]
           },
           "service": {
             "type": "string",
-            "enum": [
-              "products",
-              "customers",
-              "deliveries",
-              "transactions"
-            ]
+            "enum": ["products", "customers", "deliveries", "transactions"]
           }
         }
       },
       "CreateCustomer": {
         "type": "object",
-        "required": [
-          "fullName",
-          "email",
-          "phone"
-        ],
+        "required": ["fullName", "email", "phone"],
         "properties": {
           "fullName": {
             "type": "string",
@@ -1833,12 +1770,7 @@
       },
       "Customer": {
         "type": "object",
-        "required": [
-          "id",
-          "fullName",
-          "email",
-          "phone"
-        ],
+        "required": ["id", "fullName", "email", "phone"],
         "properties": {
           "id": {
             "type": "string",
@@ -1933,12 +1865,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "PENDING",
-              "FULFILLABLE",
-              "FULFILLED",
-              "CANCELLED"
-            ]
+            "enum": ["PENDING", "FULFILLABLE", "FULFILLED", "CANCELLED"]
           }
         },
         "example": {
@@ -1954,27 +1881,18 @@
       },
       "UpdateDeliveryStatus": {
         "type": "object",
-        "required": [
-          "status"
-        ],
+        "required": ["status"],
         "properties": {
           "status": {
             "type": "string",
-            "enum": [
-              "FULFILLED",
-              "CANCELLED"
-            ],
+            "enum": ["FULFILLED", "CANCELLED"],
             "description": "FULFILLED only allowed when current status is FULFILLABLE; CANCELLED allowed otherwise"
           }
         }
       },
       "DeliveryAddress": {
         "type": "object",
-        "required": [
-          "address",
-          "city",
-          "region"
-        ],
+        "required": ["address", "city", "region"],
         "properties": {
           "address": {
             "type": "string",
@@ -2044,13 +1962,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "PENDING",
-              "APPROVED",
-              "DECLINED",
-              "ERROR",
-              "REFUNDED"
-            ]
+            "enum": ["PENDING", "APPROVED", "DECLINED", "ERROR", "REFUNDED"]
           },
           "productId": {
             "type": "string"
@@ -2104,10 +2016,7 @@
       },
       "CreateTransactionResponse": {
         "type": "object",
-        "required": [
-          "transaction",
-          "deliveryId"
-        ],
+        "required": ["transaction", "deliveryId"],
         "properties": {
           "transaction": {
             "$ref": "#/components/schemas/Transaction"
@@ -2135,9 +2044,7 @@
       },
       "TransactionListResponse": {
         "type": "object",
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "properties": {
           "items": {
             "type": "array",
@@ -2167,13 +2074,7 @@
       },
       "Card": {
         "type": "object",
-        "required": [
-          "number",
-          "cvc",
-          "expMonth",
-          "expYear",
-          "cardHolder"
-        ],
+        "required": ["number", "cvc", "expMonth", "expYear", "cardHolder"],
         "properties": {
           "number": {
             "type": "string",
@@ -2205,10 +2106,7 @@
       },
       "PayTransaction": {
         "type": "object",
-        "required": [
-          "deliveryId",
-          "card"
-        ],
+        "required": ["deliveryId", "card"],
         "properties": {
           "deliveryId": {
             "type": "string"
@@ -2220,18 +2118,11 @@
       },
       "PayTransactionResponse": {
         "type": "object",
-        "required": [
-          "paymentStatus",
-          "transaction"
-        ],
+        "required": ["paymentStatus", "transaction"],
         "properties": {
           "paymentStatus": {
             "type": "string",
-            "enum": [
-              "APPROVED",
-              "DECLINED",
-              "ERROR"
-            ],
+            "enum": ["APPROVED", "DECLINED", "ERROR"],
             "description": "Always returned under HTTP 200 when the use-case succeeds"
           },
           "transaction": {
@@ -2265,9 +2156,7 @@
           },
           "transactionStatus": {
             "type": "string",
-            "enum": [
-              "REFUNDED"
-            ]
+            "enum": ["REFUNDED"]
           }
         },
         "example": {
@@ -2280,10 +2169,7 @@
       },
       "ValidationDetail": {
         "type": "object",
-        "required": [
-          "field",
-          "constraints"
-        ],
+        "required": ["field", "constraints"],
         "properties": {
           "field": {
             "type": "string",
@@ -2294,26 +2180,18 @@
             "items": {
               "type": "string"
             },
-            "example": [
-              "email must be an email"
-            ]
+            "example": ["email must be an email"]
           }
         }
       },
       "ErrorValidationPipe": {
         "type": "object",
-        "required": [
-          "error",
-          "message",
-          "details"
-        ],
+        "required": ["error", "message", "details"],
         "description": "Global ValidationPipe (whitelist / class-validator) — HTTP 400",
         "properties": {
           "error": {
             "type": "string",
-            "enum": [
-              "VALIDATION"
-            ]
+            "enum": ["VALIDATION"]
           },
           "message": {
             "type": "string",
@@ -2332,26 +2210,19 @@
           "details": [
             {
               "field": "fullName",
-              "constraints": [
-                "fullName should not be empty"
-              ]
+              "constraints": ["fullName should not be empty"]
             }
           ]
         }
       },
       "ErrorValidationDomain": {
         "type": "object",
-        "required": [
-          "error",
-          "message"
-        ],
+        "required": ["error", "message"],
         "description": "Domain VALIDATION via domainErrorToHttp — HTTP 400",
         "properties": {
           "error": {
             "type": "string",
-            "enum": [
-              "VALIDATION"
-            ]
+            "enum": ["VALIDATION"]
           },
           "message": {
             "type": "string"
@@ -2364,18 +2235,12 @@
       },
       "ErrorNotFound": {
         "type": "object",
-        "required": [
-          "error",
-          "entity",
-          "id"
-        ],
+        "required": ["error", "entity", "id"],
         "description": "domainErrorToHttp NOT_FOUND — HTTP 404",
         "properties": {
           "error": {
             "type": "string",
-            "enum": [
-              "NOT_FOUND"
-            ]
+            "enum": ["NOT_FOUND"]
           },
           "entity": {
             "type": "string",
@@ -2394,18 +2259,12 @@
       },
       "ErrorInsufficientStock": {
         "type": "object",
-        "required": [
-          "error",
-          "productId",
-          "stock"
-        ],
+        "required": ["error", "productId", "stock"],
         "description": "domainErrorToHttp INSUFFICIENT_STOCK — HTTP 409",
         "properties": {
           "error": {
             "type": "string",
-            "enum": [
-              "INSUFFICIENT_STOCK"
-            ]
+            "enum": ["INSUFFICIENT_STOCK"]
           },
           "productId": {
             "type": "string"
@@ -2422,17 +2281,12 @@
       },
       "ErrorInvalidState": {
         "type": "object",
-        "required": [
-          "error",
-          "message"
-        ],
+        "required": ["error", "message"],
         "description": "domainErrorToHttp INVALID_STATE — HTTP 422",
         "properties": {
           "error": {
             "type": "string",
-            "enum": [
-              "INVALID_STATE"
-            ]
+            "enum": ["INVALID_STATE"]
           },
           "message": {
             "type": "string"
@@ -2445,17 +2299,12 @@
       },
       "ErrorPaymentFailed": {
         "type": "object",
-        "required": [
-          "error",
-          "message"
-        ],
+        "required": ["error", "message"],
         "description": "Sandbox/provider hard failure (Result err PAYMENT_FAILED) — HTTP 502. Distinct from HTTP 200 paymentStatus=ERROR.",
         "properties": {
           "error": {
             "type": "string",
-            "enum": [
-              "PAYMENT_FAILED"
-            ]
+            "enum": ["PAYMENT_FAILED"]
           },
           "message": {
             "type": "string"
@@ -2468,17 +2317,12 @@
       },
       "ErrorPersistence": {
         "type": "object",
-        "required": [
-          "error",
-          "message"
-        ],
+        "required": ["error", "message"],
         "description": "domainErrorToHttp PERSISTENCE_ERROR — HTTP 500",
         "properties": {
           "error": {
             "type": "string",
-            "enum": [
-              "PERSISTENCE_ERROR"
-            ]
+            "enum": ["PERSISTENCE_ERROR"]
           },
           "message": {
             "type": "string"
