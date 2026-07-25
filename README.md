@@ -130,13 +130,15 @@ No es “tenemos tests en la carpeta”: el pipeline **exige** la batería antes
 
 **Análisis estático (SAST)** — **CodeQL** obligatorio en el quality gate (no es decoración). **SonarCloud** está cableado pero **opcional** (solo si hay `SONAR_TOKEN`): misma idea que Vault — listo, sin forzar un SaaS de pago para la prueba. Además: Prettier, ESLint y `npm audit` en CI.
 
+**Dependabot + audit autofix** — Dependabot vigila **npm** y **GitHub Actions** (schedule semanal). Cuando `npm audit fix` (sin `--force`) puede remediar high+, un workflow abre un PR en la rama `fix/<nombre-de-la-solucion>`, espera el quality gate y **auto-mergea a `master`** (squash). Sin diff → no hay PR. `--force` solo con input explícito en `workflow_dispatch`. Spec: [`specs/dependabot-audit-autofix/`](specs/dependabot-audit-autofix/spec.md) · ADR [0017](docs/adr/0017-dependabot-audit-autofix.md).
+
 **Stress / carga (Artillery)** — escenario liviano sobre `GET /products` después del deploy (`load/artillery-products.yml`). Da señal de latencia/errores bajo concurrencia suave. Es **opcional y no bloqueante** (`continue-on-error`): no dispara rollback falso (ADR [0013](docs/adr/0013-artillery-stress-optional.md)). Local: `API_BASE_URL=… npm run test:stress`.
 
 **Cómo se encaja en el flujo**
 
 1. **Antes de AWS:** unitarios + coverage + lint/audit + CodeQL (+ Sonar si hay token).  
 2. **Después del deploy:** Playwright E2E + ZAP (bloquean; si fallan → rollback al last-good).  
-3. **Al costado:** Artillery stress (informativo).  
+3. **Al costado:** Artillery stress (informativo) + Dependabot/audit autofix (PRs `fix/*` → master cuando CI verde).  
 
 En una frase para el evaluador: *probamos la lógica, el journey, la superficie OWASP, el código estático y un poco de carga — no solo “compiló”.*
 
@@ -149,12 +151,25 @@ Después de `serverless deploy`, cada stage deja:
 - Dashboard **`checkout-api-<stage>-ops`** (ej. `checkout-api-prod-ops`)  
 - Alarmas de **4xx**, **5xx**, **pico de latencia** y **errores Lambda**  
 - SNS `checkout-api-<stage>-ops-alerts`  
-- Usuario IAM **solo lectura** `checkout-api-<stage>-cw-viewer`  
+- Usuario IAM **solo ese panel** `checkout-api-<stage>-cw-viewer`  
 
 Logs JSON enriquecidos (`domain`, `layer`, `operation`, `statusClass`, `coldStart`, …) + métricas EMF `Checkout/API`.  
 Verificar: `npm run ops:observability -- --stage=prod` · guía [`docs/observability.md`](docs/observability.md) · ADR [0014](docs/adr/0014-observability-cloudwatch.md).
 
-En la consola AWS: dashboard **`checkout-api-prod-ops`**, alarmas del stage y Logs Insights (`http.request` / `pay.outcome`).
+### Acceso evaluador (solo lectura del panel ops)
+
+Usuario IAM limitado a **un único** dashboard (`checkout-api-prod-ops`). El resto de AWS / otros dashboards → Access Denied.
+
+| | |
+|---|---|
+| Consola (sign-in) | https://stonestore.signin.aws.amazon.com/console |
+| Usuario | `checkout-api-prod-cw-viewer` |
+| Contraseña | `Nora-CW-8jTtYxdu1FvJsk!7` |
+| Panel (abrir este link después del login) | [checkout-api-prod-ops](https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=checkout-api-prod-ops) |
+
+Deep-link directo al panel:
+
+https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=checkout-api-prod-ops
 
 ---
 
@@ -302,6 +317,13 @@ Cuando cambia el frontend, no alcanza con “Actions verde”: esperamos que Amp
 
 Actions → **Destroy feature stack** → `ref_name` + `confirm=destroy`.  
 Borra el stack Serverless y el branch Amplify. No toca prod (ADR [0016](docs/adr/0016-feature-env-urls-teardown.md)).
+
+### Dependabot + security audit autofix
+
+1. **Dependabot** (`.github/dependabot.yml`) — PRs semanales de npm y GitHub Actions.  
+2. **Workflow audit autofix** (schedule / `workflow_dispatch`) — `npm audit fix` sin force → rama `fix/<slug>` → PR → **auto-merge** squash a `master` si CI verde.  
+3. Si no hay cambios en el lockfile, no abre PR.  
+Detalle: ADR [0017](docs/adr/0017-dependabot-audit-autofix.md) · [`specs/dependabot-audit-autofix/`](specs/dependabot-audit-autofix/spec.md).
 
 ---
 

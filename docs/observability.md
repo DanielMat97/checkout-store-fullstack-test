@@ -40,20 +40,21 @@ Application example: `PayTransactionUseCase` emits `pay.outcome` / `pay.failed` 
 5. SQS orders queue (+ DLQ) depth  
 6. Logs Insights table of recent 4xx/5xx `http.request` (transactions log group)
 
-## IAM viewer (no keys in git)
+## IAM viewer (solo el panel ops)
 
-User is created by CloudFormation. Create console password or access keys **locally**:
+User `checkout-api-<stage>-cw-viewer` — **solo** el dashboard `checkout-api-<stage>-ops` (definición + widgets). No lista otros dashboards, no alarms console, no otros servicios AWS.
+
+Sign-in: `https://stonestore.signin.aws.amazon.com/console`  
+Abrir **siempre** el deep-link (la lista de dashboards está denegada):
+
+`https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=checkout-api-prod-ops`
+
+Password/local notes: `.local/cw-viewer-console.txt` (gitignored). Never commit credentials.
 
 ```bash
-STAGE=prod   # or dev / fb-…
-USER=$(aws cloudformation describe-stacks --stack-name "checkout-api-$STAGE" \
-  --query "Stacks[0].Outputs[?OutputKey=='CloudWatchViewerUserName'].OutputValue" --output text)
-
-# Optional access key (store offline — never commit)
-aws iam create-access-key --user-name "$USER"
+# Optional access key for CLI (store offline — never commit)
+aws iam create-access-key --user-name checkout-api-prod-cw-viewer
 ```
-
-Policy: CloudWatch dashboards/metrics/alarms + Logs Insights **read**; explicit **Deny** on IAM/CFN/Lambda mutate, dashboard put/delete, etc.
 
 ## Verify with AWS CLI
 

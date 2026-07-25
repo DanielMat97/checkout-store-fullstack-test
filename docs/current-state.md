@@ -40,6 +40,7 @@ Ver **`docs/scorecard.md`**.
 | `openapi-complete-responses` | **done** (OpenAPI 1.0.0 — all endpoint success/error bodies) |
 | `feature-env-urls-teardown` | **done** (ADR 0016 — URL comments, Amplify VITE sync, Destroy workflow) |
 | `apidog-portal-aws-server` | **done** (Apidog UI docs + OpenAPI default server = AWS) |
+| `dependabot-audit-autofix` | **draft** (ADR 0017 — Dependabot + audit fix → `fix/*` auto-merge) |
 
 ## Deploy (live)
 

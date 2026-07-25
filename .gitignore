@@ -4,6 +4,7 @@ node_modules/
 .env.*
 !.env.example
 .env.vault
+.local/
 
 # Local brief / credentials / playbooks (do not publish)
 docs/fullstack-test.md
