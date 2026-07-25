@@ -36,7 +36,9 @@ describe('InProcessOrderEventsPublisher', () => {
 
   it('throws using error type when message missing', async () => {
     const applyEffects = {
-      execute: jest.fn().mockResolvedValue(err({ type: 'NOT_FOUND', entity: 'x', id: '1' })),
+      execute: jest
+        .fn()
+        .mockResolvedValue(err({ type: 'NOT_FOUND', entity: 'x', id: '1' })),
     };
     const publisher = new InProcessOrderEventsPublisher(applyEffects as never);
     await expect(publisher.publishPaymentApproved(event)).rejects.toThrow(/NOT_FOUND/);

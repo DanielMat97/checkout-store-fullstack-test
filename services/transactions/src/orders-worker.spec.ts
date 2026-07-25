@@ -1,8 +1,5 @@
 import { err, ok } from 'neverthrow';
-import {
-  isPaymentApprovedEvent,
-  processOrdersSqsEvent,
-} from './orders-worker';
+import { isPaymentApprovedEvent, processOrdersSqsEvent } from './orders-worker';
 
 describe('orders-worker', () => {
   const event = {

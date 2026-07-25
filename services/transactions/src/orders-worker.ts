@@ -6,9 +6,7 @@ import type { PaymentApprovedEvent } from './ports/order-events.port';
 
 const logger = createLogger('orders-worker');
 
-export function isPaymentApprovedEvent(
-  value: unknown,
-): value is PaymentApprovedEvent {
+export function isPaymentApprovedEvent(value: unknown): value is PaymentApprovedEvent {
   if (!value || typeof value !== 'object') return false;
   const e = value as Record<string, unknown>;
   return (
