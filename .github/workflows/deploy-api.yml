@@ -98,6 +98,15 @@ jobs:
       - run: npm ci
       - run: npm run build:api
 
+      - name: Load secrets from Vault
+        uses: ./.github/actions/load-vault-secrets
+        with:
+          stage: ${{ env.STAGE }}
+          vault_addr: ${{ secrets.VAULT_ADDR }}
+          role_id: ${{ secrets.VAULT_ROLE_ID }}
+          secret_id: ${{ secrets.VAULT_SECRET_ID }}
+          required: ${{ vars.VAULT_REQUIRED || 'false' }}
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -107,22 +116,22 @@ jobs:
           # Prefer OIDC when role is configured:
           # role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
 
-      - name: Export payment / CORS env for Serverless
+      - name: Fallback fill missing env from GitHub Secrets
         env:
-          PAYMENT_API_URL: ${{ secrets.PAYMENT_API_URL }}
-          PAYMENT_PUBLIC_KEY: ${{ secrets.PAYMENT_PUBLIC_KEY }}
-          PAYMENT_PRIVATE_KEY: ${{ secrets.PAYMENT_PRIVATE_KEY }}
-          PAYMENT_INTEGRITY_KEY: ${{ secrets.PAYMENT_INTEGRITY_KEY }}
-          PAYMENT_GATEWAY_MODE: ${{ vars.PAYMENT_GATEWAY_MODE || 'sandbox' }}
-          CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
+          GH_PAYMENT_API_URL: ${{ secrets.PAYMENT_API_URL }}
+          GH_PAYMENT_PUBLIC_KEY: ${{ secrets.PAYMENT_PUBLIC_KEY }}
+          GH_PAYMENT_PRIVATE_KEY: ${{ secrets.PAYMENT_PRIVATE_KEY }}
+          GH_PAYMENT_INTEGRITY_KEY: ${{ secrets.PAYMENT_INTEGRITY_KEY }}
+          GH_PAYMENT_GATEWAY_MODE: ${{ vars.PAYMENT_GATEWAY_MODE || 'sandbox' }}
+          GH_CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
         run: |
           {
-            echo "PAYMENT_API_URL=$PAYMENT_API_URL"
-            echo "PAYMENT_PUBLIC_KEY=$PAYMENT_PUBLIC_KEY"
-            echo "PAYMENT_PRIVATE_KEY=$PAYMENT_PRIVATE_KEY"
-            echo "PAYMENT_INTEGRITY_KEY=$PAYMENT_INTEGRITY_KEY"
-            echo "PAYMENT_GATEWAY_MODE=$PAYMENT_GATEWAY_MODE"
-            echo "CORS_ORIGIN=${CORS_ORIGIN}"
+            [ -n "${PAYMENT_API_URL:-}" ] || echo "PAYMENT_API_URL=$GH_PAYMENT_API_URL"
+            [ -n "${PAYMENT_PUBLIC_KEY:-}" ] || echo "PAYMENT_PUBLIC_KEY=$GH_PAYMENT_PUBLIC_KEY"
+            [ -n "${PAYMENT_PRIVATE_KEY:-}" ] || echo "PAYMENT_PRIVATE_KEY=$GH_PAYMENT_PRIVATE_KEY"
+            [ -n "${PAYMENT_INTEGRITY_KEY:-}" ] || echo "PAYMENT_INTEGRITY_KEY=$GH_PAYMENT_INTEGRITY_KEY"
+            [ -n "${PAYMENT_GATEWAY_MODE:-}" ] || echo "PAYMENT_GATEWAY_MODE=$GH_PAYMENT_GATEWAY_MODE"
+            [ -n "${CORS_ORIGIN:-}" ] || echo "CORS_ORIGIN=$GH_CORS_ORIGIN"
             echo "DYNAMODB_ENDPOINT="
           } >> "$GITHUB_ENV"
 

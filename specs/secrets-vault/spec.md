@@ -1,6 +1,6 @@
 ---
 feature: secrets-vault
-status: ready
+status: done
 owner: security
 rubric: [B1, 6]
 ---

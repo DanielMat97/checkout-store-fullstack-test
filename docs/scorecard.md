@@ -50,14 +50,14 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 | Arquitecto | Pipeline deploy listo; evidencia runtime pública aún ausente. |
 | Líder técnico | CI gates + selective/FB deploy; #6 sigue 0 sin URL. |
 | Product Owner | Journey cableable; deploy no verificado en internet. |
-| Security | Secrets vía GH; OK diseño. |
+| Security | PAN solo memoria; secretos de pago vía Vault (ADR 0010). |
 | Hiring bar | **Aún no.** Coverage sí; cloud URL no. |
 
 | | Puntos (modo estricto) |
 |---|---|
 | **Base** | **60 / 100** |
-| **Bonus** | **30 / 50** |
-| **Total** | **90 / 150** |
+| **Bonus** | **31 / 50** |
+| **Total** | **91 / 150** |
 | **¿Aprueba (≥100 base)?** | **No** |
 
 ---
@@ -95,13 +95,13 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 | # | Criterio | Max | **Strict** | Justificación del panel |
 |---|---|---|---|---|
-| 1 | OWASP/HTTPS | 5 | **1** | Sin HTTPS público. |
+| 1 | OWASP/HTTPS | 5 | **2** | Headers + Vault secrecy design (ADR 0010); sin HTTPS público / Observatory. |
 | 2 | Responsive | 5 | **2** | Sin matriz. |
 | 3 | CSS | 10 | **6** | Sin cambio. |
 | 4 | Clean code | 10 | **6** | Suites FE/BE más serias; publicEnv testable. |
 | 5 | Hexagonal | 10 | **8** | Sin cambio. |
 | 6 | ROP | 10 | **7** | Sin cambio. |
-| | **Subtotal bonus** | **50** | **30** | |
+| | **Subtotal bonus** | **50** | **31** | |
 
 ---
 
@@ -109,9 +109,9 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 ```
 Base   60 / 100
-Bonus  30 /  50
+Bonus  31 /  50
 ───────────────
-Total  90 / 150
+Total  91 / 150
 ```
 
 **Resultado hiring:** **REJECT** (falta deploy + README entregable + smoke live).
@@ -129,7 +129,7 @@ Total  90 / 150
 
 | Hito | Base ≈ | Bonus ≈ | Total ≈ | Hiring |
 |---|---|---|---|---|
-| Hoy | 60 | 30 | **90** | Reject |
+| Hoy | 60 | 31 | **91** | Reject |
 | + deploy + README | 95–100 | 36 | **131–136** | Pass posible |
 
 ---

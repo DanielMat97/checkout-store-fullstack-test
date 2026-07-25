@@ -28,6 +28,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **FE live wiring**: `apps/web/src/api/*` + `checkoutApi.executePay` (customer → PENDING tx → pay → refresh stock); `cardSession` ephemeral PAN/CVV; catalog/product load from API when `VITE_MOCK_MODE=false`; Status ERROR + Retry.
 - **Testing coverage** (`testing-coverage`): Jest thresholds >80% lines FE+BE; `npm run test:cov` green; figures in README + `docs/coverage.md`. Fixed shared instrumentation (stray `.js` next to `.ts`).
 - **Cloud deploy automation** (`cloud-deploy`): GitHub Actions CI (validate/prettier/lint/audit/test/coverage), selective Lambda deploy on `main`, feature stacks for `fb-*` + Amplify branch job. Runbook: `docs/deploy.md`. Public URLs still pending (scorecard #6 = 0).
+- **HashiCorp Vault** (`secrets-vault`): KV v2 paths `secret/checkout/<stage>/{payment,app,aws}`, local Docker + seed/export, CI AppRole via `.github/actions/load-vault-secrets`, ADR 0010. Docs: `docs/vault.md`.
 
 ### Changed
 

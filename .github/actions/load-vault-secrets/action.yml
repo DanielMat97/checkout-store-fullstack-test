@@ -1,0 +1,98 @@
+name: Load secrets from Vault
+
+# Composite action: AppRole → export PAYMENT_*/app env into GITHUB_ENV.
+# Falls back to caller-provided env if VAULT_ADDR is empty (legacy GH Secrets).
+inputs:
+  stage:
+    description: 'prod | feature | dev | fb-* (fb maps to feature)'
+    required: true
+  vault_addr:
+    description: 'Vault address'
+    required: false
+    default: ''
+  role_id:
+    description: 'AppRole role_id'
+    required: false
+    default: ''
+  secret_id:
+    description: 'AppRole secret_id'
+    required: false
+    default: ''
+  required:
+    description: 'If true, fail when Vault is not configured'
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve Vault usage
+      id: cfg
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.vault_addr }}" ] && [ -n "${{ inputs.role_id }}" ] && [ -n "${{ inputs.secret_id }}" ]; then
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "enabled=false" >> "$GITHUB_OUTPUT"
+          if [ "${{ inputs.required }}" = "true" ]; then
+            echo "::error::Vault is required for this deploy but VAULT_ADDR / ROLE_ID / SECRET_ID are missing"
+            exit 1
+          fi
+          echo "::warning::Vault not configured — using pre-exported GitHub Secrets / vars fallback"
+        fi
+
+    - name: Normalize stage path
+      id: stage
+      if: steps.cfg.outputs.enabled == 'true'
+      shell: bash
+      run: |
+        STAGE='${{ inputs.stage }}'
+        case "$STAGE" in
+          fb-*) PATH_STAGE=feature ;;
+          feature) PATH_STAGE=feature ;;
+          prod) PATH_STAGE=prod ;;
+          dev) PATH_STAGE=dev ;;
+          *) PATH_STAGE=feature ;;
+        esac
+        echo "path_stage=$PATH_STAGE" >> "$GITHUB_OUTPUT"
+        echo "Loading Vault secrets for path_stage=$PATH_STAGE (input=$STAGE)"
+
+    - name: Import secrets from Vault (AppRole)
+      if: steps.cfg.outputs.enabled == 'true'
+      uses: hashicorp/vault-action@v3
+      with:
+        url: ${{ inputs.vault_addr }}
+        method: approle
+        roleId: ${{ inputs.role_id }}
+        secretId: ${{ inputs.secret_id }}
+        exportToken: false
+        secrets: |
+          secret/data/checkout/${{ steps.stage.outputs.path_stage }}/payment api_url | PAYMENT_API_URL ;
+          secret/data/checkout/${{ steps.stage.outputs.path_stage }}/payment public_key | PAYMENT_PUBLIC_KEY ;
+          secret/data/checkout/${{ steps.stage.outputs.path_stage }}/payment private_key | PAYMENT_PRIVATE_KEY ;
+          secret/data/checkout/${{ steps.stage.outputs.path_stage }}/payment integrity_key | PAYMENT_INTEGRITY_KEY ;
+          secret/data/checkout/${{ steps.stage.outputs.path_stage }}/payment events_key | PAYMENT_EVENTS_KEY ;
+          secret/data/checkout/${{ steps.stage.outputs.path_stage }}/payment currency | PAYMENT_CURRENCY ;
+          secret/data/checkout/${{ steps.stage.outputs.path_stage }}/app payment_gateway_mode | PAYMENT_GATEWAY_MODE ;
+          secret/data/checkout/${{ steps.stage.outputs.path_stage }}/app cors_origin | CORS_ORIGIN ;
+          secret/data/checkout/${{ steps.stage.outputs.path_stage }}/app base_fee | BASE_FEE ;
+          secret/data/checkout/${{ steps.stage.outputs.path_stage }}/app delivery_fee | DELIVERY_FEE ;
+
+    - name: Persist Vault secrets into GITHUB_ENV
+      if: steps.cfg.outputs.enabled == 'true'
+      shell: bash
+      run: |
+        {
+          echo "PAYMENT_API_URL=${PAYMENT_API_URL}"
+          echo "PAYMENT_PUBLIC_KEY=${PAYMENT_PUBLIC_KEY}"
+          echo "PAYMENT_PRIVATE_KEY=${PAYMENT_PRIVATE_KEY}"
+          echo "PAYMENT_INTEGRITY_KEY=${PAYMENT_INTEGRITY_KEY}"
+          echo "PAYMENT_EVENTS_KEY=${PAYMENT_EVENTS_KEY:-}"
+          echo "PAYMENT_CURRENCY=${PAYMENT_CURRENCY:-COP}"
+          echo "PAYMENT_GATEWAY_MODE=${PAYMENT_GATEWAY_MODE:-sandbox}"
+          echo "CORS_ORIGIN=${CORS_ORIGIN:-}"
+          echo "BASE_FEE=${BASE_FEE:-1500}"
+          echo "DELIVERY_FEE=${DELIVERY_FEE:-5000}"
+          echo "DYNAMODB_ENDPOINT="
+        } >> "$GITHUB_ENV"
+        echo "Vault secrets exported to GITHUB_ENV (values redacted)"

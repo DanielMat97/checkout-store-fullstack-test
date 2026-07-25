@@ -29,6 +29,12 @@
     "ci:stage": "node scripts/ci/stage-from-ref.cjs",
     "ci:api-url": "node scripts/ci/print-api-url.cjs",
     "dynamodb:up": "docker compose up -d dynamodb",
+    "vault:up": "docker compose up -d vault",
+    "vault:down": "docker compose stop vault",
+    "vault:seed": "node scripts/vault/seed.cjs",
+    "vault:export": "node scripts/vault/export-env.cjs",
+    "vault:approle": "bash scripts/vault/bootstrap-approle.sh",
+    "vault:test": "node scripts/vault/lib.spec.cjs",
     "ensure-table": "npm run ensure-table -w @app/persistence",
     "seed": "npm run seed -w @app/persistence"
   },

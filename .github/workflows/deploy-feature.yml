@@ -100,24 +100,36 @@ jobs:
           echo "amplify_url=$FE_URL" >> "$GITHUB_OUTPUT"
           echo "Predicted Amplify URL: $FE_URL"
 
-      - name: Export env for Serverless
+      - name: Load secrets from Vault (feature bundle)
+        uses: ./.github/actions/load-vault-secrets
+        with:
+          stage: feature
+          vault_addr: ${{ secrets.VAULT_ADDR }}
+          role_id: ${{ secrets.VAULT_ROLE_ID }}
+          secret_id: ${{ secrets.VAULT_SECRET_ID }}
+          required: ${{ vars.VAULT_REQUIRED || 'false' }}
+
+      - name: Fallback fill missing env from GitHub Secrets
         env:
-          PAYMENT_API_URL: ${{ secrets.PAYMENT_API_URL }}
-          PAYMENT_PUBLIC_KEY: ${{ secrets.PAYMENT_PUBLIC_KEY }}
-          PAYMENT_PRIVATE_KEY: ${{ secrets.PAYMENT_PRIVATE_KEY }}
-          PAYMENT_INTEGRITY_KEY: ${{ secrets.PAYMENT_INTEGRITY_KEY }}
-          PAYMENT_GATEWAY_MODE: ${{ vars.PAYMENT_GATEWAY_MODE_FEATURE || vars.PAYMENT_GATEWAY_MODE || 'fake' }}
+          GH_PAYMENT_API_URL: ${{ secrets.PAYMENT_API_URL }}
+          GH_PAYMENT_PUBLIC_KEY: ${{ secrets.PAYMENT_PUBLIC_KEY }}
+          GH_PAYMENT_PRIVATE_KEY: ${{ secrets.PAYMENT_PRIVATE_KEY }}
+          GH_PAYMENT_INTEGRITY_KEY: ${{ secrets.PAYMENT_INTEGRITY_KEY }}
+          GH_PAYMENT_GATEWAY_MODE: ${{ vars.PAYMENT_GATEWAY_MODE_FEATURE || vars.PAYMENT_GATEWAY_MODE || 'fake' }}
         run: |
           {
-            echo "PAYMENT_API_URL=$PAYMENT_API_URL"
-            echo "PAYMENT_PUBLIC_KEY=$PAYMENT_PUBLIC_KEY"
-            echo "PAYMENT_PRIVATE_KEY=$PAYMENT_PRIVATE_KEY"
-            echo "PAYMENT_INTEGRITY_KEY=$PAYMENT_INTEGRITY_KEY"
-            echo "PAYMENT_GATEWAY_MODE=$PAYMENT_GATEWAY_MODE"
-            echo "CORS_ORIGIN=${{ steps.cors.outputs.cors_origin }}"
-            echo "DYNAMODB_ENDPOINT="
-            echo "DYNAMODB_TABLE_NAME=checkout-store-${STAGE}"
+            [ -n "${PAYMENT_API_URL:-}" ] || echo "PAYMENT_API_URL=$GH_PAYMENT_API_URL"
+            [ -n "${PAYMENT_PUBLIC_KEY:-}" ] || echo "PAYMENT_PUBLIC_KEY=$GH_PAYMENT_PUBLIC_KEY"
+            [ -n "${PAYMENT_PRIVATE_KEY:-}" ] || echo "PAYMENT_PRIVATE_KEY=$GH_PAYMENT_PRIVATE_KEY"
+            [ -n "${PAYMENT_INTEGRITY_KEY:-}" ] || echo "PAYMENT_INTEGRITY_KEY=$GH_PAYMENT_INTEGRITY_KEY"
+            [ -n "${PAYMENT_GATEWAY_MODE:-}" ] || echo "PAYMENT_GATEWAY_MODE=$GH_PAYMENT_GATEWAY_MODE"
           } >> "$GITHUB_ENV"
+
+      - name: Overlay feature CORS + table
+        run: |
+          echo "CORS_ORIGIN=${{ steps.cors.outputs.cors_origin }}" >> "$GITHUB_ENV"
+          echo "DYNAMODB_TABLE_NAME=checkout-store-${STAGE}" >> "$GITHUB_ENV"
+          echo "DYNAMODB_ENDPOINT=" >> "$GITHUB_ENV"
 
       - name: Deploy isolated API stack
         run: npx serverless deploy --stage "$STAGE" --verbose

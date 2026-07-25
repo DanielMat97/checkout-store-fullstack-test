@@ -16,7 +16,7 @@
 | FE live (off mock) | `frontend-live-wiring/` | **done** | Base #3 completo |
 | Cobertura Jest | `testing-coverage/` | **done** | Base #5 (30) |
 | Deploy AWS | `cloud-deploy/` | **in_progress** (Actions+Amplify listos; URLs públicas pendientes) | Base #6 (20) |
-| Secrets Vault | `secrets-vault/` | **ready** → implementando | B1 secrecy + cloud-deploy |
+| Secrets Vault | `secrets-vault/` | **done** | B1 secrecy + cloud-deploy |
 | README entregable | `readme-deliverables/` | **ready** | Base #1 (5) |
 | Seguridad OWASP/HTTPS | `security-hardening/` | **ready** | Bonus #1 (5) |
 | Hexagonal + ROP real | `architecture-hex-rop/` | **done** | Bonus #5–6 (20) |

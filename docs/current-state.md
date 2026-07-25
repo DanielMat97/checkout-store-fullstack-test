@@ -9,8 +9,8 @@ Ver **`docs/scorecard.md`**.
 | | Estricto |
 |---|---|
 | Base | **60 / 100** |
-| Bonus | **30 / 50** |
-| **Total** | **90 / 150** |
+| Bonus | **31 / 50** |
+| **Total** | **91 / 150** |
 | Aprueba (≥100 base) | **No — REJECT** (#6 deploy URL = 0) |
 
 ## Specs (path to 100%)
@@ -25,6 +25,7 @@ Ver **`docs/scorecard.md`**.
 | `frontend-live-wiring` | **done** |
 | `testing-coverage` | **done** |
 | `cloud-deploy` | **in_progress** (Actions+Amplify; falta URL pública verificada) |
+| `secrets-vault` | **done** |
 | `checkout-payment` | ready (cerrar smoke E2E live) |
 | `readme-deliverables` | ready (**next** para URLs/runbook completo) |
 | `security-hardening` | ready |
@@ -35,6 +36,7 @@ Ver **`docs/scorecard.md`**.
 - CI: `.github/workflows/ci.yml`
 - Prod API (changed services): `.github/workflows/deploy-api.yml`
 - Feature `fb-*`: `.github/workflows/deploy-feature.yml` + Amplify branch
+- Secrets: HashiCorp Vault — [`docs/vault.md`](vault.md) (`npm run vault:up`)
 - Guide: [`docs/deploy.md`](deploy.md) · FE build: `amplify.yml`
 
 ## Coverage

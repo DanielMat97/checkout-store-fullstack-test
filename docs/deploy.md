@@ -84,15 +84,13 @@ Feature branches are created/updated by `deploy-feature.yml` — you do **not** 
 
 ## GitHub configuration
 
-### Secrets
+### Secrets (prefer Vault)
 
 | Secret | Purpose |
 |---|---|
-| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | Deploy credentials (prefer least-privilege IAM) |
-| `PAYMENT_API_URL` | Payment sandbox base URL |
-| `PAYMENT_PUBLIC_KEY` | Public key |
-| `PAYMENT_PRIVATE_KEY` | Private key |
-| `PAYMENT_INTEGRITY_KEY` | Integrity secret |
+| `VAULT_ADDR` / `VAULT_ROLE_ID` / `VAULT_SECRET_ID` | **Preferred** — load `PAYMENT_*` from Vault (see [`vault.md`](vault.md)) |
+| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | Deploy credentials (or OIDC later) |
+| `PAYMENT_*` | **Legacy fallback** if Vault is not configured |
 
 ### Variables
 
@@ -104,6 +102,7 @@ Feature branches are created/updated by `deploy-feature.yml` — you do **not** 
 | `CORS_ORIGIN` | `https://main.d1234abcd.amplifyapp.com` |
 | `PAYMENT_GATEWAY_MODE` | `sandbox` |
 | `PAYMENT_GATEWAY_MODE_FEATURE` | `fake` (optional; default for FB stacks) |
+| `VAULT_REQUIRED` | `true` to fail deploy when Vault is missing |
 
 ### Environments
 

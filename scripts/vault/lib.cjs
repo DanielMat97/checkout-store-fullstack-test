@@ -52,27 +52,7 @@ function vaultActionSecretLines(stage) {
 }
 
 function fieldToEnv(bundle, field) {
-  const map = {
-    payment: {
-      api_url: 'PAYMENT_API_URL',
-      public_key: 'PAYMENT_PUBLIC_KEY',
-      private_key: 'PAYMENT_PRIVATE_KEY',
-      integrity_key: 'PAYMENT_INTEGRITY_KEY',
-      events_key: 'PAYMENT_EVENTS_KEY',
-      currency: 'PAYMENT_CURRENCY',
-    },
-    aws: {
-      access_key_id: 'AWS_ACCESS_KEY_ID',
-      secret_access_key: 'AWS_SECRET_ACCESS_KEY',
-    },
-    app: {
-      payment_gateway_mode: 'PAYMENT_GATEWAY_MODE',
-      cors_origin: 'CORS_ORIGIN',
-      base_fee: 'BASE_FEE',
-      delivery_fee: 'DELIVERY_FEE',
-    },
-  };
-  return map[bundle]?.[field];
+  return PATHS.bundles?.[bundle]?.[field];
 }
 
 module.exports = {
