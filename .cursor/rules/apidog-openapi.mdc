@@ -21,6 +21,8 @@ docs/api/transactions.openapi.json
 ```
 
 - Primary format: **OpenAPI 3.0 / 3.1** (Apidog: Import → OpenAPI).
+- Public docs UI (optional): document URL + sync cadence in `docs/api/apidog.md`.
+- **First / default `servers` entry must be the deployed AWS HttpApi** (not localhost) so Apidog “Try it” hits prod.
 - Also keep `.postman/collection.json` (Collection v2.1) in sync when practical — Apidog imports Postman too; brief allows Postman **or** public Swagger.
 - Prefer generating from Nest `@nestjs/swagger` (`DocumentBuilder` + decorators) and writing/exporting into `docs/api/` so the file stays the source of truth for import.
 

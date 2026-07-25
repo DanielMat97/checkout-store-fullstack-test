@@ -1,6 +1,6 @@
 # Current state
 
-> Last updated: **2026-07-25** (feature URL comments + Amplify env sync + destroy button; OpenAPI 1.0.0; score **150/150**)
+> Last updated: **2026-07-25** (Apidog portal + OpenAPI AWS default server; feature URL teardown; score **150/150**)
 
 ## Score (rúbrica brief — modo evaluador estricto)
 
@@ -39,6 +39,7 @@ Ver **`docs/scorecard.md`**.
 | `amplify-build-gate` | **done** (ADR 0015 — Amplify SUCCEED required in FE deploy) |
 | `openapi-complete-responses` | **done** (OpenAPI 1.0.0 — all endpoint success/error bodies) |
 | `feature-env-urls-teardown` | **done** (ADR 0016 — URL comments, Amplify VITE sync, Destroy workflow) |
+| `apidog-portal-aws-server` | **done** (Apidog UI docs + OpenAPI default server = AWS) |
 
 ## Deploy (live)
 
@@ -47,6 +48,7 @@ Ver **`docs/scorecard.md`**.
 | FE | https://master.dw2i8myh0xumx.amplifyapp.com |
 | API | https://qo9kbfxew8.execute-api.us-east-1.amazonaws.com |
 | OpenAPI | https://master.dw2i8myh0xumx.amplifyapp.com/openapi.json |
+| Apidog UI | https://7j6npb6n4w.apidog.io ([docs/api/apidog.md](api/apidog.md) — sync ~3h) |
 | Payment mode | `sandbox` |
 | Security | [`docs/security.md`](security.md) |
 | Observability | [`docs/observability.md`](observability.md) — dashboard `checkout-api-<stage>-ops` |

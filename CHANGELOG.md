@@ -7,6 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Apidog portal docs + AWS default server**: [`docs/api/apidog.md`](docs/api/apidog.md) documents https://7j6npb6n4w.apidog.io (auto-sync ~every 3h). OpenAPI `servers` default/`baseUrl` = AWS HttpApi prod (not localhost). Spec: `specs/apidog-portal-aws-server/`.
 - **Feature env URLs + teardown (ADR 0016)**: sticky PR/commit comments with FE (+ API) URLs after `fb-*` and master deploys; Amplify branch env merge syncs `VITE_API_BASE_URL` to the new Serverless stage; Actions button workflow `destroy-feature.yml` removes SF stack + Amplify branch. Spec: `specs/feature-env-urls-teardown/`.
 - **OpenAPI complete responses (v1.0.0)**: every Nest HTTP route documented with success + error schemas/examples matching `domainErrorToHttp` + ValidationPipe; servers offline + prod; synced to `apps/web/public/openapi.json`. Spec: `specs/openapi-complete-responses/`.
 - **Amplify build gate (ADR 0015)**: when FE is deployed / FE paths change, Actions waits for Amplify job `SUCCEED` (`wait-amplify-job.cjs`); fails on `FAILED`/`CANCELLED`/timeout. Wired in `deploy-feature.yml` + workflow `amplify-build-gate.yml`. Spec: `specs/amplify-build-gate/`.

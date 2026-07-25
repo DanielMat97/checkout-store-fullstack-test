@@ -29,11 +29,12 @@
 | **Amplify build gate** | `amplify-build-gate/` | **done** | FE Amplify SUCCEED fail-closed (ADR 0015) |
 | **OpenAPI complete** | `openapi-complete-responses/` | **done** | All endpoint responses + error schemas |
 | **Feature URLs + teardown** | `feature-env-urls-teardown/` | **done** | PR/commit URLs + Amplify VITE sync + Destroy button (ADR 0016) |
+| **Apidog portal + AWS server** | `apidog-portal-aws-server/` | **done** | Portal docs + OpenAPI default = AWS HttpApi |
 
 ## Orden reciente
 
 ```
-… → openapi-complete-responses → feature-env-urls-teardown
+… → feature-env-urls-teardown → apidog-portal-aws-server
 ```
 
 ## Reglas

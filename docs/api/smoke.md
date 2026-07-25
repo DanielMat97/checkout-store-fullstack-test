@@ -54,4 +54,5 @@ curl -s -o /tmp/out -w "%{http_code}" -X POST "$BASE/customers" \
 cat /tmp/out
 ```
 
-OpenAPI (Apidog-importable, full success + error bodies per endpoint): [`docs/api/openapi.json`](openapi.json) · public copy served at Amplify `/openapi.json`.
+OpenAPI (Apidog-importable): [`openapi.json`](openapi.json) · public JSON on Amplify `/openapi.json`.  
+**Docs UI:** [https://7j6npb6n4w.apidog.io](https://7j6npb6n4w.apidog.io) — auto-refresh ~every 3h ([apidog.md](apidog.md)). Default server = AWS prod HttpApi.

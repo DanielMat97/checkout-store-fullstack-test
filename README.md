@@ -8,7 +8,8 @@ Mobile-first SPA to purchase a product with card checkout, delivery data, paymen
 |---|---|
 | **Web (Amplify)** | https://master.dw2i8myh0xumx.amplifyapp.com |
 | **API (AWS HTTP API)** | https://qo9kbfxew8.execute-api.us-east-1.amazonaws.com |
-| **OpenAPI (public)** | https://master.dw2i8myh0xumx.amplifyapp.com/openapi.json |
+| **OpenAPI (public JSON)** | https://master.dw2i8myh0xumx.amplifyapp.com/openapi.json |
+| **Apidog docs UI** | https://7j6npb6n4w.apidog.io (auto-sync ~3h — [docs](docs/api/apidog.md)) |
 | Web (local) | `http://localhost:5173` |
 | API (local) | `http://localhost:3000` |
 
@@ -65,7 +66,7 @@ Design system: [`docs/design-system.md`](docs/design-system.md)
 | `/deliveries` | Shipping address / fulfillment |
 | `/transactions` | PENDING create + pay |
 
-Import [`docs/api/openapi.json`](docs/api/openapi.json) in Apidog/Postman, or open the [public OpenAPI](https://master.dw2i8myh0xumx.amplifyapp.com/openapi.json).
+Import [`docs/api/openapi.json`](docs/api/openapi.json) in Apidog/Postman, open the [public OpenAPI JSON](https://master.dw2i8myh0xumx.amplifyapp.com/openapi.json), or browse the live docs UI: [Apidog portal](https://7j6npb6n4w.apidog.io) ([how it syncs](docs/api/apidog.md)).
 
 ## Deploy
 
