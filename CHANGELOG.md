@@ -7,7 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- **README principal**: guía didáctica con emojis — URLs, porqué del stack, CloudWatch (`checkout-api-<stage>-ops`), pipelines stage-by-stage, feature teardown, mapa completo de specs/ADRs/docs.
+- **README principal**: tono conversacional para el evaluador (menos tablas); Vault cableado pero **opcional por costo**; slots para pantallazos CloudWatch; cada stage de cada pipeline con su razón de ser.
 
 ### Added
 
