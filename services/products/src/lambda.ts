@@ -10,10 +10,7 @@ import {
   applySecuritySurface,
 } from '@app/shared';
 
-type AsyncHandler = (
-  event: unknown,
-  context: Context,
-) => Promise<unknown>;
+type AsyncHandler = (event: unknown, context: Context) => Promise<unknown>;
 
 const serviceName = process.env.SERVICE_NAME ?? 'products';
 let cachedServer: AsyncHandler | undefined;

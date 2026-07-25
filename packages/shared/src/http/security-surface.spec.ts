@@ -24,10 +24,7 @@ describe('applySecuritySurface', () => {
     const res = { setHeader: jest.fn(), removeHeader: jest.fn() };
     const next = jest.fn();
     middleware({}, res, next);
-    expect(res.setHeader).toHaveBeenCalledWith(
-      'X-Content-Type-Options',
-      'nosniff',
-    );
+    expect(res.setHeader).toHaveBeenCalledWith('X-Content-Type-Options', 'nosniff');
     expect(res.removeHeader).toHaveBeenCalledWith('X-Powered-By');
     expect(next).toHaveBeenCalled();
   });
