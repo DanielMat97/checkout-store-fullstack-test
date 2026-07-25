@@ -172,7 +172,9 @@ jobs:
             echo "SonarCloud skipped (no SONAR_TOKEN) — free OSS optional per ADR 0012" >> "$GITHUB_STEP_SUMMARY"
           fi
       - name: SonarCloud Scan
+        id: scan
         if: steps.sonar.outputs.run == 'true'
+        continue-on-error: true
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -181,8 +183,19 @@ jobs:
           args: >
             -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
             -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
+            -Dsonar.projectName=Checkout Store NORA
             -Dsonar.sources=apps,services,packages
             -Dsonar.exclusions=**/dist/**,**/coverage/**,**/node_modules/**,**/*.spec.ts,**/*.spec.tsx,**/e2e/**
+      - name: Sonar optional outcome
+        if: steps.sonar.outputs.run == 'true'
+        run: |
+          if [ "${{ steps.scan.outcome }}" = "failure" ]; then
+            echo "### SonarCloud scan failed (non-blocking)" >> "$GITHUB_STEP_SUMMARY"
+            echo "Token presente pero el scan falló — no bloquea quality-ok (ADR 0012 / 0013: Sonar es opcional)." >> "$GITHUB_STEP_SUMMARY"
+            echo "Revisá projectKey=\`${{ vars.SONAR_PROJECT_KEY }}\` / org=\`${{ vars.SONAR_ORGANIZATION }}\` en SonarCloud." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### SonarCloud scan OK" >> "$GITHUB_STEP_SUMMARY"
+          fi
 
   # Single success signal for deploy workflows (needs: quality → this job).
   quality-ok:

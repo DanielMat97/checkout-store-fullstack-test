@@ -108,6 +108,8 @@ Smoke: `GET /products` returns seeded catalog (200).
 
 GitHub (`DanielMat97/checkout-store-fullstack-test`) variables/secrets for Actions were configured with AWS profile **`stonestore`** (`AWS_*` secrets + `AMPLIFY_APP_ID`, `CORS_ORIGIN`, `AWS_REGION`, `SERVERLESS_STAGE`, `PAYMENT_GATEWAY_MODE=fake`).
 
+**Amplify ↔ GitHub:** si renombrás el repo, hay que actualizar el link con CLI (`aws amplify update-app --repository <nueva-url> --access-token <gh-pat>`). Si no, Amplify deja de recibir webhooks y el gate **Wait for Amplify SUCCEED** timeout/falla porque nunca aparece el `GITHUB_SHA`.
+
 Feature branches are created/updated by `deploy-feature.yml` — you do **not** need to pre-create every `fb-*` branch in Amplify.
 
 ### Amplify build gate (fail-closed)

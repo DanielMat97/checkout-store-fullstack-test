@@ -24,8 +24,8 @@
 | `AMPLIFY_APP_ID` | variable | Sí para gate Amplify FE |
 | `AMPLIFY_PROD_BRANCH` | variable | No (default `master`) |
 | `SONAR_TOKEN` | secret | No (omite Sonar) |
-| `SONAR_ORGANIZATION` | variable | Con Sonar |
-| `SONAR_PROJECT_KEY` | variable | Con Sonar |
+| `SONAR_ORGANIZATION` | variable | Con Sonar (ej. `danielmat97`) |
+| `SONAR_PROJECT_KEY` | variable | Con Sonar — debe coincidir con el project key en SonarCloud (tras rename del repo: `DanielMat97_checkout-store-fullstack-test`) |
 | `STRESS_ENABLED` | variable | No — pon `false` para omitir Artillery |
 | AWS / payment / Amplify | existentes | Sí para deploy/rollback |
 
