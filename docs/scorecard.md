@@ -1,7 +1,7 @@
 # Scorecard — evaluación estricta (hiring bar)
 
 > Fuente rúbrica: `docs/fullstack-test.md` (100 base + 50 bonus).  
-> Última evaluación: **2026-07-24** (FE Amplify + API Gateway **públicos**; smoke `GET /products` 200)  
+> Última evaluación: **2026-07-25** (smoke live FE+API; E2E cloud customer→tx→pay APPROVED→stock−1)  
 > Modo: **evaluador técnico de la empresa contratante** (no autoelogio del candidato).
 
 ---
@@ -33,13 +33,15 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 ### Checklist del evaluador (antes de publicar números)
 
-- [x] Corrí o verifiqué el flujo feliz local (tests).
-- [x] Busqué PAN/CVV en persistencia / logs.
-- [x] Confirmé dominios API reales (no solo `/health`).
-- [x] Vi coverage report (`npm run test:cov` + `docs/coverage.md`).
-- [x] Vi URL de deploy: FE https://master.dw2i8myh0xumx.amplifyapp.com · API https://qo9kbfxew8.execute-api.us-east-1.amazonaws.com · `GET /products` → 200 seeded.
-- [x] Releí la rúbrica base y bonus sin inventar criterios nuevos.
-- [x] Apliqué las 4 lentes (Arquitecto / TL / PO / Security) en el veredicto.
+- [x] Smoke FE HTTPS 200: https://master.dw2i8myh0xumx.amplifyapp.com
+- [x] Smoke API: `GET /products` 200; `GET /products/:id` + `/stock` 200
+- [x] E2E cloud: `POST /customers` → `POST /transactions` PENDING → `POST …/pay` **APPROVED** (`providerRef=fake_…`) → stock **8→7**; `GET /deliveries/:id` 200
+- [x] Bundle FE incluye `qo9kbfxew8.execute-api.us-east-1.amazonaws.com` (no solo mock)
+- [x] PAN/CVV: `cardSession` efímero; sin campos PAN en `@app/persistence`
+- [x] Coverage report `docs/coverage.md` (>80% lines FE+BE)
+- [x] API responses aún exponen `x-powered-by: Express` (headers OWASP no demostrados en cloud)
+- [x] Observatory: API Mozilla no disponible en este corte (502)
+- [x] Releí rúbrica base/bonus; apliqué 4 lentes
 
 ---
 
@@ -47,18 +49,26 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 | Lente | Veredicto (1 línea) |
 |---|---|
-| Arquitecto | Stack en cloud real; Node 24 async handlers; falta prueba E2E pago live. |
-| Líder técnico | URLs públicas + Actions secrets; table name prod no stage-suffix (−ops). |
-| Product Owner | Catálogo live OK; checkout E2E en prod **no** demostrado en este corte. |
-| Security | HTTPS público sí; sin captura Observatory; pago en `fake` mode. |
-| Hiring bar | **Base sí (≥100 no requerido si rúbrica es /150).** Deploy ya no es 0. |
+| Arquitecto | Dominios cloud reales + stock decrement; pasarela prod = **fake**, no sandbox del brief. |
+| Líder técnico | Deploy operable; README con URLs; fuga `X-Powered-By`; OpenAPI solo en repo. |
+| Product Owner | Journey API 5.1–5.3 **demostrado en cloud**; UI browser E2E no capturado. |
+| Security | PCI-minded en código; HTTPS sí; headers/Observatory **no** evidenciados en URL pública. |
+| Hiring bar | **Aún no (≥100 base).** Base 89; falta sandbox real + OWASP demo + README al 5. |
 
 | | Puntos (modo estricto) |
 |---|---|
-| **Base** | **84 / 100** |
+| **Base** | **89 / 100** |
 | **Bonus** | **32 / 50** |
-| **Total** | **116 / 150** |
-| **¿Aprueba (≥100 base)?** | **No** (84&lt;100) — pero deploy ya no bloquea a 0 |
+| **Total** | **121 / 150** |
+| **¿Aprueba (≥100 base)?** | **No** |
+
+### Evidencia citada (cloud)
+
+| | |
+|---|---|
+| FE | https://master.dw2i8myh0xumx.amplifyapp.com |
+| API | https://qo9kbfxew8.execute-api.us-east-1.amazonaws.com |
+| Pay | `tx_c73f8af4-…` → `APPROVED` / `fake_approved_…` · stock Aura Quiet 8→7 |
 
 ---
 
@@ -66,12 +76,14 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 | Paso brief | Evidencia | Nota del panel | Score parcial |
 |---|---|---|---|
-| 1–4 UI + fees | NORA Soft | OK. | ✅ |
-| 5.1–5.3 | BE + FE → API prod | FE bundle apunta a API; **pago E2E live no capturado**. | 🟡 |
-| 4 dominios API | OpenAPI + `GET /products` live | Solo smoke products verificado hoy. | 🟡 |
-| Seed | seed en `checkout-store` | OK. | ✅ |
-| Jest >80% + README | coverage + URLs en README | OK. | ✅ |
-| Deploy | Amplify + API Gateway HTTPS | URLs públicas verificadas. | ✅ |
+| 1–4 UI + fees | NORA Soft Amplify | FE 200; fees en env Amplify. | ✅ |
+| 5.1 PENDING | `POST /transactions` live | PENDING + deliveryId. | ✅ |
+| 5.2 Pago proveedor | `POST …/pay` live | **Fake** gateway (`fake_approved_…`), no sandbox UAT. | 🟡 |
+| 5.3 Stock | `GET …/stock` | 8→7 tras APPROVED. | ✅ |
+| 4 dominios API | products/customers/tx/deliveries | Smoke live en los cuatro. | ✅ |
+| Seed | catálogo en DynamoDB | OK. | ✅ |
+| Jest >80% | `docs/coverage.md` | OK (lines). | ✅ |
+| Deploy | Amplify + API GW | URLs públicas. | ✅ |
 
 ---
 
@@ -79,15 +91,15 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 | # | Criterio | Max | **Strict** | Justificación del panel |
 |---|---|---|---|---|
-| 1 | README | 5 | **4** | URLs prod + local; −1 runbook aún incompleto para evaluador externo. |
-| 2 | Imágenes | 5 | **4** | Sin cambio. |
-| 3 | Onboarding pago | 20 | **16** | FE live wired; −4 sin evidencia de pago aprobado/declinado en prod. |
-| 4 | API funcionando | 20 | **15** | `GET /products` live 200 + seed; −5 sin smoke documentado de los 4 dominios en cloud. |
-| 5 | Tests >80% | 30 | **27** | Sin cambio material. |
-| 6 | Deploy | 20 | **18** | FE+API HTTPS públicos; −2 modo pago `fake`, sin dominio custom / observabilidad demo. |
-| | **Subtotal base** | **100** | **84** | |
+| 1 | README | 5 | **4** | URLs prod + coverage + OpenAPI path. −1: sin Swagger/Postman público; data-model no enlazado en README. |
+| 2 | Imágenes | 5 | **4** | Unsplash + DS; sin matriz overflow navegadores. |
+| 3 | Onboarding pago | 20 | **17** | E2E API cloud APPROVED+stock; FE apunta a API. −3: prod en **fake** (brief pide sandbox); sin captura UI E2E. |
+| 4 | API funcionando | 20 | **18** | 4 dominios + validación 400 + pay path live. −2: `X-Powered-By` en prod; OpenAPI no hosteado. |
+| 5 | Tests >80% | 30 | **27** | FE/BE lines >80 documentados. −3: branches tx rebajados; sandbox fuera del collect global. |
+| 6 | Deploy | 20 | **19** | FE+API HTTPS públicos y cableados. −1: Amplify default domain / sin evidencia Observatory. |
+| | **Subtotal base** | **100** | **89** | |
 
-**Base oficial del corte: 84 / 100.**
+**Base oficial del corte: 89 / 100.**
 
 ---
 
@@ -95,12 +107,12 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 
 | # | Criterio | Max | **Strict** | Justificación del panel |
 |---|---|---|---|---|
-| 1 | OWASP/HTTPS | 5 | **3** | HTTPS en Amplify + API GW; headers en código; −2 sin Observatory. |
-| 2 | Responsive | 5 | **2** | Sin matriz. |
-| 3 | CSS | 10 | **6** | Sin cambio. |
-| 4 | Clean code | 10 | **6** | Node 24 handler fix; sin más. |
-| 5 | Hexagonal | 10 | **8** | Sin cambio. |
-| 6 | ROP | 10 | **7** | Sin cambio. |
+| 1 | OWASP/HTTPS | 5 | **3** | HTTPS FE+API. −2: headers OWASP no visibles en respuesta API; Observatory no corrido. |
+| 2 | Responsive | 5 | **2** | Mobile-first en código; sin matriz de dispositivos/browsers. |
+| 3 | CSS | 10 | **6** | Design system NORA; no “CSS mastery” demo. |
+| 4 | Clean code | 10 | **6** | Hex/ROP cableados; deuda headers en Lambda. |
+| 5 | Hexagonal | 10 | **8** | Ports + use-cases + adapters con tests; no perfect isolation everywhere. |
+| 6 | ROP | 10 | **7** | `neverthrow` en pagos/tx; no 100% superficie. |
 | | **Subtotal bonus** | **50** | **32** | |
 
 ---
@@ -108,21 +120,22 @@ Cada vez que un agente, humano o PR revise este scorecard **debe** comportarse c
 ## 5. Total estricto
 
 ```
-Base   84 / 100
+Base   89 / 100
 Bonus  32 /  50
 ───────────────
-Total 116 / 150
+Total 121 / 150
 ```
 
-**Resultado hiring:** **aún REJECT por base &lt;100** — gap principal: E2E pago live + smoke 4 dominios + Observatory.
+**Resultado hiring:** **REJECT** (base &lt; 100). Deploy ya no es el bloqueo; el umbral pide ~11 pts más de base.
 
 ### Gap mínimo a 100 base
 
 | Prioridad | Trabajo | Pts base ≈ |
 |---|---|---|
-| P0 | Smoke E2E live (customer→tx→pay) + documentar | +4–5 (#3/#4) |
-| P0 | Smoke 4 dominios en cloud | +3–4 (#4) |
-| P1 | Observatory / headers en URL pública | bonus |
+| P0 | Prod `PAYMENT_GATEWAY_MODE=sandbox` + keys Vault + 1 pago sandbox live | +2–3 (#3) |
+| P0 | Quitar `X-Powered-By` + headers OWASP en API GW + nota Observatory | +1–2 (#4 / bonus) |
+| P1 | README: link data-model + OpenAPI/Swagger público | +1 (#1) |
+| P1 | Subir branches tx / incluir sandbox en coverage narrative | +1–2 (#5) |
 
 ---
 
@@ -130,8 +143,8 @@ Total 116 / 150
 
 | Hito | Base ≈ | Bonus ≈ | Total ≈ | Hiring |
 |---|---|---|---|---|
-| Hoy | 84 | 32 | **116** | Reject (base) |
-| + E2E live + Observatory | 98–100 | 36 | **134–136** | Pass posible |
+| Hoy | 89 | 32 | **121** | Reject (base) |
+| + sandbox live + OWASP demo + README 5 | 98–100 | 35–37 | **133–137** | Pass posible |
 
 ---
 

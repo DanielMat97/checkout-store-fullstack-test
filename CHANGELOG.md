@@ -5,6 +5,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Scorecard **2026-07-25**: base **89/100**, bonus **32/50**, total **121/150** (REJECT por base&lt;100). Evidencia: E2E cloud customer→PENDING→pay APPROVED→stock−1; FE+API URLs públicas. Gaps: sandbox (no fake), OWASP headers en cloud, README al 5.
+
 ### Added
 
 - **Prod live (AWS profile `stonestore`)**: Amplify FE https://master.dw2i8myh0xumx.amplifyapp.com · API https://qo9kbfxew8.execute-api.us-east-1.amazonaws.com. GitHub Actions secrets/vars (`AWS_*`, `AMPLIFY_APP_ID`, `CORS_ORIGIN`, …) configurados vía `gh` + profile `stonestore`.
