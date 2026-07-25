@@ -7,7 +7,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- Scorecard **2026-07-25**: base **89/100**, bonus **32/50**, total **121/150** (REJECT por base&lt;100). Evidencia: E2E cloud customer→PENDING→pay APPROVED→stock−1; FE+API URLs públicas. Gaps: sandbox (no fake), OWASP headers en cloud, README al 5.
+- Scorecard **2026-07-25**: base **100/100**, bonus **35/50**, total **135/150** — **PASS**. Evidencia: sandbox pay APPROVED (`providerRef` real), OWASP headers FE+API, OpenAPI público, README completo.
+- Prod API: `PAYMENT_GATEWAY_MODE=sandbox` + keys en Lambda/GitHub Secrets (profile `stonestore` / `gh`).
+- Security: `applySecuritySurface` (strip `X-Powered-By` + OWASP headers); Amplify `customHeaders`; [`docs/security.md`](docs/security.md).
 
 ### Added
 
