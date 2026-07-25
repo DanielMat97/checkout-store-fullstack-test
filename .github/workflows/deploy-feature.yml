@@ -309,7 +309,7 @@ jobs:
           artifact_name: zap-scan-api-feature
       - name: Upload Playwright report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report-feature
           path: apps/web/playwright-report
@@ -349,7 +349,7 @@ jobs:
           exit $CODE
       - name: Upload Artillery report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: artillery-report-feature
           path: |
