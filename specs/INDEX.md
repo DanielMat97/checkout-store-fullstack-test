@@ -36,4 +36,4 @@ deploy-smoke-rollback → ux-quality-bar
 1. Leer gap analysis + ADR 0011 antes de tocar pay path.
 2. Sin marca de pasarela en source público.
 3. Living docs en el mismo cambio.
-4. Pipeline post-deploy: ver ADR 0012 + [`docs/ci-cd.md`](../docs/ci-cd.md).
+4. Pipeline post-deploy: ver ADR 0012/0013 + [`docs/ci-cd.md`](../docs/ci-cd.md).

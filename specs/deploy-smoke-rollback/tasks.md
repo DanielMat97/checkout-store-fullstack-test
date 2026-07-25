@@ -12,3 +12,4 @@ derived_from: plan.md
 - [x] **DS5** — `deploy-api.yml`: baseline → deploy → smoke (PW+ZAP) → rollback on fail
 - [x] **DS6** — `deploy-feature.yml`: smoke post-deploy (+ rollback best-effort)
 - [x] **DS7** — README + living docs finales; marcar tasks done
+- [x] **DS8** — ADR 0013 + Artillery scenario + job stress `continue-on-error` (prod + feature) + docs

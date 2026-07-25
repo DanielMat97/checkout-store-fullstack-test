@@ -43,6 +43,6 @@ Ver **`docs/scorecard.md`**.
 | OpenAPI | https://master.dw2i8myh0xumx.amplifyapp.com/openapi.json |
 | Payment mode | `sandbox` |
 | Security | [`docs/security.md`](security.md) |
-| CI/CD | [`docs/ci-cd.md`](ci-cd.md) — pre: CodeQL (+Sonar opc.); post: Playwright + ZAP; fail → API rollback |
+| CI/CD | [`docs/ci-cd.md`](ci-cd.md) — pre: CodeQL (+Sonar opc.); post: Playwright + ZAP; Artillery stress opcional; fail smoke → API rollback |
 | Gap analysis | [`docs/brief-gap-analysis.md`](brief-gap-analysis.md) |
 | Post-pay | SQS `checkout-orders-events-{stage}` + worker; local sync fallback |

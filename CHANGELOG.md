@@ -7,6 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Optional Artillery stress (ADR 0013)**: post-deploy mild load on `GET /products` with `continue-on-error` — never blocks deploy/rollback. Scenario: `load/artillery-products.yml`.
 - **Post-deploy smoke + rollback (ADR 0012)**: Playwright E2E + OWASP ZAP after prod/feature deploy; CodeQL (+ optional SonarCloud) in CI quality gate; API rollback to last-good SHA on smoke failure. Specs: `specs/deploy-smoke-rollback/`. Docs: [`docs/ci-cd.md`](docs/ci-cd.md).
 - **SQS post-pay orchestration (ADR 0011)**: `PaymentApproved` queue + `ordersWorker`; sync in-process fallback when queue URL empty/offline. Ops console `/orders` (list APPROVED, restore stock, mark fulfilled). APIs: `GET /transactions`, `POST /transactions/:id/restore`, `PATCH /deliveries/:id`. Gap analysis: [`docs/brief-gap-analysis.md`](docs/brief-gap-analysis.md).
 

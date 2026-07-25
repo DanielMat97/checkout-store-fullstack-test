@@ -72,13 +72,14 @@ Import [`docs/api/openapi.json`](docs/api/openapi.json) in Apidog/Postman, or op
 | Workflow | When | What |
 |---|---|---|
 | `CI` | PR / `main`/`master` | validate → prettier → lint → audit → test → coverage → **CodeQL** → SonarCloud (optional) |
-| `Deploy API (prod)` | API changes | CI gate → Serverless → **Playwright E2E** + **OWASP ZAP** → **rollback** if smoke fails |
-| `Deploy feature (fb-*)` | `fb-*` branches | Isolated API + Amplify → smoke (+ rollback best-effort) |
+| `Deploy API (prod)` | API changes | CI gate → Serverless → **Playwright** + **ZAP** → rollback si fallan; **Artillery** stress opcional (`continue-on-error`) |
+| `Deploy feature (fb-*)` | `fb-*` branches | Isolated API + Amplify → smoke (+ Artillery opcional) |
 
 - Amplify app: `dw2i8myh0xumx` (branch `master`) · build: root `amplify.yml`
-- Runbook: [`docs/deploy.md`](docs/deploy.md) · CI/CD smoke+rollback: [`docs/ci-cd.md`](docs/ci-cd.md) · Vault: [`docs/vault.md`](docs/vault.md)
+- Runbook: [`docs/deploy.md`](docs/deploy.md) · CI/CD: [`docs/ci-cd.md`](docs/ci-cd.md) · Vault: [`docs/vault.md`](docs/vault.md)
 - Local E2E: `FE_BASE_URL=http://localhost:5173 API_BASE_URL=http://localhost:3000 npm run test:e2e`
-- Optional: set `FE_BASE_URL`, `SONAR_TOKEN` / `SONAR_ORGANIZATION` / `SONAR_PROJECT_KEY` (see ADR 0012)
+- Local stress: `API_BASE_URL=http://localhost:3000 npm run test:stress`
+- Optional: `FE_BASE_URL`, `SONAR_*`, `STRESS_ENABLED=false` (ADR 0012 / 0013)
 
 ## Coverage
 

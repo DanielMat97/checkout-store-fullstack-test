@@ -257,6 +257,44 @@ jobs:
           path: apps/web/playwright-report
           if-no-files-found: ignore
 
+  stress:
+    name: Artillery stress (optional, non-blocking)
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: ${{ always() && needs.deploy.result == 'success' && needs.deploy.outputs.api_url != '' && vars.STRESS_ENABLED != 'false' }}
+    continue-on-error: true
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Wait API
+        run: node scripts/ci/wait-http-ready.cjs "${{ needs.deploy.outputs.api_url }}/products" 300 10
+      - name: Run Artillery
+        env:
+          API_BASE_URL: ${{ needs.deploy.outputs.api_url }}
+        run: |
+          set +e
+          npx artillery run load/artillery-products.yml --output artillery-report.json
+          CODE=$?
+          npx artillery report artillery-report.json --output artillery-report.html || true
+          echo "### Artillery stress (non-blocking)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Target: \`${{ needs.deploy.outputs.api_url }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Exit code: $CODE (continue-on-error — no rollback)" >> "$GITHUB_STEP_SUMMARY"
+          exit $CODE
+      - name: Upload Artillery report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: artillery-report-feature
+          path: |
+            artillery-report.json
+            artillery-report.html
+          if-no-files-found: ignore
+
   rollback:
     name: Rollback feature API on smoke failure
     runs-on: ubuntu-latest

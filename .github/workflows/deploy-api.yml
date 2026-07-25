@@ -36,6 +36,11 @@ on:
         required: false
         default: false
         type: boolean
+      skip_stress:
+        description: 'Skip optional Artillery stress (non-blocking anyway)'
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: deploy-api-prod
@@ -261,6 +266,45 @@ jobs:
           fail_action: true
           allow_issue_writing: false
           cmd_options: '-a -I'
+
+  stress:
+    name: Artillery stress (optional, non-blocking)
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    # Never gates deploy success / rollback. continue-on-error keeps workflow green.
+    if: ${{ always() && needs.deploy.result == 'success' && needs.deploy.outputs.deployed == 'true' && vars.STRESS_ENABLED != 'false' && (github.event_name != 'workflow_dispatch' || inputs.skip_stress != true) }}
+    continue-on-error: true
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Wait for API ready
+        run: node scripts/ci/wait-http-ready.cjs "${{ needs.deploy.outputs.api_url }}/products" 300 10
+      - name: Run Artillery (mild load)
+        env:
+          API_BASE_URL: ${{ needs.deploy.outputs.api_url }}
+        run: |
+          set +e
+          npx artillery run load/artillery-products.yml --output artillery-report.json
+          CODE=$?
+          npx artillery report artillery-report.json --output artillery-report.html || true
+          echo "### Artillery stress (non-blocking)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Target: \`${{ needs.deploy.outputs.api_url }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Exit code: $CODE (job has continue-on-error — does **not** rollback)" >> "$GITHUB_STEP_SUMMARY"
+          exit $CODE
+      - name: Upload Artillery report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: artillery-report-prod
+          path: |
+            artillery-report.json
+            artillery-report.html
+          if-no-files-found: ignore
 
   rollback:
     name: Rollback API on smoke failure

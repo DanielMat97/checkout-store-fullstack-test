@@ -9,7 +9,7 @@ rubric: [6, B1]
 
 ## Resumen
 
-Como equipo de entrega, quiero que cada deploy a producción (y feature cuando aplique) pase un **gate de calidad pre-deploy**, y que **después** de un deploy exitoso se ejecuten **pruebas E2E** (navegador) y **chequeos OWASP** contra el ambiente live; si esas pruebas fallan, el sistema debe **volver a la versión anterior que sí funcionaba**.
+Como equipo de entrega, quiero que cada deploy a producción (y feature cuando aplique) pase un **gate de calidad pre-deploy**, y que **después** de un deploy exitoso se ejecuten **pruebas E2E** (navegador) y **chequeos OWASP** contra el ambiente live; si esas pruebas fallan, el sistema debe **volver a la versión anterior que sí funcionaba**. Opcionalmente (sin bloquear) se corre un smoke de **stress** con Artillery.
 
 ## Alcance
 
@@ -21,7 +21,7 @@ Como equipo de entrega, quiero que cada deploy a producción (y feature cuando a
   - **SonarCloud** opcional cuando exista `SONAR_TOKEN` (tier gratis para OSS público; si no hay token, el job se omite sin fallar el gate).
 - Dependencias: `npm audit` (ya existe) como control OWASP dependency-ish.
 
-### Post-deploy (nuevo stage)
+### Post-deploy (bloqueante para rollback)
 
 - **Playwright** E2E contra FE HTTPS + API HTTPS desplegados (no Selenium: ver ADR 0012).
 - Escenarios mínimos de negocio:
@@ -33,18 +33,28 @@ Como equipo de entrega, quiero que cada deploy a producción (y feature cuando a
 - **OWASP ZAP baseline** (gratis) contra FE y/o API live (headers, issues HIGH/CRITICAL fallan el job).
 - Evidencia en GitHub Step Summary + artifacts (reportes Playwright / ZAP).
 
+### Stress (opcional, no bloqueante) — ADR 0013
+
+- Tras deploy exitoso, un job **Artillery** carga levemente `GET /products` (y health-ish paths) contra la API live.
+- El job usa `continue-on-error: true`: **nunca** falla el workflow, **no** dispara rollback, **no** bloquea quality-ok ni el merge.
+- Se omite con var `STRESS_ENABLED=false` o input `skip_stress` en `workflow_dispatch`.
+- Carga acotada (pocos VUs / corta duración) para no agotar cuota Lambda/API Gateway ni costos.
+- Artifact del reporte Artillery cuando exista.
+
 ### Rollback
 
 - Antes del deploy se captura el **SHA last-known-good** (último `deploy-api` exitoso distinto del run actual).
 - Si E2E o ZAP post-deploy fallan → redeploy API desde ese SHA (Serverless stage prod / feature).
-- FE Amplify: se documenta e intenta rollback vía job Amplify del commit good cuando `AMPLIFY_APP_ID` esté configurado; si no es posible, el workflow falla con instrucción clara (API ya revertida).
+- FE Amplify: best-effort; API ya revertida.
+- **Stress Artillery no participa en la decisión de rollback.**
 
 ## Fuera de alcance
 
-- SonarQube self-hosted Community Edition (infra propia; no en Actions de este repo).
+- SonarQube self-hosted Community Edition.
 - Blue/green / canary AWS avanzado.
-- E2E de todos los edge cases de pasarela (solo happy path + smoke UI/API).
-- LocalStack / E2E locales obligatorios en CI (post-deploy usa URLs cloud).
+- Load test masivo / soak de horas (solo smoke de stress corto).
+- Stress contra endpoints de pago (no martillar la pasarela).
+- LocalStack / E2E locales obligatorios en CI.
 
 ## Criterios de aceptación (EARS)
 
@@ -53,18 +63,21 @@ Como equipo de entrega, quiero que cada deploy a producción (y feature cuando a
 - Cuando el deploy Serverless de prod termina OK, el workflow debe lanzar un job post-deploy de Playwright + ZAP contra `FE_BASE_URL` / `API` del stage.
 - Cuando Playwright o ZAP post-deploy fallan, el workflow debe redeployar el API desde el SHA last-known-good y marcar el run como fallido.
 - Cuando no existe SHA previo (primer deploy), el rollback se omite con warning explícito (no inventar SHA).
-- Cuando se busca en docs, debe existir spec/plan/tasks + ADR 0012 + mención en README/current-state.
+- Cuando corre el stage Artillery de stress, un fallo de latencia/errores HTTP **no** debe marcar el workflow como fallido ni activar rollback.
+- Cuando `STRESS_ENABLED=false` (o `skip_stress`), el job de stress se omite sin impacto.
+- Cuando se busca en docs, debe existir spec/plan/tasks + ADR 0012/0013 + mención en README/current-state/`docs/ci-cd.md`.
 
 ## Supuestos
 
-- URLs prod conocidas vía vars/secrets: `FE_BASE_URL` (o Amplify master URL documentada) y API vía `print-api-url.cjs`.
-- Amplify FE se despliega en paralelo al push; E2E espera readiness (poll HTTP 200) con timeout razonable (~10–15 min).
-- Tarjeta de prueba y `PAYMENT_GATEWAY_MODE` ya configurados en el ambiente (fake o sandbox).
+- URLs prod conocidas vía vars/secrets: `FE_BASE_URL` y API vía `print-api-url.cjs`.
+- Amplify FE se despliega en paralelo; E2E espera readiness.
+- Stress por defecto **habilitado** tras deploy (`STRESS_ENABLED` distinto de `false`).
 - Provider brand **nunca** en source/docs públicos.
 
 ## Referencias
 
 - ADR 0012 (Playwright + free SAST + ZAP + rollback)
+- ADR 0013 (Artillery stress opcional non-blocking)
 - `specs/cloud-deploy/`, `specs/security-hardening/`
 - Workflows: `.github/workflows/ci.yml`, `deploy-api.yml`, `deploy-feature.yml`
 - Scorecard base #6 (deploy) + bonus B1 (OWASP)

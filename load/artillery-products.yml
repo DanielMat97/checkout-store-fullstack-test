@@ -1,0 +1,36 @@
+# Artillery — light API stress (non-blocking CI)
+# refs specs/deploy-smoke-rollback/spec.md · ADR 0013
+#
+# Usage:
+#   API_BASE_URL=https://….execute-api….amazonaws.com npm run test:stress
+#
+# Keep phases short — this is a smoke load, not a soak test.
+
+config:
+  target: '{{ $processEnvironment.API_BASE_URL }}'
+  phases:
+    - duration: 20
+      arrivalRate: 2
+      name: warm-up
+    - duration: 30
+      arrivalRate: 5
+      name: mild-load
+  defaults:
+    headers:
+      Accept: application/json
+  http:
+    timeout: 15
+
+scenarios:
+  - name: Catalog read path
+    weight: 70
+    flow:
+      - get:
+          url: /products
+      - think: 1
+  - name: Stock probe
+    weight: 30
+    flow:
+      - get:
+          url: /products/prod_aura_quiet/stock
+      - think: 1
