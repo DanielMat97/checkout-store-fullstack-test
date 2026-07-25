@@ -5,6 +5,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **README principal**: guía didáctica con emojis — URLs, porqué del stack, CloudWatch (`checkout-api-<stage>-ops`), pipelines stage-by-stage, feature teardown, mapa completo de specs/ADRs/docs.
+
 ### Added
 
 - **Apidog portal docs + AWS default server**: [`docs/api/apidog.md`](docs/api/apidog.md) documents https://7j6npb6n4w.apidog.io (auto-sync ~every 3h). OpenAPI `servers` default/`baseUrl` = AWS HttpApi prod (not localhost). Spec: `specs/apidog-portal-aws-server/`.

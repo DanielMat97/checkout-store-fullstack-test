@@ -1,6 +1,6 @@
 # Current state
 
-> Last updated: **2026-07-25** (Apidog portal + OpenAPI AWS default server; feature URL teardown; score **150/150**)
+> Last updated: **2026-07-25** (README didáctico completo; Apidog + OpenAPI AWS default; score **150/150**)
 
 ## Score (rúbrica brief — modo evaluador estricto)
 
