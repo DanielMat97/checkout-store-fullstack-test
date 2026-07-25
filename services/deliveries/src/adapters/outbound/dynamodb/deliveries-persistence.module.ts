@@ -3,6 +3,7 @@ import { createPersistence, type DeliveryRepositoryPort } from '@app/persistence
 import {
   CreateDeliveryUseCase,
   GetDeliveryUseCase,
+  UpdateDeliveryStatusUseCase,
 } from '../../../application/delivery.use-cases';
 import { DeliveriesController } from '../../inbound/http/deliveries.controller';
 import { DELIVERY_REPOSITORY } from '../../../ports/tokens';
@@ -16,6 +17,7 @@ import { DELIVERY_REPOSITORY } from '../../../ports/tokens';
     },
     CreateDeliveryUseCase,
     GetDeliveryUseCase,
+    UpdateDeliveryStatusUseCase,
   ],
   exports: [DELIVERY_REPOSITORY],
 })

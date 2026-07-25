@@ -5,6 +5,7 @@ import type {
   PersistenceError,
   ProductRecord,
   TransactionRecord,
+  TransactionStatus,
   CustomerRepositoryPort,
   DeliveryRepositoryPort,
   ProductRepositoryPort,
@@ -36,11 +37,28 @@ export class InMemoryTransactionRepository implements TransactionRepositoryPort 
     this.items.set(tx.id, { ...tx });
     return ok({ ...tx });
   }
+
+  async listByCreatedAt(options?: {
+    status?: TransactionStatus;
+    limit?: number;
+  }): Promise<Result<TransactionRecord[], PersistenceError>> {
+    let items = [...this.items.values()].sort((a, b) =>
+      b.createdAt.localeCompare(a.createdAt),
+    );
+    if (options?.status) {
+      items = items.filter((t) => t.status === options.status);
+    }
+    if (options?.limit && options.limit > 0) {
+      items = items.slice(0, options.limit);
+    }
+    return ok(items.map((t) => ({ ...t })));
+  }
 }
 
 export class InMemoryProductReader implements ProductRepositoryPort {
   private readonly items = new Map<string, ProductRecord>();
   decrementCalls: Array<{ id: string; qty: number }> = [];
+  incrementCalls: Array<{ id: string; qty: number }> = [];
 
   seed(products: ProductRecord[]): void {
     for (const p of products) {
@@ -97,6 +115,18 @@ export class InMemoryProductReader implements ProductRepositoryPort {
     }
     return this.updateStock(id, item.stock - qty);
   }
+
+  async incrementStock(
+    id: string,
+    qty: number,
+  ): Promise<Result<ProductRecord, PersistenceError>> {
+    this.incrementCalls.push({ id, qty });
+    const item = this.items.get(id);
+    if (!item) {
+      return err({ type: 'NOT_FOUND', entity: 'product', id });
+    }
+    return this.updateStock(id, item.stock + qty);
+  }
 }
 
 export class InMemoryCustomerReader implements CustomerRepositoryPort {
@@ -136,5 +166,15 @@ export class InMemoryDeliveryWriter implements DeliveryRepositoryPort {
   async put(delivery: DeliveryRecord): Promise<Result<DeliveryRecord, PersistenceError>> {
     this.items.set(delivery.id, { ...delivery });
     return ok({ ...delivery });
+  }
+
+  async listByTransaction(
+    transactionId: string,
+  ): Promise<Result<DeliveryRecord[], PersistenceError>> {
+    return ok(
+      [...this.items.values()]
+        .filter((d) => d.transactionId === transactionId)
+        .map((d) => ({ ...d })),
+    );
   }
 }

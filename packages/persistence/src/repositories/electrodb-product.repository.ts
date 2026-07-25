@@ -114,4 +114,21 @@ export class ElectroDbProductRepository implements ProductRepositoryPort {
     }
     return this.updateStock(id, current.value.stock - qty);
   }
+
+  async incrementStock(
+    id: string,
+    qty: number,
+  ): Promise<Result<ProductRecord, PersistenceError>> {
+    const current = await this.getById(id);
+    if (current.isErr()) {
+      return current;
+    }
+    if (qty < 1) {
+      return err({
+        type: 'PERSISTENCE_ERROR',
+        message: 'increment qty must be >= 1',
+      });
+    }
+    return this.updateStock(id, current.value.stock + qty);
+  }
 }

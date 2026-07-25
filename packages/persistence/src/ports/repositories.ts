@@ -5,6 +5,7 @@ import type {
   PersistenceError,
   ProductRecord,
   TransactionRecord,
+  TransactionStatus,
 } from '../types';
 
 export interface ProductRepositoryPort {
@@ -19,6 +20,10 @@ export interface ProductRepositoryPort {
     id: string,
     qty: number,
   ): Promise<Result<ProductRecord, PersistenceError>>;
+  incrementStock(
+    id: string,
+    qty: number,
+  ): Promise<Result<ProductRecord, PersistenceError>>;
 }
 
 export interface CustomerRepositoryPort {
@@ -29,10 +34,17 @@ export interface CustomerRepositoryPort {
 export interface DeliveryRepositoryPort {
   getById(id: string): Promise<Result<DeliveryRecord, PersistenceError>>;
   put(delivery: DeliveryRecord): Promise<Result<DeliveryRecord, PersistenceError>>;
+  listByTransaction(
+    transactionId: string,
+  ): Promise<Result<DeliveryRecord[], PersistenceError>>;
 }
 
 export interface TransactionRepositoryPort {
   getById(id: string): Promise<Result<TransactionRecord, PersistenceError>>;
   put(tx: TransactionRecord): Promise<Result<TransactionRecord, PersistenceError>>;
   update(tx: TransactionRecord): Promise<Result<TransactionRecord, PersistenceError>>;
+  listByCreatedAt(options?: {
+    status?: TransactionStatus;
+    limit?: number;
+  }): Promise<Result<TransactionRecord[], PersistenceError>>;
 }

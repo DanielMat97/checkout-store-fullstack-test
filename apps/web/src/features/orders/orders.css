@@ -1,0 +1,111 @@
+.nora-orders {
+  padding: var(--nora-space-6) var(--nora-shell-pad-x) 0;
+  animation: nora-fade var(--nora-slow) var(--nora-ease) both;
+}
+
+.nora-orders__nav {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--nora-fs-xs);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--nora-ink-soft);
+}
+
+.nora-orders__nav:hover {
+  color: var(--nora-ink);
+}
+
+.nora-orders__eyebrow {
+  margin: 0 0 var(--nora-space-2);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--nora-ink-soft);
+}
+
+.nora-orders__title {
+  margin: 0;
+  font-family: var(--nora-font-display);
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.nora-orders__lede {
+  margin: var(--nora-space-2) 0 var(--nora-space-6);
+  max-width: 36rem;
+  color: var(--nora-ink-soft);
+  line-height: 1.5;
+}
+
+.nora-orders__state {
+  margin: 0 0 var(--nora-space-4);
+  color: var(--nora-ink-soft);
+}
+
+.nora-orders__state--error {
+  color: var(--nora-danger, #9b3b2e);
+}
+
+.nora-orders__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+  border-top: 1px solid color-mix(in srgb, var(--nora-ink) 12%, transparent);
+}
+
+.nora-orders__row {
+  display: grid;
+  gap: var(--nora-space-3);
+  padding: var(--nora-space-4) 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--nora-ink) 12%, transparent);
+}
+
+@media (min-width: 720px) {
+  .nora-orders__row {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+}
+
+.nora-orders__product {
+  margin: 0;
+  font-family: var(--nora-font-display);
+  font-size: 1.25rem;
+}
+
+.nora-orders__id,
+.nora-orders__hints {
+  margin: 0.25rem 0 0;
+  font-size: var(--nora-fs-xs);
+  color: var(--nora-ink-soft);
+  letter-spacing: 0.02em;
+}
+
+.nora-orders__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--nora-space-2);
+  align-items: center;
+}
+
+.nora-orders__link {
+  font-size: var(--nora-fs-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--nora-ink-soft);
+  margin-right: var(--nora-space-2);
+}
+
+.nora-orders__link:hover {
+  color: var(--nora-ink);
+}

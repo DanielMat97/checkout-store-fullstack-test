@@ -11,7 +11,7 @@ import {
 import { isMockMode } from '../../mocks/checkoutService';
 import { loadProduct, type Product } from './checkoutApi';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { selectProduct, setPaymentStatus, setStep } from '../../store/checkoutSlice';
+import { selectProduct, setPaymentStatus, setProductStock, setStep } from '../../store/checkoutSlice';
 import './product.css';
 
 export function ProductPage({ embed = false }: { embed?: boolean }) {
@@ -35,6 +35,9 @@ export function ProductPage({ embed = false }: { embed?: boolean }) {
         return;
       }
       setProduct(loaded);
+      // API / mock product.stock is source of truth when opening the page
+      // (avoids stale Redux seed after a successful purchase).
+      dispatch(setProductStock({ productId: loaded.id, stock: loaded.stock }));
       if (selectedId !== loaded.id) {
         dispatch(selectProduct(loaded.id));
       }
@@ -74,13 +77,18 @@ export function ProductPage({ embed = false }: { embed?: boolean }) {
       <ShellHeader
         home
         trailing={
-          lastStatus === 'APPROVED' && selectedId === product.id ? (
-            <span className="nora-product__hint">Stock updated</span>
-          ) : (
-            <Link className="nora-product__back" to="/" onClick={backHome}>
-              Back
+          <nav className="nora-product__nav" aria-label="Store">
+            <Link className="nora-product__nav-link" to="/orders">
+              Orders
             </Link>
-          )
+            {lastStatus === 'APPROVED' && selectedId === product.id ? (
+              <span className="nora-product__hint">Stock updated</span>
+            ) : (
+              <Link className="nora-product__back" to="/" onClick={backHome}>
+                Back
+              </Link>
+            )}
+          </nav>
         }
       />
 

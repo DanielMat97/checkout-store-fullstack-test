@@ -75,6 +75,25 @@
   color: var(--nora-success);
 }
 
+.nora-product__nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.nora-product__nav-link {
+  font-size: var(--nora-fs-xs);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--nora-ink-soft);
+}
+
+.nora-product__nav-link:hover {
+  color: var(--nora-ink);
+}
+
 .nora-product__back {
   font-size: var(--nora-fs-xs);
   letter-spacing: 0.1em;

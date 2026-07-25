@@ -1,12 +1,17 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { err, ok, type Result } from 'neverthrow';
 import { randomUUID } from 'crypto';
-import type { DeliveryRepositoryPort, DeliveryRecord } from '@app/persistence';
+import type {
+  DeliveryRepositoryPort,
+  DeliveryRecord,
+  DeliveryStatus,
+} from '@app/persistence';
 import { DELIVERY_REPOSITORY } from '../ports/tokens';
 
 export type DeliveryError =
   | { type: 'NOT_FOUND'; id: string }
   | { type: 'VALIDATION'; message: string }
+  | { type: 'INVALID_STATE'; message: string }
   | { type: 'PERSISTENCE_ERROR'; message: string };
 
 export type CreateDeliveryInput = {
@@ -86,5 +91,61 @@ export class GetDeliveryUseCase {
       });
     }
     return ok(result.value);
+  }
+}
+
+@Injectable()
+export class UpdateDeliveryStatusUseCase {
+  constructor(
+    @Inject(DELIVERY_REPOSITORY)
+    private readonly deliveries: DeliveryRepositoryPort,
+  ) {}
+
+  async execute(
+    id: string,
+    status: DeliveryStatus,
+  ): Promise<Result<DeliveryRecord, DeliveryError>> {
+    if (status !== 'FULFILLED' && status !== 'CANCELLED') {
+      return err({
+        type: 'VALIDATION',
+        message: 'Only FULFILLED or CANCELLED allowed via PATCH',
+      });
+    }
+
+    const loaded = await this.deliveries.getById(id);
+    if (loaded.isErr()) {
+      if (loaded.error.type === 'NOT_FOUND') {
+        return err({ type: 'NOT_FOUND', id });
+      }
+      return err({
+        type: 'PERSISTENCE_ERROR',
+        message:
+          loaded.error.type === 'PERSISTENCE_ERROR'
+            ? loaded.error.message
+            : loaded.error.type,
+      });
+    }
+
+    if (status === 'FULFILLED' && loaded.value.status !== 'FULFILLABLE') {
+      return err({
+        type: 'INVALID_STATE',
+        message: `Cannot fulfill delivery in status ${loaded.value.status}`,
+      });
+    }
+
+    const saved = await this.deliveries.put({
+      ...loaded.value,
+      status,
+    });
+    if (saved.isErr()) {
+      return err({
+        type: 'PERSISTENCE_ERROR',
+        message:
+          saved.error.type === 'PERSISTENCE_ERROR'
+            ? saved.error.message
+            : saved.error.type,
+      });
+    }
+    return ok(saved.value);
   }
 }

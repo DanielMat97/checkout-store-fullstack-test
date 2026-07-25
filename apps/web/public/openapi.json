@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Checkout Store API",
-    "version": "0.3.0",
-    "description": "Single Serverless Framework HTTP API Gateway. Import into Apidog. Pay endpoint returns HTTP 200 with paymentStatus APPROVED|DECLINED|ERROR (declined is not an HTTP error)."
+    "version": "0.4.0",
+    "description": "Single Serverless Framework HTTP API Gateway. Import into Apidog. Pay endpoint returns HTTP 200 with paymentStatus APPROVED|DECLINED|ERROR (declined is not an HTTP error). Ops: list/restore transactions; PATCH delivery fulfill. Post-pay effects via SQS worker (sync fallback when ORDERS_EVENTS_QUEUE_URL empty)."
   },
   "servers": [
     {
@@ -12,22 +12,38 @@
     }
   ],
   "tags": [
-    { "name": "products" },
-    { "name": "customers" },
-    { "name": "deliveries" },
-    { "name": "transactions" }
+    {
+      "name": "products"
+    },
+    {
+      "name": "customers"
+    },
+    {
+      "name": "deliveries"
+    },
+    {
+      "name": "transactions"
+    }
   ],
   "paths": {
     "/products/health": {
       "get": {
-        "tags": ["products"],
+        "tags": [
+          "products"
+        ],
         "summary": "Health",
-        "responses": { "200": { "description": "OK" } }
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
     "/products": {
       "get": {
-        "tags": ["products"],
+        "tags": [
+          "products"
+        ],
         "summary": "List products (seed)",
         "responses": {
           "200": {
@@ -39,7 +55,9 @@
                   "properties": {
                     "items": {
                       "type": "array",
-                      "items": { "$ref": "#/components/schemas/Product" }
+                      "items": {
+                        "$ref": "#/components/schemas/Product"
+                      }
                     }
                   }
                 }
@@ -51,14 +69,19 @@
     },
     "/products/{id}": {
       "get": {
-        "tags": ["products"],
+        "tags": [
+          "products"
+        ],
         "summary": "Get product",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "example": "prod_aura_quiet" }
+            "schema": {
+              "type": "string",
+              "example": "prod_aura_quiet"
+            }
           }
         ],
         "responses": {
@@ -66,24 +89,32 @@
             "description": "Product",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Product" }
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
               }
             }
           },
-          "404": { "description": "Not found" }
+          "404": {
+            "description": "Not found"
+          }
         }
       }
     },
     "/products/{id}/stock": {
       "get": {
-        "tags": ["products"],
+        "tags": [
+          "products"
+        ],
         "summary": "Get product stock",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" }
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -94,33 +125,49 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "productId": { "type": "string" },
-                    "stock": { "type": "integer" }
+                    "productId": {
+                      "type": "string"
+                    },
+                    "stock": {
+                      "type": "integer"
+                    }
                   }
                 }
               }
             }
           },
-          "404": { "description": "Not found" }
+          "404": {
+            "description": "Not found"
+          }
         }
       }
     },
     "/customers/health": {
       "get": {
-        "tags": ["customers"],
+        "tags": [
+          "customers"
+        ],
         "summary": "Health",
-        "responses": { "200": { "description": "OK" } }
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
     "/customers": {
       "post": {
-        "tags": ["customers"],
+        "tags": [
+          "customers"
+        ],
         "summary": "Create customer",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/CreateCustomer" }
+              "schema": {
+                "$ref": "#/components/schemas/CreateCustomer"
+              }
             }
           }
         },
@@ -129,24 +176,32 @@
             "description": "Created",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Customer" }
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                }
               }
             }
           },
-          "400": { "description": "Validation" }
+          "400": {
+            "description": "Validation"
+          }
         }
       }
     },
     "/customers/{id}": {
       "get": {
-        "tags": ["customers"],
+        "tags": [
+          "customers"
+        ],
         "summary": "Get customer",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" }
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -154,30 +209,44 @@
             "description": "Customer",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Customer" }
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                }
               }
             }
           },
-          "404": { "description": "Not found" }
+          "404": {
+            "description": "Not found"
+          }
         }
       }
     },
     "/deliveries/health": {
       "get": {
-        "tags": ["deliveries"],
+        "tags": [
+          "deliveries"
+        ],
         "summary": "Health",
-        "responses": { "200": { "description": "OK" } }
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
     "/deliveries": {
       "post": {
-        "tags": ["deliveries"],
+        "tags": [
+          "deliveries"
+        ],
         "summary": "Create delivery",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/CreateDelivery" }
+              "schema": {
+                "$ref": "#/components/schemas/CreateDelivery"
+              }
             }
           }
         },
@@ -186,24 +255,32 @@
             "description": "Created",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Delivery" }
+                "schema": {
+                  "$ref": "#/components/schemas/Delivery"
+                }
               }
             }
           },
-          "400": { "description": "Validation" }
+          "400": {
+            "description": "Validation"
+          }
         }
       }
     },
     "/deliveries/{id}": {
       "get": {
-        "tags": ["deliveries"],
+        "tags": [
+          "deliveries"
+        ],
         "summary": "Get delivery",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" }
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -211,30 +288,135 @@
             "description": "Delivery",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Delivery" }
+                "schema": {
+                  "$ref": "#/components/schemas/Delivery"
+                }
               }
             }
           },
-          "404": { "description": "Not found" }
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "deliveries"
+        ],
+        "summary": "Update delivery status (FULFILLABLE → FULFILLED)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDeliveryStatus"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Delivery"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "422": {
+            "description": "Invalid state"
+          }
         }
       }
     },
     "/transactions/health": {
       "get": {
-        "tags": ["transactions"],
+        "tags": [
+          "transactions"
+        ],
         "summary": "Health",
-        "responses": { "200": { "description": "OK" } }
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
     "/transactions": {
+      "get": {
+        "tags": [
+          "transactions"
+        ],
+        "summary": "List transactions (ops console)",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "APPROVED",
+                "DECLINED",
+                "ERROR",
+                "REFUNDED"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transaction list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionList"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
-        "tags": ["transactions"],
+        "tags": [
+          "transactions"
+        ],
         "summary": "Create PENDING transaction + delivery",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/CreateTransaction" }
+              "schema": {
+                "$ref": "#/components/schemas/CreateTransaction"
+              }
             }
           }
         },
@@ -243,26 +425,38 @@
             "description": "Created PENDING",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/CreateTransactionResponse" }
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTransactionResponse"
+                }
               }
             }
           },
-          "400": { "description": "Validation" },
-          "404": { "description": "Product/customer not found" },
-          "409": { "description": "Insufficient stock" }
+          "400": {
+            "description": "Validation"
+          },
+          "404": {
+            "description": "Product/customer not found"
+          },
+          "409": {
+            "description": "Insufficient stock"
+          }
         }
       }
     },
     "/transactions/{id}": {
       "get": {
-        "tags": ["transactions"],
+        "tags": [
+          "transactions"
+        ],
         "summary": "Get transaction",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" }
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -270,31 +464,41 @@
             "description": "Transaction",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Transaction" }
+                "schema": {
+                  "$ref": "#/components/schemas/Transaction"
+                }
               }
             }
           },
-          "404": { "description": "Not found" }
+          "404": {
+            "description": "Not found"
+          }
         }
       }
     },
     "/transactions/{id}/pay": {
       "post": {
-        "tags": ["transactions"],
+        "tags": [
+          "transactions"
+        ],
         "summary": "Pay PENDING transaction",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" }
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/PayTransaction" },
+              "schema": {
+                "$ref": "#/components/schemas/PayTransaction"
+              },
               "examples": {
                 "approvedCard": {
                   "summary": "Sandbox/fake happy path",
@@ -318,28 +522,78 @@
             "description": "Payment processed (check paymentStatus)",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PayTransactionResponse" },
+                "schema": {
+                  "$ref": "#/components/schemas/PayTransactionResponse"
+                },
                 "examples": {
                   "approved": {
                     "value": {
                       "paymentStatus": "APPROVED",
-                      "transaction": { "status": "APPROVED" }
+                      "transaction": {
+                        "status": "APPROVED"
+                      }
                     }
                   },
                   "declined": {
                     "value": {
                       "paymentStatus": "DECLINED",
-                      "transaction": { "status": "DECLINED" }
+                      "transaction": {
+                        "status": "DECLINED"
+                      }
                     }
                   }
                 }
               }
             }
           },
-          "400": { "description": "Validation" },
-          "404": { "description": "Not found" },
-          "422": { "description": "Invalid state (not PENDING)" },
-          "502": { "description": "Provider failure" }
+          "400": {
+            "description": "Validation"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "422": {
+            "description": "Invalid state (not PENDING)"
+          },
+          "502": {
+            "description": "Provider failure"
+          }
+        }
+      }
+    },
+    "/transactions/{id}/restore": {
+      "post": {
+        "tags": [
+          "transactions"
+        ],
+        "summary": "Ops: restore stock, cancel delivery, mark REFUNDED",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Restored",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestoreTransactionResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "422": {
+            "description": "Invalid state"
+          }
         }
       }
     }
@@ -348,34 +602,76 @@
     "schemas": {
       "Product": {
         "type": "object",
-        "required": ["id", "name", "description", "priceMinor", "stock", "imageUrl"],
+        "required": [
+          "id",
+          "name",
+          "description",
+          "priceMinor",
+          "stock",
+          "imageUrl"
+        ],
         "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "kicker": { "type": "string" },
-          "description": { "type": "string" },
-          "priceMinor": { "type": "integer" },
-          "stock": { "type": "integer" },
-          "imageUrl": { "type": "string" },
-          "imageAlt": { "type": "string" }
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "kicker": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "priceMinor": {
+            "type": "integer"
+          },
+          "stock": {
+            "type": "integer"
+          },
+          "imageUrl": {
+            "type": "string"
+          },
+          "imageAlt": {
+            "type": "string"
+          }
         }
       },
       "CreateCustomer": {
         "type": "object",
-        "required": ["fullName", "email", "phone"],
+        "required": [
+          "fullName",
+          "email",
+          "phone"
+        ],
         "properties": {
-          "fullName": { "type": "string" },
-          "email": { "type": "string", "format": "email" },
-          "phone": { "type": "string" }
+          "fullName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string"
+          }
         }
       },
       "Customer": {
         "allOf": [
-          { "$ref": "#/components/schemas/CreateCustomer" },
+          {
+            "$ref": "#/components/schemas/CreateCustomer"
+          },
           {
             "type": "object",
-            "required": ["id"],
-            "properties": { "id": { "type": "string" } }
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            }
           }
         ]
       },
@@ -390,27 +686,58 @@
           "feeMinor"
         ],
         "properties": {
-          "transactionId": { "type": "string" },
-          "customerId": { "type": "string" },
-          "address": { "type": "string" },
-          "city": { "type": "string" },
-          "region": { "type": "string" },
-          "feeMinor": { "type": "integer" }
+          "transactionId": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "feeMinor": {
+            "type": "integer"
+          }
         }
       },
       "Delivery": {
         "type": "object",
         "properties": {
-          "id": { "type": "string" },
-          "transactionId": { "type": "string" },
-          "customerId": { "type": "string" },
-          "address": { "type": "string" },
-          "city": { "type": "string" },
-          "region": { "type": "string" },
-          "feeMinor": { "type": "integer" },
+          "id": {
+            "type": "string"
+          },
+          "transactionId": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "feeMinor": {
+            "type": "integer"
+          },
           "status": {
             "type": "string",
-            "enum": ["PENDING", "FULFILLABLE", "FULFILLED"]
+            "enum": [
+              "PENDING",
+              "FULFILLABLE",
+              "FULFILLED",
+              "CANCELLED"
+            ]
           }
         }
       },
@@ -425,18 +752,38 @@
           "delivery"
         ],
         "properties": {
-          "productId": { "type": "string" },
-          "customerId": { "type": "string" },
-          "productAmount": { "type": "integer" },
-          "baseFee": { "type": "integer" },
-          "deliveryFee": { "type": "integer" },
+          "productId": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "string"
+          },
+          "productAmount": {
+            "type": "integer"
+          },
+          "baseFee": {
+            "type": "integer"
+          },
+          "deliveryFee": {
+            "type": "integer"
+          },
           "delivery": {
             "type": "object",
-            "required": ["address", "city", "region"],
+            "required": [
+              "address",
+              "city",
+              "region"
+            ],
             "properties": {
-              "address": { "type": "string" },
-              "city": { "type": "string" },
-              "region": { "type": "string" }
+              "address": {
+                "type": "string"
+              },
+              "city": {
+                "type": "string"
+              },
+              "region": {
+                "type": "string"
+              }
             }
           }
         }
@@ -444,42 +791,102 @@
       "Transaction": {
         "type": "object",
         "properties": {
-          "id": { "type": "string" },
+          "id": {
+            "type": "string"
+          },
           "status": {
             "type": "string",
-            "enum": ["PENDING", "APPROVED", "DECLINED", "ERROR"]
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "DECLINED",
+              "ERROR",
+              "REFUNDED"
+            ]
           },
-          "productId": { "type": "string" },
-          "customerId": { "type": "string" },
-          "productAmount": { "type": "integer" },
-          "baseFee": { "type": "integer" },
-          "deliveryFee": { "type": "integer" },
-          "total": { "type": "integer" },
-          "providerRef": { "type": "string" },
-          "createdAt": { "type": "string", "format": "date-time" }
+          "productId": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "string"
+          },
+          "productAmount": {
+            "type": "integer"
+          },
+          "baseFee": {
+            "type": "integer"
+          },
+          "deliveryFee": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "providerRef": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deliveryId": {
+            "type": "string"
+          },
+          "effectsApplied": {
+            "type": "boolean"
+          },
+          "stockRestoredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
         }
       },
       "CreateTransactionResponse": {
         "type": "object",
         "properties": {
-          "transaction": { "$ref": "#/components/schemas/Transaction" },
-          "deliveryId": { "type": "string" }
+          "transaction": {
+            "$ref": "#/components/schemas/Transaction"
+          },
+          "deliveryId": {
+            "type": "string"
+          }
         }
       },
       "PayTransaction": {
         "type": "object",
-        "required": ["deliveryId", "card"],
+        "required": [
+          "deliveryId",
+          "card"
+        ],
         "properties": {
-          "deliveryId": { "type": "string" },
+          "deliveryId": {
+            "type": "string"
+          },
           "card": {
             "type": "object",
-            "required": ["number", "cvc", "expMonth", "expYear", "cardHolder"],
+            "required": [
+              "number",
+              "cvc",
+              "expMonth",
+              "expYear",
+              "cardHolder"
+            ],
             "properties": {
-              "number": { "type": "string" },
-              "cvc": { "type": "string" },
-              "expMonth": { "type": "string" },
-              "expYear": { "type": "string" },
-              "cardHolder": { "type": "string" }
+              "number": {
+                "type": "string"
+              },
+              "cvc": {
+                "type": "string"
+              },
+              "expMonth": {
+                "type": "string"
+              },
+              "expYear": {
+                "type": "string"
+              },
+              "cardHolder": {
+                "type": "string"
+              }
             }
           }
         }
@@ -489,9 +896,61 @@
         "properties": {
           "paymentStatus": {
             "type": "string",
-            "enum": ["APPROVED", "DECLINED", "ERROR"]
+            "enum": [
+              "APPROVED",
+              "DECLINED",
+              "ERROR"
+            ]
           },
-          "transaction": { "$ref": "#/components/schemas/Transaction" }
+          "transaction": {
+            "$ref": "#/components/schemas/Transaction"
+          }
+        }
+      },
+      "UpdateDeliveryStatus": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "FULFILLED",
+              "CANCELLED"
+            ]
+          }
+        }
+      },
+      "TransactionList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Transaction"
+            }
+          }
+        }
+      },
+      "RestoreTransactionResponse": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string"
+          },
+          "productId": {
+            "type": "string"
+          },
+          "stock": {
+            "type": "integer"
+          },
+          "deliveryStatus": {
+            "type": "string"
+          },
+          "transactionStatus": {
+            "type": "string"
+          }
         }
       }
     }

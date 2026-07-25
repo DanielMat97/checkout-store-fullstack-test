@@ -135,6 +135,8 @@ Total 135 / 150
 | P2 | Subir branches en use-cases / incluir más paths sandbox en cov global |
 | P3 | Dominio custom Amplify |
 
+**Nota arquitectura (fuera de rúbrica brief):** SQS post-pay + Orders console (`specs/sqs-orchestration`, `specs/orders-console`, ADR 0011) son enhancement de orquestación/ops — **no** suben el score del brief hasta evidencia de cola en cloud + demos; el brief no exige SQS.
+
 ---
 
 ## 6. Proyección (no cuenta para “hoy”)

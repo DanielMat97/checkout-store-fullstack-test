@@ -60,4 +60,18 @@ export class InMemoryProductRepository implements ProductRepositoryPort {
     }
     return this.updateStock(id, item.stock - qty);
   }
+
+  async incrementStock(
+    id: string,
+    qty: number,
+  ): Promise<Result<ProductRecord, PersistenceError>> {
+    const item = this.items.get(id);
+    if (!item) {
+      return err({ type: 'NOT_FOUND', entity: 'product', id });
+    }
+    if (qty < 1) {
+      return err({ type: 'PERSISTENCE_ERROR', message: 'increment qty must be >= 1' });
+    }
+    return this.updateStock(id, item.stock + qty);
+  }
 }

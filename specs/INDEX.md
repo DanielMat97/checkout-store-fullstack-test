@@ -1,81 +1,37 @@
 # Specs index — path to 100% (rúbrica)
 
-> Generado: 2026-07-24.  
-> Objetivo: **100 pts base** (aprobar) y ruta clara a **hasta 150** (bonus).  
-> Implementación: **no** incluida en este lote — solo contratos SDD (`spec` / `plan` / `tasks`).
+> Updated: 2026-07-25.  
+> Gap analysis: [`docs/brief-gap-analysis.md`](../docs/brief-gap-analysis.md)
 
 ## Estado de features
 
-| Feature | Carpeta | Estado spec | Cierra rúbrica |
+| Feature | Carpeta | Estado | Cierra |
 |---|---|---|---|
-| UI mock (hecho) | `checkout-ui-mock/` | **done** | Base #2 parcial, #3 UI, bonus CSS/responsive parcial |
-| Pago E2E (contrato negocio) | `checkout-payment/` | **ready** | Base #3 (mitad sistema) |
-| Persistencia + seed | `persistence-seed/` | **done** | Base #4 prereq; brief seed |
-| APIs 4 dominios | `api-domains/` | **done** | Base #4 (20) |
-| Pasarela sandbox | `payment-gateway/` | **done** | Base #3 pasos 5.1–5.3 |
-| FE live (off mock) | `frontend-live-wiring/` | **done** | Base #3 completo |
-| Cobertura Jest | `testing-coverage/` | **done** | Base #5 (30) |
-| Deploy AWS | `cloud-deploy/` | **in_progress** (Actions+Amplify listos; URLs públicas pendientes) | Base #6 (20) |
-| Secrets Vault | `secrets-vault/` | **done** | B1 secrecy + cloud-deploy |
-| README entregable | `readme-deliverables/` | **ready** | Base #1 (5) |
-| Seguridad OWASP/HTTPS | `security-hardening/` | **ready** | Bonus #1 (5) |
-| Hexagonal + ROP real | `architecture-hex-rop/` | **done** | Bonus #5–6 (20) |
-| Barra UX/calidad | `ux-quality-bar/` | **ready** | Base #2 resto + bonus #2–4 |
+| UI mock | `checkout-ui-mock/` | **done** | Base #2–3 UI |
+| Pago E2E | `checkout-payment/` | **done** | Base #3 |
+| Persistencia + seed | `persistence-seed/` | **done** | Base #4 |
+| APIs 4 dominios | `api-domains/` | **done** | Base #4 |
+| Pasarela sandbox | `payment-gateway/` | **done** | Base #3 |
+| FE live | `frontend-live-wiring/` | **done** | Base #3 |
+| Cobertura Jest | `testing-coverage/` | **done** | Base #5 |
+| Deploy AWS | `cloud-deploy/` | **done** | Base #6 |
+| Secrets Vault | `secrets-vault/` | **done** | B1 |
+| README | `readme-deliverables/` | **done** | Base #1 |
+| Seguridad | `security-hardening/` | **done** | B1 |
+| Hex + ROP | `architecture-hex-rop/` | **done** | B5–6 |
+| UX quality | `ux-quality-bar/` | **ready** | B2–4 |
+| **SQS post-pay** | `sqs-orchestration/` | **done** | Arch enhancement (ADR 0011) |
+| **Orders console** | `orders-console/` | **done** | Ops + brief §5–6 stock |
 
-## Orden de implementación (obligatorio)
+## Orden reciente
 
 ```
-1. persistence-seed
-2. architecture-hex-rop   (puertos/ROP desde el primer use-case)
-3. payment-gateway
-4. api-domains            (orquesta use-cases; OpenAPI)
-5. checkout-payment       (cierre E2E dominio; puede solaparse con 3–4)
-6. frontend-live-wiring
-7. testing-coverage
-8. security-hardening     (headers ya parcial; HTTPS en deploy)
-8b. secrets-vault          (Vault KV + AppRole para CI/local)
-9. cloud-deploy
-10. readme-deliverables
-11. ux-quality-bar        (evidencia Lighthouse/browsers; polish)
+… → cloud-deploy → security-hardening →
+sqs-orchestration → orders-console → ux-quality-bar
 ```
 
-`checkout-ui-mock` ya está **done** — no reabrir salvo regresión.
+## Reglas
 
-## Mapa rúbrica → evidencia de cierre
-
-| # | Criterio | Pts | Spec(s) que lo cierran |
-|---|---|---|---|
-| 1 | README | 5 | `readme-deliverables` |
-| 2 | Imágenes / overflow | 5 | `checkout-ui-mock` + `ux-quality-bar` |
-| 3 | Onboarding tarjeta completo | 20 | `checkout-payment` + `payment-gateway` + `frontend-live-wiring` |
-| 4 | API funcionando | 20 | `api-domains` + `persistence-seed` |
-| 5 | Tests >80% FE+BE | 30 | `testing-coverage` |
-| 6 | Deploy cloud | 20 | `cloud-deploy` |
-| B1 | OWASP/HTTPS | 5 | `security-hardening` + `secrets-vault` |
-| B2 | Responsive multi-browser | 5 | `ux-quality-bar` |
-| B3 | CSS | 10 | `checkout-ui-mock` + `ux-quality-bar` |
-| B4 | Código limpio | 10 | `architecture-hex-rop` + `ux-quality-bar` |
-| B5 | Hexagonal | 10 | `architecture-hex-rop` |
-| B6 | ROP | 10 | `architecture-hex-rop` |
-
-## Reglas al implementar
-
-1. Leer `AGENTS.md` → `docs/current-state.md` → ADR → **este índice** → `spec` → `plan` → `tasks`.
-2. No contradecir ADRs 0001–0008 sin nuevo ADR.
-3. Actualizar scorecard estricto al cerrar cada feature.
-4. Repo público: **sin** marca de la pasarela; secrets solo env.
-5. Living docs en el mismo cambio.
-
-## Definition of “100% base”
-
-Todas las checkboxes de `tasks.md` en:
-
-- `persistence-seed`
-- `payment-gateway`
-- `api-domains`
-- `frontend-live-wiring`
-- `testing-coverage`
-- `cloud-deploy`
-- `readme-deliverables`
-
-…y scorecard panel ≥ **100 / 100** base con evidencia (URLs, coverage %, OpenAPI).
+1. Leer gap analysis + ADR 0011 antes de tocar pay path.
+2. Sin marca de pasarela en source público.
+3. Living docs en el mismo cambio.

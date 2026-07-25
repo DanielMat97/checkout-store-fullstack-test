@@ -18,7 +18,7 @@ export interface Customer {
 
 export interface Transaction {
   id: string;
-  status: 'PENDING' | 'APPROVED' | 'DECLINED' | 'ERROR';
+  status: 'PENDING' | 'APPROVED' | 'DECLINED' | 'ERROR' | 'REFUNDED';
   productId: string;
   customerId: string;
   productAmount: number;
@@ -27,6 +27,28 @@ export interface Transaction {
   total: number;
   providerRef?: string;
   createdAt: string;
+  deliveryId?: string;
+  effectsApplied?: boolean;
+  stockRestoredAt?: string;
+}
+
+export interface Delivery {
+  id: string;
+  transactionId: string;
+  customerId: string;
+  address: string;
+  city: string;
+  region: string;
+  feeMinor: number;
+  status: 'PENDING' | 'FULFILLABLE' | 'FULFILLED' | 'CANCELLED';
+}
+
+export interface RestoreTransactionResponse {
+  transactionId: string;
+  productId: string;
+  stock: number;
+  deliveryStatus: string;
+  transactionStatus: string;
 }
 
 export interface CreateTransactionResponse {

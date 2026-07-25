@@ -9,7 +9,7 @@ export const transactionEntitySchema = {
   attributes: {
     transactionId: { type: 'string', required: true },
     status: {
-      type: ['PENDING', 'APPROVED', 'DECLINED', 'ERROR'] as const,
+      type: ['PENDING', 'APPROVED', 'DECLINED', 'ERROR', 'REFUNDED'] as const,
       required: true,
     },
     productId: { type: 'string', required: true },
@@ -20,6 +20,9 @@ export const transactionEntitySchema = {
     total: { type: 'number', required: true },
     providerRef: { type: 'string' },
     createdAt: { type: 'string', required: true },
+    deliveryId: { type: 'string' },
+    effectsApplied: { type: 'boolean' },
+    stockRestoredAt: { type: 'string' },
   },
   indexes: {
     primary: {

@@ -4,6 +4,7 @@ import { DeliveriesController } from './deliveries.controller';
 import {
   CreateDeliveryUseCase,
   GetDeliveryUseCase,
+  UpdateDeliveryStatusUseCase,
 } from '../../../application/delivery.use-cases';
 
 describe('DeliveriesController', () => {
@@ -18,16 +19,34 @@ describe('DeliveriesController', () => {
     status: 'PENDING' as const,
   };
 
+  function providers(overrides?: {
+    create?: { execute: jest.Mock };
+    get?: { execute: jest.Mock };
+    update?: { execute: jest.Mock };
+  }) {
+    return [
+      {
+        provide: CreateDeliveryUseCase,
+        useValue: overrides?.create ?? { execute: jest.fn() },
+      },
+      {
+        provide: GetDeliveryUseCase,
+        useValue: overrides?.get ?? { execute: jest.fn() },
+      },
+      {
+        provide: UpdateDeliveryStatusUseCase,
+        useValue: overrides?.update ?? { execute: jest.fn() },
+      },
+    ];
+  }
+
   it('creates delivery', async () => {
     const createDelivery = {
       execute: jest.fn().mockResolvedValue(ok(delivery)),
     };
     const module = await Test.createTestingModule({
       controllers: [DeliveriesController],
-      providers: [
-        { provide: CreateDeliveryUseCase, useValue: createDelivery },
-        { provide: GetDeliveryUseCase, useValue: { execute: jest.fn() } },
-      ],
+      providers: providers({ create: createDelivery }),
     }).compile();
     await expect(module.get(DeliveriesController).create(delivery)).resolves.toEqual(
       delivery,
@@ -43,10 +62,7 @@ describe('DeliveriesController', () => {
     };
     const module = await Test.createTestingModule({
       controllers: [DeliveriesController],
-      providers: [
-        { provide: CreateDeliveryUseCase, useValue: createDelivery },
-        { provide: GetDeliveryUseCase, useValue: { execute: jest.fn() } },
-      ],
+      providers: providers({ create: createDelivery }),
     }).compile();
     const controller = module.get(DeliveriesController);
     await expect(controller.create(delivery)).rejects.toMatchObject({
@@ -66,13 +82,25 @@ describe('DeliveriesController', () => {
     };
     const module = await Test.createTestingModule({
       controllers: [DeliveriesController],
-      providers: [
-        { provide: CreateDeliveryUseCase, useValue: { execute: jest.fn() } },
-        { provide: GetDeliveryUseCase, useValue: getDelivery },
-      ],
+      providers: providers({ get: getDelivery }),
     }).compile();
     const controller = module.get(DeliveriesController);
     await expect(controller.get('del_1')).resolves.toEqual(delivery);
     await expect(controller.get('x')).rejects.toMatchObject({ status: 404 });
+  });
+
+  it('patches delivery status to FULFILLED', async () => {
+    const update = {
+      execute: jest
+        .fn()
+        .mockResolvedValue(ok({ ...delivery, status: 'FULFILLED' as const })),
+    };
+    const module = await Test.createTestingModule({
+      controllers: [DeliveriesController],
+      providers: providers({ update }),
+    }).compile();
+    await expect(
+      module.get(DeliveriesController).patch('del_1', { status: 'FULFILLED' }),
+    ).resolves.toMatchObject({ status: 'FULFILLED' });
   });
 });

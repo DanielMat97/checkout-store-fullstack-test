@@ -5,12 +5,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **SQS post-pay orchestration (ADR 0011)**: `PaymentApproved` queue + `ordersWorker`; sync in-process fallback when queue URL empty/offline. Ops console `/orders` (list APPROVED, restore stock, mark fulfilled). APIs: `GET /transactions`, `POST /transactions/:id/restore`, `PATCH /deliveries/:id`. Gap analysis: [`docs/brief-gap-analysis.md`](docs/brief-gap-analysis.md).
+
 ### Changed
 
 - Scorecard **2026-07-25**: base **100/100**, bonus **35/50**, total **135/150** — **PASS**. Evidencia: sandbox pay APPROVED (`providerRef` real), OWASP headers FE+API, OpenAPI público, README completo.
 - Prod API: `PAYMENT_GATEWAY_MODE=sandbox` + keys en Lambda/GitHub Secrets (profile `stonestore` / `gh`).
 - Security: `applySecuritySurface` (strip `X-Powered-By` + OWASP headers); Amplify `customHeaders`; [`docs/security.md`](docs/security.md).
-
+- Bonus note: SQS + ops console = arquitectura enhancement (no ítem brief); hexagonal/ROP score unchanged until cloud SQS proven in scorecard evidence.
 ### Added
 
 - **Prod live (AWS profile `stonestore`)**: Amplify FE https://master.dw2i8myh0xumx.amplifyapp.com · API https://qo9kbfxew8.execute-api.us-east-1.amazonaws.com. GitHub Actions secrets/vars (`AWS_*`, `AMPLIFY_APP_ID`, `CORS_ORIGIN`, …) configurados vía `gh` + profile `stonestore`.
@@ -41,7 +45,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Hex + ROP** (`architecture-hex-rop`): ADR 0009 (`neverthrow`); `CreateTransaction` / `PayTransaction` use-cases with port fakes (DECLINED no decrementa stock); thin HTTP controllers; minimal use-cases in products/customers/deliveries; OpenAPI paths updated. Payment still `FakePaymentGateway` until `payment-gateway`.
 - **Payment sandbox adapter** (`payment-gateway`): `SandboxPaymentGateway` (acceptance → tokenize → create tx → poll), integrity SHA-256, env-only keys, Nest wiring (`PAYMENT_GATEWAY_MODE=sandbox|fake`). Docs: `docs/payment-adapter.md`. Zero provider brand in public source.
 - **API domains**: DTOs + global `ValidationPipe` (stable 400 body), `GET /products/:id/stock`, `POST /deliveries`, 201 on creates, OpenAPI 0.3 with schemas/examples, smoke guide `docs/api/smoke.md`, `useDotenv: true` in `serverless.ts`.
-- **FE live wiring**: `apps/web/src/api/*` + `checkoutApi.executePay` (customer → PENDING tx → pay → refresh stock); `cardSession` ephemeral PAN/CVV; catalog/product load from API when `VITE_MOCK_MODE=false`; Status ERROR + Retry.
+- **FE live wiring**: `apps/web/src/api/*` + `checkoutApi.executePay` (customer → PENDING tx → pay → refresh stock); `cardSession` ephemeral PAN/CVV; catalog/product load from API when `VITE_MOCK_MODE=false`; Status ERROR + Retry. Checkout form hydrates from Redux + `peekPendingCard` on “Edit details”; product/status pages sync stock from API after APPROVED (no SQS — brief is sync step 5.x).
+
 - **Testing coverage** (`testing-coverage`): Jest thresholds >80% lines FE+BE; `npm run test:cov` green; figures in README + `docs/coverage.md`. Fixed shared instrumentation (stray `.js` next to `.ts`).
 - **Cloud deploy automation** (`cloud-deploy`): GitHub Actions CI (validate/prettier/lint/audit/test/coverage), selective Lambda deploy on `main`, feature stacks for `fb-*` + Amplify branch job. Runbook: `docs/deploy.md`. Public URLs still pending (scorecard #6 = 0).
 - **HashiCorp Vault** (`secrets-vault`): KV v2 paths `secret/checkout/<stage>/{payment,app,aws}`, local Docker + seed/export, CI AppRole via `.github/actions/load-vault-secrets`, ADR 0010. Docs: `docs/vault.md`.

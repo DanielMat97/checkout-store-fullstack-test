@@ -3,6 +3,7 @@ import { ok, err } from 'neverthrow';
 import { TransactionsController } from './transactions.controller';
 import { CreateTransactionUseCase } from '../../../application/create-transaction.use-case';
 import { PayTransactionUseCase } from '../../../application/pay-transaction.use-case';
+import { RestoreTransactionStockUseCase } from '../../../application/restore-transaction-stock.use-case';
 import { TRANSACTION_REPOSITORY } from '../../../ports/injection.tokens';
 
 describe('TransactionsController', () => {
@@ -30,7 +31,8 @@ describe('TransactionsController', () => {
   async function build(overrides?: {
     create?: { execute: jest.Mock };
     pay?: { execute: jest.Mock };
-    transactions?: { getById: jest.Mock };
+    restore?: { execute: jest.Mock };
+    transactions?: { getById: jest.Mock; listByCreatedAt?: jest.Mock };
   }) {
     const module = await Test.createTestingModule({
       controllers: [TransactionsController],
@@ -44,8 +46,15 @@ describe('TransactionsController', () => {
           useValue: overrides?.pay ?? { execute: jest.fn() },
         },
         {
+          provide: RestoreTransactionStockUseCase,
+          useValue: overrides?.restore ?? { execute: jest.fn() },
+        },
+        {
           provide: TRANSACTION_REPOSITORY,
-          useValue: overrides?.transactions ?? { getById: jest.fn() },
+          useValue: overrides?.transactions ?? {
+            getById: jest.fn(),
+            listByCreatedAt: jest.fn().mockResolvedValue(ok([])),
+          },
         },
       ],
     }).compile();
@@ -129,5 +138,32 @@ describe('TransactionsController', () => {
         },
       }),
     ).rejects.toMatchObject({ status: 422 });
+  });
+
+  it('lists transactions', async () => {
+    const transactions = {
+      getById: jest.fn(),
+      listByCreatedAt: jest.fn().mockResolvedValue(ok([tx])),
+    };
+    const controller = await build({ transactions });
+    await expect(controller.list('APPROVED', '10')).resolves.toEqual({ items: [tx] });
+  });
+
+  it('restores stock', async () => {
+    const restore = {
+      execute: jest.fn().mockResolvedValue(
+        ok({
+          transactionId: 'txn_1',
+          productId: 'prod_a',
+          stock: 6,
+          deliveryStatus: 'CANCELLED',
+          transactionStatus: 'REFUNDED',
+        }),
+      ),
+    };
+    const controller = await build({ restore });
+    await expect(controller.restore('txn_1')).resolves.toMatchObject({
+      transactionStatus: 'REFUNDED',
+    });
   });
 });

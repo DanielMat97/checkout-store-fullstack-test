@@ -13,6 +13,7 @@
   "dependencies": {
     "@app/persistence": "*",
     "@app/shared": "*",
+    "@aws-sdk/client-sqs": "^3.1095.0",
     "@codegenie/serverless-express": "^5.0.0",
     "@nestjs/common": "^11.0.12",
     "@nestjs/core": "^11.0.12",

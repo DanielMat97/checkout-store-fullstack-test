@@ -2,7 +2,10 @@ import { apiFetch } from './http';
 import type {
   CreateTransactionResponse,
   Customer,
+  Delivery,
   PayTransactionResponse,
+  RestoreTransactionResponse,
+  Transaction,
 } from './types';
 
 export async function createCustomer(input: {
@@ -50,4 +53,38 @@ export async function payTransaction(
       body: JSON.stringify(input),
     },
   );
+}
+
+export async function listTransactions(options?: {
+  status?: Transaction['status'];
+  limit?: number;
+}): Promise<Transaction[]> {
+  const params = new URLSearchParams();
+  if (options?.status) params.set('status', options.status);
+  if (options?.limit) params.set('limit', String(options.limit));
+  const qs = params.toString();
+  const data = await apiFetch<{ items: Transaction[] }>(
+    `/transactions${qs ? `?${qs}` : ''}`,
+  );
+  return data.items;
+}
+
+export async function restoreTransaction(
+  transactionId: string,
+): Promise<RestoreTransactionResponse> {
+  return apiFetch<RestoreTransactionResponse>(
+    `/transactions/${encodeURIComponent(transactionId)}/restore`,
+    { method: 'POST' },
+  );
+}
+
+export async function fetchDelivery(deliveryId: string): Promise<Delivery> {
+  return apiFetch<Delivery>(`/deliveries/${encodeURIComponent(deliveryId)}`);
+}
+
+export async function markDeliveryFulfilled(deliveryId: string): Promise<Delivery> {
+  return apiFetch<Delivery>(`/deliveries/${encodeURIComponent(deliveryId)}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status: 'FULFILLED' }),
+  });
 }

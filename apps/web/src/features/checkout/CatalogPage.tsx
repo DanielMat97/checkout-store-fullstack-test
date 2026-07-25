@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { AppShell, ShellHeader, Price, withViewTransition } from '../../design-system';
 import { isMockMode } from '../../mocks/checkoutService';
 import { listCatalogProducts, type Product } from './checkoutApi';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { selectProduct, setStocks } from '../../store/checkoutSlice';
-import { useNavigate } from 'react-router-dom';
 import './catalog.css';
 
 export function CatalogPage() {
@@ -51,9 +51,14 @@ export function CatalogPage() {
       <ShellHeader
         home
         trailing={
-          <a className="nora-catalog__nav-link" href="#edit">
-            Shop
-          </a>
+          <nav className="nora-catalog__nav" aria-label="Store">
+            <Link className="nora-catalog__nav-link" to="/orders">
+              Orders
+            </Link>
+            <a className="nora-catalog__nav-link" href="#edit">
+              Shop
+            </a>
+          </nav>
         }
       />
 

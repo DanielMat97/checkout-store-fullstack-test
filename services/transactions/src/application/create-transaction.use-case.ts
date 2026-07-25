@@ -88,12 +88,9 @@ export class CreateTransactionUseCase {
       deliveryFee: input.deliveryFee,
       total: totalOf(input),
       createdAt,
+      deliveryId,
+      effectsApplied: false,
     };
-
-    const saved = await this.transactions.put(transaction);
-    if (saved.isErr()) {
-      return err(mapPersistence(saved.error));
-    }
 
     const delivery = await this.deliveries.put({
       id: deliveryId,
@@ -107,6 +104,11 @@ export class CreateTransactionUseCase {
     });
     if (delivery.isErr()) {
       return err(mapPersistence(delivery.error));
+    }
+
+    const saved = await this.transactions.put(transaction);
+    if (saved.isErr()) {
+      return err(mapPersistence(saved.error));
     }
 
     return ok({ transaction: saved.value, deliveryId });

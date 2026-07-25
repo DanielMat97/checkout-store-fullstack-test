@@ -4,7 +4,7 @@ import type {
   DeliveryRepositoryPort,
   PersistenceError,
 } from '@app/persistence';
-import { CreateDeliveryUseCase, GetDeliveryUseCase } from './delivery.use-cases';
+import { CreateDeliveryUseCase, GetDeliveryUseCase, UpdateDeliveryStatusUseCase } from './delivery.use-cases';
 
 class MemoryDeliveries implements DeliveryRepositoryPort {
   private readonly items = new Map<string, DeliveryRecord>();
@@ -20,6 +20,16 @@ class MemoryDeliveries implements DeliveryRepositoryPort {
   async put(delivery: DeliveryRecord): Promise<Result<DeliveryRecord, PersistenceError>> {
     this.items.set(delivery.id, { ...delivery });
     return ok({ ...delivery });
+  }
+
+  async listByTransaction(
+    transactionId: string,
+  ): Promise<Result<DeliveryRecord[], PersistenceError>> {
+    return ok(
+      [...this.items.values()]
+        .filter((d) => d.transactionId === transactionId)
+        .map((d) => ({ ...d })),
+    );
   }
 }
 
@@ -69,6 +79,7 @@ describe('Delivery use-cases (ROP)', () => {
     const failing: DeliveryRepositoryPort = {
       getById: async () => err({ type: 'PERSISTENCE_ERROR', message: 'down' }),
       put: async () => err({ type: 'PERSISTENCE_ERROR', message: 'down' }),
+      listByTransaction: async () => err({ type: 'PERSISTENCE_ERROR', message: 'down' }),
     };
     expect(
       (
@@ -85,5 +96,22 @@ describe('Delivery use-cases (ROP)', () => {
     expect(
       (await new GetDeliveryUseCase(failing).execute('x'))._unsafeUnwrapErr().type,
     ).toBe('PERSISTENCE_ERROR');
+  });
+
+  it('fulfills FULFILLABLE delivery', async () => {
+    const created = await create.execute({
+      transactionId: 'tx_f',
+      customerId: 'cust_1',
+      address: 'Calle 1',
+      city: 'Bogotá',
+      region: 'Cundinamarca',
+      feeMinor: 5000,
+    });
+    const id = created._unsafeUnwrap().id;
+    await repo.put({ ...created._unsafeUnwrap(), status: 'FULFILLABLE' });
+    const update = new UpdateDeliveryStatusUseCase(repo);
+    const fulfilled = await update.execute(id, 'FULFILLED');
+    expect(fulfilled.isOk()).toBe(true);
+    expect(fulfilled._unsafeUnwrap().status).toBe('FULFILLED');
   });
 });

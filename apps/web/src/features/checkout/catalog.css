@@ -16,6 +16,12 @@
     border-color var(--nora-fast) var(--nora-ease);
 }
 
+.nora-catalog__nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
 .nora-catalog__nav-link:hover {
   color: var(--nora-ink);
   border-bottom-color: var(--nora-ink);

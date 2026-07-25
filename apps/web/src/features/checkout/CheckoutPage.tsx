@@ -35,26 +35,11 @@ import { ColombiaFlag } from './ColombiaFlag';
 import { getProductById } from '../../mocks/catalog';
 import { isMockMode } from '../../mocks/checkoutService';
 import { setPendingCard, splitExpiry } from './cardSession';
+import { seedCheckoutForm } from './seedCheckoutForm';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setCardMeta, setDelivery, setStep } from '../../store/checkoutSlice';
 import './checkout-flow.css';
 import './checkout-form.css';
-
-const emptyCard: CardFormValues = {
-  number: '',
-  holder: '',
-  expiry: '',
-  cvv: '',
-};
-
-const emptyDelivery: DeliveryFormValues = {
-  fullName: '',
-  email: '',
-  phone: '',
-  address: '',
-  city: '',
-  region: '',
-};
 
 const offAutocomplete = {
   autoComplete: 'off' as const,
@@ -71,8 +56,14 @@ export function CheckoutPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const stocks = useAppSelector((s) => s.checkout.stocks);
-  const [card, setCard] = useState<CardFormValues>(emptyCard);
-  const [delivery, setDeliveryForm] = useState<DeliveryFormValues>(emptyDelivery);
+  const savedDelivery = useAppSelector((s) => s.checkout.delivery);
+  const savedCardMeta = useAppSelector((s) => s.checkout.cardMeta);
+  const seeded = seedCheckoutForm({
+    delivery: savedDelivery,
+    cardMeta: savedCardMeta,
+  });
+  const [card, setCard] = useState<CardFormValues>(seeded.card);
+  const [delivery, setDeliveryForm] = useState<DeliveryFormValues>(seeded.delivery);
   const [cardErrors, setCardErrors] = useState<FormErrors<CardFormValues>>({});
   const [deliveryErrors, setDeliveryErrors] = useState<FormErrors<DeliveryFormValues>>(
     {},

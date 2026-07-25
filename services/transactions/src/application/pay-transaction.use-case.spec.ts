@@ -1,4 +1,6 @@
 import { FakePaymentGateway } from '../adapters/outbound/payment/fake-payment.gateway';
+import { InProcessOrderEventsPublisher } from '../adapters/outbound/order-events/in-process-order-events.publisher';
+import { ApplyPaymentApprovedEffectsUseCase } from './apply-payment-approved-effects.use-case';
 import { CreateTransactionUseCase } from './create-transaction.use-case';
 import { PayTransactionUseCase } from './pay-transaction.use-case';
 import {
@@ -21,6 +23,21 @@ describe('PayTransactionUseCase', () => {
     expYear: '30',
     cardHolder: 'Ada Lovelace',
   };
+
+  function payUseCase(gateway: FakePaymentGateway) {
+    const applyEffects = new ApplyPaymentApprovedEffectsUseCase(
+      transactions,
+      products,
+      deliveries,
+    );
+    const publisher = new InProcessOrderEventsPublisher(applyEffects);
+    return new PayTransactionUseCase(
+      transactions,
+      customers,
+      gateway,
+      publisher,
+    );
+  }
 
   async function seedPending() {
     products.seed([
@@ -68,13 +85,7 @@ describe('PayTransactionUseCase', () => {
 
   it('APPROVED: updates tx, marks delivery fulfillable, decrements stock', async () => {
     const pending = await seedPending();
-    const pay = new PayTransactionUseCase(
-      transactions,
-      products,
-      deliveries,
-      customers,
-      new FakePaymentGateway('APPROVED'),
-    );
+    const pay = payUseCase(new FakePaymentGateway('APPROVED'));
 
     const result = await pay.execute({
       transactionId: pending.transaction.id,
@@ -86,6 +97,7 @@ describe('PayTransactionUseCase', () => {
     if (result.isOk()) {
       expect(result.value.paymentStatus).toBe('APPROVED');
       expect(result.value.transaction.status).toBe('APPROVED');
+      expect(result.value.transaction.effectsApplied).toBe(true);
     }
     expect(products.decrementCalls).toEqual([{ id: 'prod_aura_quiet', qty: 1 }]);
     const stock = await products.getById('prod_aura_quiet');
@@ -96,13 +108,7 @@ describe('PayTransactionUseCase', () => {
 
   it('DECLINED: updates tx without decrementing stock', async () => {
     const pending = await seedPending();
-    const pay = new PayTransactionUseCase(
-      transactions,
-      products,
-      deliveries,
-      customers,
-      new FakePaymentGateway('DECLINED'),
-    );
+    const pay = payUseCase(new FakePaymentGateway('DECLINED'));
 
     const result = await pay.execute({
       transactionId: pending.transaction.id,
@@ -122,13 +128,7 @@ describe('PayTransactionUseCase', () => {
 
   it('ERROR: updates tx without decrementing stock', async () => {
     const pending = await seedPending();
-    const pay = new PayTransactionUseCase(
-      transactions,
-      products,
-      deliveries,
-      customers,
-      new FakePaymentGateway('ERROR'),
-    );
+    const pay = payUseCase(new FakePaymentGateway('ERROR'));
 
     const result = await pay.execute({
       transactionId: pending.transaction.id,

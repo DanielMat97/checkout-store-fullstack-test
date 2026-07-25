@@ -1,6 +1,6 @@
 # Current state
 
-> Last updated: **2026-07-25** (PASS base 100 — sandbox + OWASP + OpenAPI público)
+> Last updated: **2026-07-25** (SQS orchestration + Orders console implemented; base PASS unchanged)
 
 ## Score (rúbrica brief — modo evaluador estricto)
 
@@ -26,9 +26,11 @@ Ver **`docs/scorecard.md`**.
 | `testing-coverage` | **done** |
 | `cloud-deploy` | **done** |
 | `secrets-vault` | **done** |
-| `checkout-payment` | **done** (E2E sandbox cloud) |
+| `checkout-payment` | **done** (E2E sandbox cloud; post-pay sync fallback o SQS) |
 | `readme-deliverables` | **done** |
 | `security-hardening` | **done** (headers FE/API + `docs/security.md`) |
+| `sqs-orchestration` | **done** (ADR 0011; deploy crea cola) |
+| `orders-console` | **done** (`/orders` ops demo) |
 | `ux-quality-bar` | ready (bonus responsive matrix) |
 
 ## Deploy (live)
@@ -40,3 +42,5 @@ Ver **`docs/scorecard.md`**.
 | OpenAPI | https://master.dw2i8myh0xumx.amplifyapp.com/openapi.json |
 | Payment mode | `sandbox` |
 | Security | [`docs/security.md`](security.md) |
+| Gap analysis | [`docs/brief-gap-analysis.md`](brief-gap-analysis.md) |
+| Post-pay | SQS `checkout-orders-events-{stage}` + worker; local sync fallback |

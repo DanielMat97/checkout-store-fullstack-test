@@ -60,6 +60,9 @@ const serverlessConfiguration = {
       PAYMENT_CURRENCY: '${env:PAYMENT_CURRENCY, "COP"}',
       BASE_FEE: '${env:BASE_FEE, "1500"}',
       DELIVERY_FEE: '${env:DELIVERY_FEE, "5000"}',
+      ORDERS_EVENTS_QUEUE_URL: {
+        Ref: 'CheckoutOrdersEventsQueue',
+      },
     },
     iam: {
       role: {
@@ -83,6 +86,19 @@ const serverlessConfiguration = {
                   [{ 'Fn::GetAtt': ['CheckoutTable', 'Arn'] }, 'index', '*'],
                 ],
               },
+            ],
+          },
+          {
+            Effect: 'Allow',
+            Action: [
+              'sqs:SendMessage',
+              'sqs:ReceiveMessage',
+              'sqs:DeleteMessage',
+              'sqs:GetQueueAttributes',
+            ],
+            Resource: [
+              { 'Fn::GetAtt': ['CheckoutOrdersEventsQueue', 'Arn'] },
+              { 'Fn::GetAtt': ['CheckoutOrdersEventsDlq', 'Arn'] },
             ],
           },
         ],
@@ -143,6 +159,21 @@ const serverlessConfiguration = {
         { httpApi: { path: '/transactions/{proxy+}', method: 'ANY' } },
       ],
     },
+    ordersWorker: {
+      handler: 'services/transactions/dist/orders-worker.handler',
+      timeout: 60,
+      environment: {
+        SERVICE_NAME: 'orders-worker',
+      },
+      events: [
+        {
+          sqs: {
+            arn: { 'Fn::GetAtt': ['CheckoutOrdersEventsQueue', 'Arn'] },
+            batchSize: 5,
+          },
+        },
+      ],
+    },
   },
   resources: {
     Resources: {
@@ -177,6 +208,26 @@ const serverlessConfiguration = {
           ],
         },
       },
+      CheckoutOrdersEventsDlq: {
+        Type: 'AWS::SQS::Queue',
+        Properties: {
+          QueueName: 'checkout-orders-events-dlq-${sls:stage}',
+          MessageRetentionPeriod: 1209600,
+        },
+      },
+      CheckoutOrdersEventsQueue: {
+        Type: 'AWS::SQS::Queue',
+        Properties: {
+          QueueName: 'checkout-orders-events-${sls:stage}',
+          VisibilityTimeout: 120,
+          RedrivePolicy: {
+            deadLetterTargetArn: {
+              'Fn::GetAtt': ['CheckoutOrdersEventsDlq', 'Arn'],
+            },
+            maxReceiveCount: 3,
+          },
+        },
+      },
     },
     Outputs: {
       CheckoutTableName: {
@@ -185,6 +236,10 @@ const serverlessConfiguration = {
         Export: {
           Name: 'checkout-api-${sls:stage}-CheckoutTableName',
         },
+      },
+      OrdersEventsQueueUrl: {
+        Description: 'SQS queue for PaymentApproved events',
+        Value: { Ref: 'CheckoutOrdersEventsQueue' },
       },
       StageName: {
         Description: 'Deployed Serverless stage',

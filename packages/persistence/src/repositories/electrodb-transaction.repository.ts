@@ -1,6 +1,6 @@
 import { err, ok, type Result } from 'neverthrow';
 import type { CheckoutEntities } from '../entities';
-import type { PersistenceError, TransactionRecord } from '../types';
+import type { PersistenceError, TransactionRecord, TransactionStatus } from '../types';
 import type { TransactionRepositoryPort } from '../ports/repositories';
 
 function mapPersistenceError(error: unknown): PersistenceError {
@@ -19,6 +19,9 @@ function toRecord(data: {
   total: number;
   providerRef?: string;
   createdAt: string;
+  deliveryId?: string;
+  effectsApplied?: boolean;
+  stockRestoredAt?: string;
 }): TransactionRecord {
   return {
     id: data.transactionId,
@@ -31,6 +34,27 @@ function toRecord(data: {
     total: data.total,
     providerRef: data.providerRef,
     createdAt: data.createdAt,
+    deliveryId: data.deliveryId,
+    effectsApplied: data.effectsApplied,
+    stockRestoredAt: data.stockRestoredAt,
+  };
+}
+
+function toEntity(tx: TransactionRecord) {
+  return {
+    transactionId: tx.id,
+    status: tx.status,
+    productId: tx.productId,
+    customerId: tx.customerId,
+    productAmount: tx.productAmount,
+    baseFee: tx.baseFee,
+    deliveryFee: tx.deliveryFee,
+    total: tx.total,
+    providerRef: tx.providerRef,
+    createdAt: tx.createdAt,
+    deliveryId: tx.deliveryId,
+    effectsApplied: tx.effectsApplied,
+    stockRestoredAt: tx.stockRestoredAt,
   };
 }
 
@@ -51,20 +75,7 @@ export class ElectroDbTransactionRepository implements TransactionRepositoryPort
 
   async put(tx: TransactionRecord): Promise<Result<TransactionRecord, PersistenceError>> {
     try {
-      await this.entities.transactions
-        .put({
-          transactionId: tx.id,
-          status: tx.status,
-          productId: tx.productId,
-          customerId: tx.customerId,
-          productAmount: tx.productAmount,
-          baseFee: tx.baseFee,
-          deliveryFee: tx.deliveryFee,
-          total: tx.total,
-          providerRef: tx.providerRef,
-          createdAt: tx.createdAt,
-        })
-        .go();
+      await this.entities.transactions.put(toEntity(tx)).go();
       return ok(tx);
     } catch (error) {
       return err(mapPersistenceError(error));
@@ -79,21 +90,30 @@ export class ElectroDbTransactionRepository implements TransactionRepositoryPort
       if (existing.isErr()) {
         return existing;
       }
-      await this.entities.transactions
-        .put({
-          transactionId: tx.id,
-          status: tx.status,
-          productId: tx.productId,
-          customerId: tx.customerId,
-          productAmount: tx.productAmount,
-          baseFee: tx.baseFee,
-          deliveryFee: tx.deliveryFee,
-          total: tx.total,
-          providerRef: tx.providerRef,
-          createdAt: tx.createdAt,
-        })
-        .go();
+      await this.entities.transactions.put(toEntity(tx)).go();
       return ok(tx);
+    } catch (error) {
+      return err(mapPersistenceError(error));
+    }
+  }
+
+  async listByCreatedAt(options?: {
+    status?: TransactionStatus;
+    limit?: number;
+  }): Promise<Result<TransactionRecord[], PersistenceError>> {
+    try {
+      const result = await this.entities.transactions.query.byType({}).go({
+        order: 'desc',
+        pages: 'all',
+      });
+      let items = result.data.map(toRecord);
+      if (options?.status) {
+        items = items.filter((t) => t.status === options.status);
+      }
+      if (options?.limit && options.limit > 0) {
+        items = items.slice(0, options.limit);
+      }
+      return ok(items);
     } catch (error) {
       return err(mapPersistenceError(error));
     }

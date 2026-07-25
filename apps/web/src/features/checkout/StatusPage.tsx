@@ -1,7 +1,9 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppShell, BrandLockup, Button, withViewTransition } from '../../design-system';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { resetCheckout, setStep } from '../../store/checkoutSlice';
+import { resetCheckout, setProductStock, setStep } from '../../store/checkoutSlice';
+import { pollProductStockUntilChanged, refreshProductStock } from './checkoutApi';
 import './status.css';
 
 export function StatusPage() {
@@ -11,10 +13,30 @@ export function StatusPage() {
   const transactionId = useAppSelector((s) => s.checkout.transactionId);
   const productId = useAppSelector((s) => s.checkout.productId);
   const paymentError = useAppSelector((s) => s.checkout.paymentError);
+  const previousStock = useAppSelector((s) =>
+    productId ? s.checkout.stocks[productId] : undefined,
+  );
 
   const approved = status === 'APPROVED';
   const pending = status === 'PENDING';
   const errored = status === 'ERROR';
+
+  useEffect(() => {
+    if (!approved || !productId) return;
+    let cancelled = false;
+    const baseline = previousStock ?? 0;
+    (async () => {
+      const stock = await pollProductStockUntilChanged(productId, baseline);
+      if (!cancelled) {
+        dispatch(setProductStock({ productId, stock }));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // Intentionally once on APPROVED mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [approved, productId, dispatch]);
 
   const title = pending
     ? 'Confirming'
@@ -33,12 +55,18 @@ export function StatusPage() {
           'We could not reach the payment service. Check your connection and try again.')
         : 'No charge was taken and stock stays as it was. You can try another card.';
 
-  const onContinue = () => {
+  const onContinue = async () => {
     const target = productId ? `/product/${productId}` : '/';
-    if (!approved) {
-      dispatch(resetCheckout());
-    } else {
+    if (approved && productId) {
+      try {
+        const stock = await refreshProductStock(productId);
+        dispatch(setProductStock({ productId, stock }));
+      } catch {
+        // Product page will reload stock from API/catalog.
+      }
       dispatch(setStep('product'));
+    } else {
+      dispatch(resetCheckout());
     }
     withViewTransition(() => navigate(target));
   };

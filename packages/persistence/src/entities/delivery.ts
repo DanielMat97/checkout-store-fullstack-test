@@ -15,7 +15,7 @@ export const deliveryEntitySchema = {
     region: { type: 'string', required: true },
     feeMinor: { type: 'number', required: true },
     status: {
-      type: ['PENDING', 'FULFILLABLE', 'FULFILLED'] as const,
+      type: ['PENDING', 'FULFILLABLE', 'FULFILLED', 'CANCELLED'] as const,
       required: true,
     },
   },

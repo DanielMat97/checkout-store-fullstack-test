@@ -7,11 +7,13 @@ import {
   Inject,
   Param,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import type { TransactionRepositoryPort } from '@app/persistence';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import type { TransactionRepositoryPort, TransactionStatus } from '@app/persistence';
 import { CreateTransactionUseCase } from '../../../application/create-transaction.use-case';
 import { PayTransactionUseCase } from '../../../application/pay-transaction.use-case';
+import { RestoreTransactionStockUseCase } from '../../../application/restore-transaction-stock.use-case';
 import { TRANSACTION_REPOSITORY } from '../../../ports/injection.tokens';
 import { domainErrorToHttp } from './domain-error.mapper';
 import { CreateTransactionDto, PayTransactionDto } from './dto';
@@ -22,6 +24,7 @@ export class TransactionsController {
   constructor(
     private readonly createTransaction: CreateTransactionUseCase,
     private readonly payTransaction: PayTransactionUseCase,
+    private readonly restoreStock: RestoreTransactionStockUseCase,
     @Inject(TRANSACTION_REPOSITORY)
     private readonly transactions: TransactionRepositoryPort,
   ) {}
@@ -35,6 +38,30 @@ export class TransactionsController {
       throw domainErrorToHttp(result.error);
     }
     return result.value;
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'List transactions (ops console)' })
+  @ApiQuery({ name: 'status', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  async list(
+    @Query('status') status?: TransactionStatus,
+    @Query('limit') limitRaw?: string,
+  ) {
+    const limit = limitRaw ? Number(limitRaw) : 50;
+    const result = await this.transactions.listByCreatedAt({
+      status,
+      limit: Number.isFinite(limit) ? limit : 50,
+    });
+    if (result.isErr()) {
+      throw domainErrorToHttp({
+        type: 'PERSISTENCE_ERROR',
+        message: result.error.type === 'PERSISTENCE_ERROR'
+          ? result.error.message
+          : result.error.type,
+      });
+    }
+    return { items: result.value };
   }
 
   @Get(':id')
@@ -63,6 +90,20 @@ export class TransactionsController {
       deliveryId: body.deliveryId,
       card: body.card,
     });
+    if (result.isErr()) {
+      throw domainErrorToHttp(result.error);
+    }
+    return result.value;
+  }
+
+  @Post(':id/restore')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Ops: restore stock (+1), cancel delivery, mark transaction REFUNDED (demo console)',
+  })
+  async restore(@Param('id') id: string) {
+    const result = await this.restoreStock.execute(id);
     if (result.isErr()) {
       throw domainErrorToHttp(result.error);
     }

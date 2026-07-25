@@ -52,6 +52,29 @@ export async function refreshProductStock(productId: string): Promise<number> {
   return data.stock;
 }
 
+/** Brief §6: short poll until stock drops after async post-pay effects. */
+export async function pollProductStockUntilChanged(
+  productId: string,
+  previousStock: number,
+  opts: { attempts?: number; delayMs?: number } = {},
+): Promise<number> {
+  const attempts = opts.attempts ?? 5;
+  const delayMs = opts.delayMs ?? 200;
+  let stock = previousStock;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      stock = await refreshProductStock(productId);
+    } catch {
+      break;
+    }
+    if (stock !== previousStock) {
+      return stock;
+    }
+    await new Promise((r) => setTimeout(r, delayMs));
+  }
+  return stock;
+}
+
 export type LivePayInput = {
   product: Product;
   delivery: DeliveryInfo;
@@ -114,7 +137,10 @@ export async function executePay(input: LivePayInput): Promise<PayResult> {
   let stock = input.product.stock;
   if (paid.paymentStatus === 'APPROVED') {
     try {
-      stock = await refreshProductStock(input.product.id);
+      stock = await pollProductStockUntilChanged(
+        input.product.id,
+        input.product.stock,
+      );
     } catch {
       stock = Math.max(0, input.product.stock - 1);
     }

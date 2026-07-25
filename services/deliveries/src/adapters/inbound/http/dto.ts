@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsString, MaxLength, Min } from 'class-validator';
+import {
+  IsIn,
+  IsInt,
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+  Min,
+} from 'class-validator';
+import type { DeliveryStatus } from '@app/persistence';
 
 export class CreateDeliveryDto {
   @ApiProperty()
@@ -34,4 +42,11 @@ export class CreateDeliveryDto {
   @IsInt()
   @Min(0)
   feeMinor!: number;
+}
+
+export class UpdateDeliveryStatusDto {
+  @ApiProperty({ enum: ['FULFILLED', 'CANCELLED'] })
+  @IsString()
+  @IsIn(['FULFILLED', 'CANCELLED'])
+  status!: Extract<DeliveryStatus, 'FULFILLED' | 'CANCELLED'>;
 }
