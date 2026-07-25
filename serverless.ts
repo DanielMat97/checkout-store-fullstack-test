@@ -1,4 +1,5 @@
 import type { AWS } from '@serverless/typescript';
+import { observabilityResources } from './infra/observability-resources.cjs';
 
 /**
  * Single Serverless Framework stack = one HTTP API (API Gateway) that routes
@@ -9,6 +10,8 @@ import type { AWS } from '@serverless/typescript';
  * - `fb-*` — isolated feature stacks (unique DynamoDB table + API URL)
  */
 const stage = '${sls:stage}';
+
+const observability = observabilityResources({ stage });
 
 function corsOrigins(): string[] {
   const raw = process.env.CORS_ORIGIN ?? 'http://localhost:5173';
@@ -176,7 +179,9 @@ const serverlessConfiguration = {
     },
   },
   resources: {
+    Conditions: observability.Conditions,
     Resources: {
+      ...observability.Resources,
       CheckoutTable: {
         Type: 'AWS::DynamoDB::Table',
         Properties: {
@@ -230,6 +235,7 @@ const serverlessConfiguration = {
       },
     },
     Outputs: {
+      ...observability.Outputs,
       CheckoutTableName: {
         Description: 'Single-table DynamoDB name',
         Value: { Ref: 'CheckoutTable' },

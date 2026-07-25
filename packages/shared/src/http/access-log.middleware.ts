@@ -21,6 +21,9 @@ export function AccessLogMiddleware(targetService: string): Type<NestMiddleware>
       res.setHeader('x-correlation-id', correlationId);
 
       res.on('finish', () => {
+        const rawLen = req.headers['content-length'];
+        const contentLength =
+          typeof rawLen === 'string' && rawLen !== '' ? Number(rawLen) : undefined;
         logHttpRequest({
           service: 'api-gateway',
           method: req.method,
@@ -29,7 +32,12 @@ export function AccessLogMiddleware(targetService: string): Type<NestMiddleware>
           durationMs: Date.now() - started,
           correlationId,
           requestId,
-          targetService,
+          targetService: targetService,
+          userAgent:
+            typeof req.headers['user-agent'] === 'string'
+              ? req.headers['user-agent']
+              : undefined,
+          contentLength: Number.isFinite(contentLength) ? contentLength : undefined,
         });
       });
 

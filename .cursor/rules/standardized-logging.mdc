@@ -9,31 +9,45 @@ alwaysApply: true
 
 - All backend logs go through `createLogger` from `@app/shared` — **including API Gateway access logs**.
 - Nest runtime logs use `NestStandardLogger` (wraps `createLogger`). Never `console.*` in handlers/use-cases/adapters.
+- Prefer `createApplicationLogger(domain, operation)` (or `logger.child({ layer, operation })`) in use-cases.
 
 ```typescript
-import { createLogger, logHttpRequest, NestStandardLogger } from '@app/shared';
+import {
+  createLogger,
+  createApplicationLogger,
+  logHttpRequest,
+  NestStandardLogger,
+} from '@app/shared';
 
 const logger = createLogger('transactions');
 logger.info('transaction.created', { transactionId });
 
+const payLog = createApplicationLogger('transactions', 'pay_transaction');
+payLog.info('pay.outcome', { paymentStatus: 'APPROVED' });
+
 // API access (same JSON envelope)
-logHttpRequest({ service: 'api-gateway', message implied: 'http.request', ... });
+logHttpRequest({ method, path, statusCode, durationMs, correlationId, targetService });
 ```
 
 ## Standard shape
 
 Every line is one JSON object:
 
-`timestamp`, `level`, `service`, `message`, optional `correlationId` / `requestId`, optional `data` (redacted).
+`timestamp`, `level`, `service`, `message`, `stage`, optional `functionName` / `runtime`, optional `correlationId` / `requestId`, optional `domain` / `layer` / `operation`, optional `data` (redacted).
 
-| Kind | `service` | `message` |
-|---|---|---|
-| Domain / Lambda | microservice name | event key e.g. `lambda.cold_start` |
-| HTTP access (API) | `api-gateway` | `http.request` |
+| Kind | `service` | `layer` | `message` |
+|---|---|---|---|
+| Domain / Lambda | microservice name | `infrastructure` / `adapter` / … | event key e.g. `lambda.cold_start` |
+| Application use-case | domain name | `application` | e.g. `pay.outcome` |
+| HTTP access (API) | `api-gateway` | `http` | `http.request` |
 
-HTTP `data` includes: `channel: "http"`, `method`, `path`, `statusCode`, `durationMs`, `targetService`.
+HTTP `data` includes: `channel: "http"`, `method`, `path`, `route` (normalized), `statusCode`, `statusClass`, `durationMs`, `targetService`, `coldStart`, optional `userAgent` / `contentLength`.
+
+HTTP access also emits **EMF** custom metrics under namespace `Checkout/API` (see `docs/observability.md`).
 
 ## Wiring
 
 - Each Nest app: `AccessLogMiddleware(serviceName)` on all routes + `NestStandardLogger` in `NestFactory.create`.
 - Propagate `x-correlation-id` on every response.
+- Lambda handlers: pass `requestId: context.awsRequestId` into `createLogger` meta.
+- CloudWatch dashboards / alarms / IAM viewer: `infra/observability-resources.cjs` via Serverless.

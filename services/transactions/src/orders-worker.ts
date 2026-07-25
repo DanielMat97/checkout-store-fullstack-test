@@ -4,7 +4,11 @@ import { createLogger } from '@app/shared';
 import { ApplyPaymentApprovedEffectsUseCase } from './application/apply-payment-approved-effects.use-case';
 import type { PaymentApprovedEvent } from './ports/order-events.port';
 
-const logger = createLogger('orders-worker');
+const logger = createLogger('orders-worker', {
+  domain: 'transactions',
+  layer: 'infrastructure',
+  operation: 'orders_worker',
+});
 
 export function isPaymentApprovedEvent(value: unknown): value is PaymentApprovedEvent {
   if (!value || typeof value !== 'object') return false;

@@ -41,7 +41,8 @@
     "vault:approle": "bash scripts/vault/bootstrap-approle.sh",
     "vault:test": "node scripts/vault/lib.spec.cjs",
     "ensure-table": "npm run ensure-table -w @app/persistence",
-    "seed": "npm run seed -w @app/persistence"
+    "seed": "npm run seed -w @app/persistence",
+    "ops:observability": "node scripts/ops/describe-observability.cjs"
   },
   "devDependencies": {
     "@serverless/typescript": "^3.38.0",

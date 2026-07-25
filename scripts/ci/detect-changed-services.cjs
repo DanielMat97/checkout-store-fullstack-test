@@ -23,6 +23,7 @@ const FUNCTION_ALIASES = {
 
 const FULL_STACK_PATTERNS = [
   /^serverless\.(ts|js|yml|yaml)$/,
+  /^infra\//,
   /^package(-lock)?\.json$/,
   /^packages\/shared\//,
   /^packages\/persistence\//,

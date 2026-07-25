@@ -1,4 +1,4 @@
-import { createLogger } from './logger';
+import { createLogger, createApplicationLogger } from './logger';
 
 describe('createLogger', () => {
   const writes: { stream: 'out' | 'err'; chunk: string }[] = [];
@@ -7,6 +7,7 @@ describe('createLogger', () => {
 
   beforeEach(() => {
     writes.length = 0;
+    process.env.STAGE = 'test';
     originalOut = process.stdout.write.bind(process.stdout);
     originalErr = process.stderr.write.bind(process.stderr);
     process.stdout.write = ((chunk: string | Uint8Array) => {
@@ -22,6 +23,7 @@ describe('createLogger', () => {
   afterEach(() => {
     process.stdout.write = originalOut;
     process.stderr.write = originalErr;
+    delete process.env.STAGE;
   });
 
   it('redacts sensitive card fields from data', () => {
@@ -31,6 +33,7 @@ describe('createLogger', () => {
     expect(writes[0].chunk).not.toContain('4111111111111111');
     expect(writes[0].chunk).toContain('1111');
     expect(writes[0].chunk).toContain('"service":"products"');
+    expect(writes[0].chunk).toContain('"stage":"test"');
   });
 
   it('writes debug/warn to stdout and error to stderr', () => {
@@ -51,5 +54,24 @@ describe('createLogger', () => {
     expect(writes.find((w) => w.stream === 'err')?.chunk).toContain(
       '"correlationId":"c1"',
     );
+  });
+
+  it('child logger merges domain/layer/operation', () => {
+    const logger = createApplicationLogger('transactions', 'pay_transaction', {
+      correlationId: 'c2',
+    });
+    logger.info('pay.outcome', { paymentStatus: 'APPROVED' });
+    const line = writes[0].chunk;
+    expect(line).toContain('"layer":"application"');
+    expect(line).toContain('"operation":"pay_transaction"');
+    expect(line).toContain('"domain":"transactions"');
+    expect(line).toContain('"correlationId":"c2"');
+  });
+
+  it('child() inherits ids', () => {
+    const root = createLogger('deliveries', { requestId: 'r9' });
+    root.child({ layer: 'adapter', operation: 'put_delivery' }).info('saved');
+    expect(writes[0].chunk).toContain('"requestId":"r9"');
+    expect(writes[0].chunk).toContain('"layer":"adapter"');
   });
 });

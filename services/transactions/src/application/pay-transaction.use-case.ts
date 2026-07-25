@@ -1,6 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { err, errAsync, ok, okAsync, ResultAsync, type Result } from 'neverthrow';
 import type { TransactionRepositoryPort } from '@app/persistence';
+import { createApplicationLogger } from '@app/shared';
 import type { Transaction } from '../domain/transaction';
 import { assertPending, type DomainError } from '../domain/errors';
 import type { CustomerReaderPort } from '../ports/cross-domain.ports';
@@ -13,6 +14,8 @@ import {
   TRANSACTION_REPOSITORY,
 } from '../ports/injection.tokens';
 import { fromRepoResult } from './result-async';
+
+const payLog = createApplicationLogger('transactions', 'pay_transaction');
 
 export type PayTransactionInput = {
   transactionId: string;
@@ -41,7 +44,7 @@ export class PayTransactionUseCase {
   async execute(
     input: PayTransactionInput,
   ): Promise<Result<PayTransactionOutput, DomainError>> {
-    return this.validate(input)
+    const result = await this.validate(input)
       .andThen((valid) =>
         fromRepoResult(this.transactions.getById(valid.transactionId)).map((tx) => ({
           valid,
@@ -81,6 +84,25 @@ export class PayTransactionUseCase {
         }
         return this.onTerminal(tx, 'ERROR', outcome.providerRef);
       });
+
+    if (result.isOk()) {
+      payLog.info('pay.outcome', {
+        transactionId: result.value.transaction.id,
+        paymentStatus: result.value.paymentStatus,
+        productId: result.value.transaction.productId,
+      });
+    } else {
+      const failure = result.error;
+      payLog.warn('pay.failed', {
+        transactionId: input.transactionId,
+        errorType: failure.type,
+        message: 'message' in failure ? failure.message : undefined,
+        entity: 'entity' in failure ? failure.entity : undefined,
+        id: 'id' in failure ? failure.id : undefined,
+      });
+    }
+
+    return result;
   }
 
   private validate(

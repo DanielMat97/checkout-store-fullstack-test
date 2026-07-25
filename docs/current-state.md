@@ -1,6 +1,6 @@
 # Current state
 
-> Last updated: **2026-07-25** (FE hooks + coverage ≥80% + BE-on-FE gate; score **150/150**)
+> Last updated: **2026-07-25** (observability: enriched logs + CW dashboards/alarms/IAM viewer; score **150/150**)
 
 ## Score (rúbrica brief — modo evaluador estricto)
 
@@ -35,6 +35,7 @@ Ver **`docs/scorecard.md`**.
 | `deploy-smoke-rollback` | **done** (ADR 0012 — Playwright + ZAP + CodeQL + rollback) |
 | `ux-quality-bar` | **done** (matriz B2–B4 + `docs/ux-evidence.md`) |
 | `frontend-hooks-coverage` | **done** (hooks + FE cov ≥80% + `ci:backend-on-fe`) |
+| `observability-cloudwatch` | **done** (ADR 0014 — logs + CW dashboard/alarms/IAM viewer) |
 
 ## Deploy (live)
 
@@ -45,6 +46,7 @@ Ver **`docs/scorecard.md`**.
 | OpenAPI | https://master.dw2i8myh0xumx.amplifyapp.com/openapi.json |
 | Payment mode | `sandbox` |
 | Security | [`docs/security.md`](security.md) |
+| Observability | [`docs/observability.md`](observability.md) — dashboard `checkout-api-<stage>-ops` |
 | UX evidence | [`docs/ux-evidence.md`](ux-evidence.md) |
 | CI/CD | [`docs/ci-cd.md`](ci-cd.md) — pre: CodeQL (+Sonar opc.); **BE gate on FE changes**; post: Playwright + ZAP; Artillery opcional |
 | Gap analysis | [`docs/brief-gap-analysis.md`](brief-gap-analysis.md) |

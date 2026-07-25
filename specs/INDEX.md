@@ -24,12 +24,13 @@
 | FE hooks + cov + BE-on-FE | `frontend-hooks-coverage/` | **done** | Base #5 / B4 + CI |
 | SQS post-pay | `sqs-orchestration/` | **done** | Arch enhancement (ADR 0011) |
 | Orders console | `orders-console/` | **done** | Ops + brief §5–6 stock |
-| **Deploy smoke + rollback** | `deploy-smoke-rollback/` | **done** | CI E2E/ZAP/SAST (ADR 0012) |
+| Deploy smoke + rollback | `deploy-smoke-rollback/` | **done** | CI E2E/ZAP/SAST (ADR 0012) |
+| **Observability CW** | `observability-cloudwatch/` | **done** | Logs + dashboards + alarms + IAM (ADR 0014) |
 
 ## Orden reciente
 
 ```
-… → ux-quality-bar → bonus-hex-rop-polish → frontend-hooks-coverage
+… → frontend-hooks-coverage → observability-cloudwatch
 ```
 
 ## Reglas

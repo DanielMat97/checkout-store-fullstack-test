@@ -7,6 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Observability CloudWatch (ADR 0014)**: enriched JSON logger (`domain`/`layer`/`operation`, HTTP `route`/`statusClass`/`coldStart`, EMF `Checkout/API`); pay use-case `pay.outcome`/`pay.failed`; Serverless dashboard `checkout-api-<stage>-ops`, alarms 4xx/5xx/latency/Lambda errors, SNS + optional email, IAM read-only viewer; `docs/observability.md` + `npm run ops:observability`. Spec: `specs/observability-cloudwatch/`.
 - **FE hooks + coverage + BE-on-FE gate**: presentational pages; hooks (`useCatalog`, `useProductPage`, `useCheckoutForm`, `useSummaryPay`, `usePaymentStatus`, `useOrdersConsole`); Jest FE stmts/branch/funcs/lines ≥80%; `npm run ci:backend-on-fe` + CI job. Spec: `specs/frontend-hooks-coverage/`.
 - **UX quality bar (B2–B4)**: tokens/veil shadows, overflow SE fixes, Playwright matrix Chromium/Firefox/WebKit + iPhone SE, `docs/ux-evidence.md`. CheckoutPage uses `loadProduct`; unused Modal removed.
 - **Hex + ROP polish (B4–B6)**: `GetTransaction`/`ListTransactions` use-cases (controller sin repo); shared `domainErrorToHttp` in `@app/shared`; pay/create/apply-effects railways con `ResultAsync.andThen`.

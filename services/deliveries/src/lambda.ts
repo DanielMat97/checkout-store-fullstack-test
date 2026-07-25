@@ -32,9 +32,14 @@ async function bootstrap(): Promise<AsyncHandler> {
 }
 
 export const handler: AsyncHandler = async (event, context) => {
-  const logger = createLogger(serviceName);
+  const logger = createLogger(serviceName, {
+    requestId: context.awsRequestId,
+    domain: serviceName,
+    layer: 'infrastructure',
+    operation: 'lambda_invoke',
+  });
   if (!cachedServer) {
-    logger.info('lambda.cold_start');
+    logger.info('lambda.cold_start', { coldStart: true });
     cachedServer = await bootstrap();
   }
   return cachedServer(event, context);
