@@ -90,10 +90,29 @@ jobs:
       - run: npm run build:shared
       - run: npm test
 
+  backend-on-fe:
+    name: Backend gate (on FE changes)
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Detect FE changes + run Nest test/cov/audit
+        env:
+          BASE_REF: ${{ github.event.before || github.event.pull_request.base.sha }}
+          HEAD_REF: ${{ github.sha }}
+        run: npm run ci:backend-on-fe
+
   coverage:
     name: Coverage (>80%)
     runs-on: ubuntu-latest
-    needs: test
+    needs: [test, backend-on-fe]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

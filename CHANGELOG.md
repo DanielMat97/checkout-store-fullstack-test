@@ -7,6 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **FE hooks + coverage + BE-on-FE gate**: presentational pages; hooks (`useCatalog`, `useProductPage`, `useCheckoutForm`, `useSummaryPay`, `usePaymentStatus`, `useOrdersConsole`); Jest FE stmts/branch/funcs/lines ≥80%; `npm run ci:backend-on-fe` + CI job. Spec: `specs/frontend-hooks-coverage/`.
 - **UX quality bar (B2–B4)**: tokens/veil shadows, overflow SE fixes, Playwright matrix Chromium/Firefox/WebKit + iPhone SE, `docs/ux-evidence.md`. CheckoutPage uses `loadProduct`; unused Modal removed.
 - **Hex + ROP polish (B4–B6)**: `GetTransaction`/`ListTransactions` use-cases (controller sin repo); shared `domainErrorToHttp` in `@app/shared`; pay/create/apply-effects railways con `ResultAsync.andThen`.
 - **Optional Artillery stress (ADR 0013)**: post-deploy mild load on `GET /products` with `continue-on-error` — never blocks deploy/rollback. Scenario: `load/artillery-products.yml`.

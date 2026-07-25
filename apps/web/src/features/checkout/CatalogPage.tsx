@@ -1,50 +1,11 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { AppShell, ShellHeader, Price, withViewTransition } from '../../design-system';
+import { Link } from 'react-router-dom';
+import { AppShell, ShellHeader, Price } from '../../design-system';
 import { isMockMode } from '../../mocks/checkoutService';
-import { listCatalogProducts, type Product } from './checkoutApi';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { selectProduct, setStocks } from '../../store/checkoutSlice';
+import { useCatalog } from './hooks/useCatalog';
 import './catalog.css';
 
 export function CatalogPage() {
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  const stocks = useAppSelector((s) => s.checkout.stocks);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const items = await listCatalogProducts();
-        if (cancelled) return;
-        setProducts(items);
-        dispatch(setStocks(Object.fromEntries(items.map((p) => [p.id, p.stock]))));
-      } catch (e) {
-        if (!cancelled) {
-          setError(e instanceof Error ? e.message : 'Could not load catalog.');
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [dispatch]);
-
-  const openProduct = (id: string) => {
-    dispatch(selectProduct(id));
-    withViewTransition(() => navigate(`/product/${id}`));
-  };
-
-  const featured = products[0];
-  const rest = products.slice(1);
+  const { featured, rest, stocks, loading, error, openProduct } = useCatalog();
 
   return (
     <AppShell layout="store" mockBanner={isMockMode()}>
@@ -110,7 +71,7 @@ export function CatalogPage() {
           </section>
         ) : null}
 
-        {!loading && !error && products.length > 0 ? (
+        {!loading && !error && rest.length + (featured ? 1 : 0) > 0 ? (
           <section id="edit" className="nora-catalog__edit" aria-labelledby="edit-title">
             <header className="nora-catalog__edit-head">
               <p className="nora-catalog__eyebrow">The edit</p>

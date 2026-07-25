@@ -1,5 +1,3 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
 import {
   AppShell,
   ShellHeader,
@@ -8,36 +6,12 @@ import {
   Price,
   TextField,
   SuggestField,
-  withViewTransition,
 } from '../../design-system';
-import { detectCardBrand, formatCardNumber, formatExpiry, sanitizeCvv } from './card';
-import {
-  emailError,
-  validateCard,
-  validateDelivery,
-  type CardFormValues,
-  type DeliveryFormValues,
-  type FormErrors,
-} from './validation';
-import {
-  BOGOTA_AREA_CITIES,
-  COLOMBIA_DEPARTMENTS,
-  formatColombiaPhone,
-} from './colombia';
-import {
-  sanitizeAddress,
-  sanitizeEmailInput,
-  sanitizePersonName,
-  sanitizePlaceName,
-  toTitleCase,
-} from './textFormat';
+import { BOGOTA_AREA_CITIES, COLOMBIA_DEPARTMENTS } from './colombia';
+import { toTitleCase, sanitizePlaceName } from './textFormat';
 import { ColombiaFlag } from './ColombiaFlag';
 import { isMockMode } from '../../mocks/checkoutService';
-import { setPendingCard, splitExpiry } from './cardSession';
-import { seedCheckoutForm } from './seedCheckoutForm';
-import { loadProduct, type Product } from './checkoutApi';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { setCardMeta, setDelivery, setStep } from '../../store/checkoutSlice';
+import { useCheckoutForm } from './hooks/useCheckoutForm';
 import './checkout-flow.css';
 import './checkout-form.css';
 
@@ -51,46 +25,34 @@ const offAutocomplete = {
 };
 
 export function CheckoutPage() {
-  const { productId = '' } = useParams();
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  const stocks = useAppSelector((s) => s.checkout.stocks);
-  const savedDelivery = useAppSelector((s) => s.checkout.delivery);
-  const savedCardMeta = useAppSelector((s) => s.checkout.cardMeta);
-  const seeded = seedCheckoutForm({
-    delivery: savedDelivery,
-    cardMeta: savedCardMeta,
-  });
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [card, setCard] = useState<CardFormValues>(seeded.card);
-  const [delivery, setDeliveryForm] = useState<DeliveryFormValues>(seeded.delivery);
-  const [cardErrors, setCardErrors] = useState<FormErrors<CardFormValues>>({});
-  const [deliveryErrors, setDeliveryErrors] = useState<FormErrors<DeliveryFormValues>>(
-    {},
-  );
-  const [touchedEmail, setTouchedEmail] = useState(false);
-  const [showCvv, setShowCvv] = useState(false);
-
-  const brand = useMemo(() => detectCardBrand(card.number), [card.number]);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      const loaded = await loadProduct(productId);
-      if (cancelled) return;
-      if (!loaded) {
-        navigate('/', { replace: true });
-        return;
-      }
-      setProduct(loaded);
-      setLoading(false);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [productId, navigate]);
+  const {
+    product,
+    loading,
+    units,
+    card,
+    delivery,
+    cardErrors,
+    deliveryErrors,
+    brand,
+    showCvv,
+    setShowCvv,
+    emailFieldError,
+    close,
+    onSubmit,
+    updateCardNumber,
+    updateCardHolder,
+    blurCardHolder,
+    updateExpiry,
+    updateCvv,
+    updateFullName,
+    blurFullName,
+    updateEmail,
+    blurEmail,
+    updatePhone,
+    updateAddress,
+    updateCity,
+    updateRegion,
+  } = useCheckoutForm();
 
   if (loading || !product) {
     return (
@@ -102,77 +64,6 @@ export function CheckoutPage() {
       </AppShell>
     );
   }
-
-  const units = stocks[product.id] ?? product.stock;
-
-  const close = () => {
-    dispatch(setStep('product'));
-    withViewTransition(() => navigate(`/product/${product.id}`));
-  };
-
-  const clearDeliveryError = (key: keyof DeliveryFormValues) => {
-    setDeliveryErrors((prev) => {
-      if (!prev[key]) return prev;
-      const next = { ...prev };
-      delete next[key];
-      return next;
-    });
-  };
-
-  const clearCardError = (key: keyof CardFormValues) => {
-    setCardErrors((prev) => {
-      if (!prev[key]) return prev;
-      const next = { ...prev };
-      delete next[key];
-      return next;
-    });
-  };
-
-  const onSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    const nextCardErrors = validateCard(card);
-    const nextDeliveryErrors = validateDelivery(delivery);
-    setCardErrors(nextCardErrors);
-    setDeliveryErrors(nextDeliveryErrors);
-    setTouchedEmail(true);
-    if (
-      Object.keys(nextCardErrors).length > 0 ||
-      Object.keys(nextDeliveryErrors).length > 0
-    ) {
-      return;
-    }
-
-    dispatch(
-      setCardMeta({
-        brand,
-        last4: card.number.replace(/\D/g, '').slice(-4),
-        holderName: card.holder.trim(),
-      }),
-    );
-    const { expMonth, expYear } = splitExpiry(card.expiry);
-    setPendingCard({
-      number: card.number.replace(/\D/g, ''),
-      cvc: card.cvv,
-      expMonth,
-      expYear,
-      cardHolder: card.holder.trim(),
-    });
-    dispatch(
-      setDelivery({
-        ...delivery,
-        fullName: toTitleCase(delivery.fullName).trim(),
-        city: toTitleCase(delivery.city).trim(),
-        region: delivery.region.trim(),
-        email: delivery.email.trim().toLowerCase(),
-        phone: formatColombiaPhone(delivery.phone),
-      }),
-    );
-    dispatch(setStep('summary'));
-    withViewTransition(() => navigate('/summary'));
-  };
-
-  const emailFieldError =
-    deliveryErrors.email ?? (touchedEmail ? emailError(delivery.email) : undefined);
 
   return (
     <AppShell layout="flow" mockBanner={isMockMode()}>
@@ -250,13 +141,7 @@ export function CheckoutPage() {
                   value={card.number}
                   error={cardErrors.number}
                   trailing={<CardBrandMark brand={brand} />}
-                  onChange={(e) => {
-                    clearCardError('number');
-                    setCard((c) => ({
-                      ...c,
-                      number: formatCardNumber(e.target.value),
-                    }));
-                  }}
+                  onChange={(e) => updateCardNumber(e.target.value)}
                 />
                 <TextField
                   label="Name on card"
@@ -266,19 +151,8 @@ export function CheckoutPage() {
                   maxLength={60}
                   {...offAutocomplete}
                   autoCapitalize="words"
-                  onChange={(e) => {
-                    clearCardError('holder');
-                    setCard((c) => ({
-                      ...c,
-                      holder: sanitizePersonName(e.target.value),
-                    }));
-                  }}
-                  onBlur={() =>
-                    setCard((c) => ({
-                      ...c,
-                      holder: sanitizePersonName(c.holder).trim(),
-                    }))
-                  }
+                  onChange={(e) => updateCardHolder(e.target.value)}
+                  onBlur={blurCardHolder}
                 />
                 <div className="nora-checkout__pair">
                   <TextField
@@ -290,13 +164,7 @@ export function CheckoutPage() {
                     maxLength={5}
                     value={card.expiry}
                     error={cardErrors.expiry}
-                    onChange={(e) => {
-                      clearCardError('expiry');
-                      setCard((c) => ({
-                        ...c,
-                        expiry: formatExpiry(e.target.value),
-                      }));
-                    }}
+                    onChange={(e) => updateExpiry(e.target.value)}
                   />
                   <TextField
                     label="CVV"
@@ -315,44 +183,10 @@ export function CheckoutPage() {
                         aria-pressed={showCvv}
                         onClick={() => setShowCvv((v) => !v)}
                       >
-                        {showCvv ? (
-                          <svg
-                            viewBox="0 0 24 24"
-                            width="20"
-                            height="20"
-                            aria-hidden="true"
-                          >
-                            <path
-                              fill="currentColor"
-                              d="M12 6c-5 0-9.3 3.1-11 7.5 1.7 4.4 6 7.5 11 7.5s9.3-3.1 11-7.5C21.3 9.1 17 6 12 6zm0 12.5A5 5 0 1 1 12 8.5a5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"
-                            />
-                            <path
-                              fill="currentColor"
-                              d="M3.3 3.3 20.7 20.7l-1.4 1.4L1.9 4.7z"
-                            />
-                          </svg>
-                        ) : (
-                          <svg
-                            viewBox="0 0 24 24"
-                            width="20"
-                            height="20"
-                            aria-hidden="true"
-                          >
-                            <path
-                              fill="currentColor"
-                              d="M12 6c-5 0-9.3 3.1-11 7.5C2.7 17.9 7 21 12 21s9.3-3.1 11-7.5C21.3 9.1 17 6 12 6zm0 12.5A5 5 0 1 1 12 8.5a5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"
-                            />
-                          </svg>
-                        )}
+                        {showCvv ? 'Hide' : 'Show'}
                       </button>
                     }
-                    onChange={(e) => {
-                      clearCardError('cvv');
-                      setCard((c) => ({
-                        ...c,
-                        cvv: sanitizeCvv(e.target.value),
-                      }));
-                    }}
+                    onChange={(e) => updateCvv(e.target.value)}
                   />
                 </div>
               </div>
@@ -370,19 +204,8 @@ export function CheckoutPage() {
                   maxLength={60}
                   {...offAutocomplete}
                   autoCapitalize="words"
-                  onChange={(e) => {
-                    clearDeliveryError('fullName');
-                    setDeliveryForm((d) => ({
-                      ...d,
-                      fullName: sanitizePersonName(e.target.value),
-                    }));
-                  }}
-                  onBlur={() =>
-                    setDeliveryForm((d) => ({
-                      ...d,
-                      fullName: sanitizePersonName(d.fullName).trim(),
-                    }))
-                  }
+                  onChange={(e) => updateFullName(e.target.value)}
+                  onBlur={blurFullName}
                 />
                 <TextField
                   label="Email"
@@ -394,24 +217,8 @@ export function CheckoutPage() {
                   maxLength={120}
                   hint={!emailFieldError ? 'We will send the receipt here' : undefined}
                   {...offAutocomplete}
-                  onChange={(e) => {
-                    clearDeliveryError('email');
-                    setDeliveryForm((d) => ({
-                      ...d,
-                      email: sanitizeEmailInput(e.target.value),
-                    }));
-                  }}
-                  onBlur={() => {
-                    setTouchedEmail(true);
-                    const email = delivery.email.trim().toLowerCase();
-                    setDeliveryForm((d) => ({ ...d, email }));
-                    const err = emailError(email);
-                    if (err) {
-                      setDeliveryErrors((prev) => ({ ...prev, email: err }));
-                    } else {
-                      clearDeliveryError('email');
-                    }
-                  }}
+                  onChange={(e) => updateEmail(e.target.value)}
+                  onBlur={blurEmail}
                 />
                 <TextField
                   label="Phone"
@@ -424,13 +231,7 @@ export function CheckoutPage() {
                   hint={!deliveryErrors.phone ? 'Colombian mobile' : undefined}
                   leading={<ColombiaFlag />}
                   {...offAutocomplete}
-                  onChange={(e) => {
-                    clearDeliveryError('phone');
-                    setDeliveryForm((d) => ({
-                      ...d,
-                      phone: formatColombiaPhone(e.target.value),
-                    }));
-                  }}
+                  onChange={(e) => updatePhone(e.target.value)}
                 />
                 <TextField
                   label="Street address"
@@ -439,13 +240,7 @@ export function CheckoutPage() {
                   error={deliveryErrors.address}
                   maxLength={120}
                   {...offAutocomplete}
-                  onChange={(e) => {
-                    clearDeliveryError('address');
-                    setDeliveryForm((d) => ({
-                      ...d,
-                      address: sanitizeAddress(e.target.value),
-                    }));
-                  }}
+                  onChange={(e) => updateAddress(e.target.value)}
                 />
                 <SuggestField
                   label="City"
@@ -457,13 +252,7 @@ export function CheckoutPage() {
                   hint={
                     !deliveryErrors.city ? 'Bogotá localities & nearby cities' : undefined
                   }
-                  onChange={(value) => {
-                    clearDeliveryError('city');
-                    setDeliveryForm((d) => ({
-                      ...d,
-                      city: sanitizePlaceName(value),
-                    }));
-                  }}
+                  onChange={updateCity}
                   transformOnBlur={(v) => toTitleCase(sanitizePlaceName(v)).trim()}
                 />
                 <SuggestField
@@ -473,13 +262,7 @@ export function CheckoutPage() {
                   value={delivery.region}
                   options={COLOMBIA_DEPARTMENTS}
                   error={deliveryErrors.region}
-                  onChange={(value) => {
-                    clearDeliveryError('region');
-                    setDeliveryForm((d) => ({
-                      ...d,
-                      region: sanitizePlaceName(value, 80),
-                    }));
-                  }}
+                  onChange={updateRegion}
                   transformOnBlur={(v) => sanitizePlaceName(v, 80).trim()}
                 />
               </div>

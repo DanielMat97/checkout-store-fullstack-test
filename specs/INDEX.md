@@ -21,6 +21,7 @@
 | Hex + ROP | `architecture-hex-rop/` | **done** | B5–6 |
 | UX quality | `ux-quality-bar/` | **done** | B2–4 |
 | Hex + ROP polish | `bonus-hex-rop-polish/` | **done** | B4–6 |
+| FE hooks + cov + BE-on-FE | `frontend-hooks-coverage/` | **done** | Base #5 / B4 + CI |
 | SQS post-pay | `sqs-orchestration/` | **done** | Arch enhancement (ADR 0011) |
 | Orders console | `orders-console/` | **done** | Ops + brief §5–6 stock |
 | **Deploy smoke + rollback** | `deploy-smoke-rollback/` | **done** | CI E2E/ZAP/SAST (ADR 0012) |
@@ -28,8 +29,7 @@
 ## Orden reciente
 
 ```
-… → sqs-orchestration → orders-console →
-deploy-smoke-rollback → ux-quality-bar → bonus-hex-rop-polish
+… → ux-quality-bar → bonus-hex-rop-polish → frontend-hooks-coverage
 ```
 
 ## Reglas

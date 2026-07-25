@@ -1,6 +1,6 @@
 # Current state
 
-> Last updated: **2026-07-25** (bonus UX matrix + hex/ROP polish → **150/150**)
+> Last updated: **2026-07-25** (FE hooks + coverage ≥80% + BE-on-FE gate; score **150/150**)
 
 ## Score (rúbrica brief — modo evaluador estricto)
 
@@ -34,6 +34,7 @@ Ver **`docs/scorecard.md`**.
 | `orders-console` | **done** (`/orders` ops demo) |
 | `deploy-smoke-rollback` | **done** (ADR 0012 — Playwright + ZAP + CodeQL + rollback) |
 | `ux-quality-bar` | **done** (matriz B2–B4 + `docs/ux-evidence.md`) |
+| `frontend-hooks-coverage` | **done** (hooks + FE cov ≥80% + `ci:backend-on-fe`) |
 
 ## Deploy (live)
 
@@ -45,6 +46,6 @@ Ver **`docs/scorecard.md`**.
 | Payment mode | `sandbox` |
 | Security | [`docs/security.md`](security.md) |
 | UX evidence | [`docs/ux-evidence.md`](ux-evidence.md) |
-| CI/CD | [`docs/ci-cd.md`](ci-cd.md) — pre: CodeQL (+Sonar opc.); post: Playwright + ZAP; Artillery stress opcional; fail smoke → API rollback |
+| CI/CD | [`docs/ci-cd.md`](ci-cd.md) — pre: CodeQL (+Sonar opc.); **BE gate on FE changes**; post: Playwright + ZAP; Artillery opcional |
 | Gap analysis | [`docs/brief-gap-analysis.md`](brief-gap-analysis.md) |
 | Post-pay | SQS `checkout-orders-events-{stage}` + worker; local sync fallback |

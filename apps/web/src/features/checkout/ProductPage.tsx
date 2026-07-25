@@ -1,57 +1,12 @@
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useEffect, useState, type MouseEvent } from 'react';
-import {
-  AppShell,
-  ShellHeader,
-  Button,
-  Price,
-  StockBadge,
-  withViewTransition,
-} from '../../design-system';
+import { Link } from 'react-router-dom';
+import { AppShell, ShellHeader, Button, Price, StockBadge } from '../../design-system';
 import { isMockMode } from '../../mocks/checkoutService';
-import { loadProduct, type Product } from './checkoutApi';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import {
-  selectProduct,
-  setPaymentStatus,
-  setProductStock,
-  setStep,
-} from '../../store/checkoutSlice';
+import { useProductPage } from './hooks/useProductPage';
 import './product.css';
 
 export function ProductPage({ embed = false }: { embed?: boolean }) {
-  const { productId = '' } = useParams();
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  const stocks = useAppSelector((s) => s.checkout.stocks);
-  const lastStatus = useAppSelector((s) => s.checkout.paymentStatus);
-  const selectedId = useAppSelector((s) => s.checkout.productId);
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      const loaded = await loadProduct(productId);
-      if (cancelled) return;
-      if (!loaded) {
-        navigate('/', { replace: true });
-        return;
-      }
-      setProduct(loaded);
-      // API / mock product.stock is source of truth when opening the page
-      // (avoids stale Redux seed after a successful purchase).
-      dispatch(setProductStock({ productId: loaded.id, stock: loaded.stock }));
-      if (selectedId !== loaded.id) {
-        dispatch(selectProduct(loaded.id));
-      }
-      setLoading(false);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [productId, selectedId, dispatch, navigate]);
+  const { product, loading, units, lastStatus, selectedId, onPay, backHome } =
+    useProductPage();
 
   if (loading || !product) {
     return (
@@ -63,19 +18,6 @@ export function ProductPage({ embed = false }: { embed?: boolean }) {
       </AppShell>
     );
   }
-
-  const units = stocks[product.id] ?? product.stock;
-
-  const onPay = () => {
-    dispatch(setPaymentStatus('idle'));
-    dispatch(setStep('card-delivery'));
-    withViewTransition(() => navigate(`/product/${product.id}/checkout`));
-  };
-
-  const backHome = (e: MouseEvent) => {
-    e.preventDefault();
-    withViewTransition(() => navigate('/'));
-  };
 
   return (
     <AppShell layout="store" mockBanner={isMockMode() && !embed}>

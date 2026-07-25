@@ -30,6 +30,7 @@
     "deploy:function": "npm run ci && npm run build:api && serverless deploy function",
     "remove:api": "serverless remove",
     "ci:changed": "node scripts/ci/detect-changed-services.cjs",
+    "ci:backend-on-fe": "node scripts/ci/backend-gate-on-fe.cjs",
     "ci:stage": "node scripts/ci/stage-from-ref.cjs",
     "ci:api-url": "node scripts/ci/print-api-url.cjs",
     "dynamodb:up": "docker compose up -d dynamodb",

@@ -1,77 +1,19 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { AppShell, Button, ShellHeader, withViewTransition } from '../../design-system';
+import { Link } from 'react-router-dom';
+import { AppShell, Button, ShellHeader } from '../../design-system';
 import { isMockMode } from '../../mocks/checkoutService';
-import { useAppDispatch } from '../../store/hooks';
-import { setProductStock } from '../../store/checkoutSlice';
-import {
-  fulfillOrderDelivery,
-  loadApprovedOrders,
-  restoreOrderStock,
-  type OrderRow,
-} from './ordersApi';
+import { useOrdersConsole } from './hooks/useOrdersConsole';
 import './orders.css';
 
 export function OrdersPage() {
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  const [rows, setRows] = useState<OrderRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [busyId, setBusyId] = useState<string | null>(null);
-
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      setRows(await loadApprovedOrders());
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not load orders.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
-
-  const onRestore = async (row: OrderRow) => {
-    setBusyId(row.transaction.id);
-    try {
-      const result = await restoreOrderStock(row.transaction.id);
-      dispatch(setProductStock({ productId: result.productId, stock: result.stock }));
-      await refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Restore failed.');
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  const onFulfill = async (row: OrderRow) => {
-    if (!row.delivery?.id) return;
-    setBusyId(row.transaction.id);
-    try {
-      await fulfillOrderDelivery(row.delivery.id);
-      await refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Fulfill failed.');
-    } finally {
-      setBusyId(null);
-    }
-  };
+  const { rows, loading, error, busyId, onRestore, onFulfill, goShop } =
+    useOrdersConsole();
 
   return (
     <AppShell layout="store" mockBanner={isMockMode()}>
       <ShellHeader
         home
         trailing={
-          <button
-            type="button"
-            className="nora-orders__nav"
-            onClick={() => withViewTransition(() => navigate('/'))}
-          >
+          <button type="button" className="nora-orders__nav" onClick={goShop}>
             Shop
           </button>
         }

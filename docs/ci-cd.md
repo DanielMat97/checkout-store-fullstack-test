@@ -34,7 +34,20 @@ FE_BASE_URL=http://localhost:5173 API_BASE_URL=http://localhost:3000 npm run tes
 
 # Stress Artillery (solo API):
 API_BASE_URL=http://localhost:3000 npm run test:stress
+
+# When apps/web/ changed — Nest test + coverage + audit:
+npm run ci:backend-on-fe
 ```
+
+## Backend gate on FE changes
+
+Si el diff incluye `apps/web/` (o el workflow/script del gate), CI job **Backend gate (on FE changes)** y `npm run ci:backend-on-fe` ejecutan:
+
+1. `npm run build:shared`
+2. `npm test` + `npm run test:cov` en `@app/products|customers|deliveries|transactions`
+3. `npm run audit`
+
+Sin cambios FE → skip exitoso. Spec: [`specs/frontend-hooks-coverage/`](../specs/frontend-hooks-coverage/spec.md).
 
 Usa tarjeta de prueba del flujo NORA; no commits con PAN reales. Stress no llama endpoints de pago.
 

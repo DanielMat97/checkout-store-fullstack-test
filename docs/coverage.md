@@ -1,7 +1,15 @@
 # Coverage report
 
-> Generated: **2026-07-25**. Metric gate: **statements, branches, functions, lines ≥80%** on every Nest service.  
+> Generated: **2026-07-25**. Metric gate: **statements, branches, functions, lines ≥80%** on every Nest service **and** `@app/web`.  
 > Command: `npm run test:cov` (all workspaces).
+
+## Snapshot (frontend)
+
+| Workspace | Statements | Branches | Functions | Lines |
+|---|---:|---:|---:|---:|
+| `@app/web` | **94.57** | **82.55** | **97.84** | **95.54** |
+
+FE collects API, checkout/orders hooks + pure modules, mocks, store, format. Pages (`.tsx`) stay presentational.
 
 ## Snapshot (backend services)
 
@@ -12,26 +20,25 @@
 | `@app/deliveries` | **100** | **90** | **100** | **100** |
 | `@app/transactions` | **100** | **92.85** | **100** | **100** |
 
-## Snapshot (related packages / FE)
+## Snapshot (shared packages)
 
 | Workspace | Lines | Statements | Branches | Functions |
 |---|---:|---:|---:|---:|
-| `@app/web` | **99.65** | 98.41 | 88.27 | 100 |
 | `@app/shared` | **97.5** | 96.59 | 84.84 | 100 |
 | `@app/persistence` | **96.91** | 96.93 | 84.61 | 100 |
 
-**BE Nest services:** all four enforce `coverageThreshold.global` `{ branches: 80, functions: 80, lines: 80, statements: 80 }`.
+**Gates:** Nest + web enforce `{ branches: 80, functions: 80, lines: 80, statements: 80 }`.
 
 ## Notes
 
-- Collects application/adapter logic; excludes `main`/`lambda`/Nest modules/DTO barrels and UI pages.
-- `SandboxPaymentGateway` remains excluded from the transactions **global** threshold (dedicated unit specs for network/poll branches).
-- Orders Lambda composition root uses `istanbul ignore next` on the handler wiring; core loop covered via `processOrdersSqsEvent`.
+- FE hooks live under `features/*/hooks/` with unit specs via `@testing-library/react` + `src/test/renderHook.tsx`.
+- When `apps/web/` changes, `npm run ci:backend-on-fe` runs Nest test + cov + audit (see `docs/ci-cd.md`).
+- `SandboxPaymentGateway` remains excluded from the transactions **global** threshold.
 
 ## Reproduce
 
 ```bash
+npm run test:cov -w @app/web
 npm run test:cov -w @app/products -w @app/customers -w @app/deliveries -w @app/transactions
-# or
-npm run test:cov
+npm run ci:backend-on-fe
 ```
