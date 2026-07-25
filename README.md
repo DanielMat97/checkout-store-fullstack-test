@@ -154,34 +154,110 @@ Después de `serverless deploy`, cada stage deja:
 Logs JSON enriquecidos (`domain`, `layer`, `operation`, `statusClass`, `coldStart`, …) + métricas EMF `Checkout/API`.  
 Verificar: `npm run ops:observability -- --stage=prod` · guía [`docs/observability.md`](docs/observability.md) · ADR [0014](docs/adr/0014-observability-cloudwatch.md).
 
-### 🖼️ Evidencia visual (pegá acá los screenshots)
+En la consola AWS: dashboard **`checkout-api-prod-ops`**, alarmas del stage y Logs Insights (`http.request` / `pay.outcome`).
 
-> Espacio reservado para el evaluador / evidencia de entrega.  
-> Sugerencia: dashboard overview · alarmas · Insights de `http.request` · cola SQS.
+---
 
-**1. Dashboard `checkout-api-prod-ops` (widgets API / Lambda / EMF / SQS)**
+## 🔁 Pipelines — el flujo (dibujo)
 
+Runbooks: [`docs/ci-cd.md`](docs/ci-cd.md) · [`docs/deploy.md`](docs/deploy.md).  
+Abajo: mapa mental → detalle de cada workflow. La batería de tests está en [Calidad…](#-calidad-seguridad-y-carga-sí-lo-corrimos-de-verdad).
+
+### Mapa: ¿qué se dispara?
+
+```mermaid
+flowchart TD
+  push["Push / workflow_dispatch"]
+  push --> path{¿Qué cambió?}
+
+  path -->|"cualquier cosa en master"| CI["CI — quality gate"]
+  path -->|"services / packages / serverless / CI scripts"| DeployAPI["Deploy API prod"]
+  path -->|"apps/web / amplify.yml / shared"| AmpGate["Amplify build gate"]
+  path -->|"branch fb-*"| Feat["Deploy feature"]
+  path -->|"Actions → Destroy feature"| Destroy["Destroy feature stack"]
+
+  DeployAPI --> CIReuse["Reusa CI completo"]
+  Feat --> CIReuse2["Reusa CI completo"]
+  AmpGate --> WaitAmp["Espera Amplify SUCCEED"]
+  Destroy --> Clean["Borra SF stage + branch Amplify"]
 ```
-[ pegar captura aquí ]
+
+### CI — calidad fail-closed
+
+```mermaid
+flowchart LR
+  V[Validate] --> P[Prettier]
+  V --> L[Lint]
+  V --> A[Audit]
+  V --> BE[Backend gate<br/>si cambió FE]
+  V --> QL[CodeQL]
+
+  P --> T[Test Jest]
+  L --> T
+  A --> T
+  T --> C[Coverage ≥80%]
+  C --> S[SonarCloud<br/>opcional / non-blocking]
+  C --> QOK[quality-ok]
+  QL --> QOK
+  S --> QOK
+  BE --> QOK
 ```
 
-**2. Alarmas (4xx / 5xx / latency / Lambda Errors)**
+Sin `quality-ok` **verde**, ningún deploy toca AWS.
 
-```
-[ pegar captura aquí ]
+### Deploy API (prod)
+
+```mermaid
+flowchart TD
+  Q[Quality = CI completo] --> Base[Baseline last-good SHA]
+  Q --> Det[Detect: full | functions | none]
+
+  Det -->|none| Skip[Skip deploy]
+  Det -->|full / functions| Dep[Serverless deploy]
+  Dep --> Sync[Sync Amplify VITE_API_BASE_URL]
+  Dep --> Seed[Seed catalog<br/>solo full]
+  Sync --> Pub[Comment URLs en el commit]
+  Seed --> Pub
+
+  Pub --> Smoke[Smoke: Playwright E2E + OWASP ZAP]
+  Smoke -->|OK| Stress[Artillery stress<br/>opcional, no bloquea]
+  Smoke -->|FAIL| RB[Rollback → last-good SHA]
+  Stress --> Done[Listo]
+  RB --> Done
 ```
 
-**3. Logs Insights (ej. errores o `pay.outcome`)**
+`workflow_dispatch` con **mode=full** fuerza stack completo (todas las Lambdas + infra), no solo diffs.
 
+### Amplify build gate (FE en master)
+
+```mermaid
+flowchart LR
+  FE[Push con paths FE] --> Det2[detect-fe-amplify]
+  Det2 -->|sí| Wait[wait-amplify-job<br/>SUCCEED / FAIL / timeout]
+  Wait -->|SUCCEED| Comment[Comment FE URL]
+  Wait -->|FAILED / CANCELLED / timeout| Red[Workflow rojo]
 ```
-[ pegar captura aquí ]
+
+Actions verde ≠ Amplify verde: este gate cierra esa mentira.
+
+### Feature `fb-*` + Destroy
+
+```mermaid
+flowchart TD
+  FB[Push fb-*] --> QF[Quality = CI]
+  QF --> DF[Deploy stage aislado<br/>API + Dynamo + seed]
+  DF --> Amp[Amplify branch → esa API]
+  Amp --> Gate[Amplify SUCCEED]
+  Gate --> SmokeF[Smoke / stress / rollback]
+  SmokeF --> Sticky[Comment sticky: FE + API + Destroy link]
+
+  Des[Destroy feature stack<br/>confirm=destroy] --> DelSF[serverless remove]
+  Des --> DelAmp[delete Amplify branch]
 ```
 
 ---
 
 ## 🔁 Pipelines — cada stage y su razón de ser
-
-Runbooks largos: [`docs/ci-cd.md`](docs/ci-cd.md) · [`docs/deploy.md`](docs/deploy.md). La batería (Jest, Playwright, ZAP, CodeQL, Artillery) está contada arriba en [Calidad…](#-calidad-seguridad-y-carga-sí-lo-corrimos-de-verdad). Acá va el “por qué existe cada casillero”.
 
 ### CI (calidad, fail-closed)
 

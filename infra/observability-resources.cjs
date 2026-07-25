@@ -444,11 +444,9 @@ function observabilityResources({ stage }) {
       Type: 'AWS::IAM::User',
       Properties: {
         UserName: viewerUserName,
-        Tags: [
-          { Key: 'Service', Value: 'checkout-api' },
-          { Key: 'Stage', Value: stage },
-          { Key: 'Purpose', Value: 'cloudwatch-dashboard-readonly' },
-        ],
+        // Do not set Stage/Service here — Serverless stackTags already include STAGE
+        // (IAM tag keys are case-insensitive → Duplicate tag keys).
+        Tags: [{ Key: 'Purpose', Value: 'cloudwatch-dashboard-readonly' }],
       },
     },
     CheckoutCwViewerPolicy: {

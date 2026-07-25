@@ -12,6 +12,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Auditoría aplicada**: repo GitHub renombrado a `checkout-store-fullstack-test` (sin marca del proveedor); docs/specs sin el slug viejo; smoke FE/API + `VITE_MOCK_MODE=false` verificado en Amplify; huecos de coverage FE/BE cerrados; [`docs/auditoria.md`](docs/auditoria.md) actualizado (ítem historial/PRs omitido a propósito).
 - **CI post-rename**: Amplify reconectado al repo nuevo; `SONAR_PROJECT_KEY` actualizado; SonarCloud scan con `continue-on-error` (opcional de verdad, no tumba `quality-ok`).
 - **Serverless v4 CI auth**: workflows de deploy/destroy leen `SERVERLESS_ACCESS_KEY` / `SERVERLESS_LICENSE_KEY` y fallan temprano si faltan (SF v4 ya no permite deploy headless sin auth).
+- **Observability IAM tags**: `CheckoutCwViewerUser` sin tags `Stage`/`Service` (colisión case-insensitive con stack tag `STAGE` de Serverless). `infra/**` incluido en paths del Deploy API.
 
 ### Added
 

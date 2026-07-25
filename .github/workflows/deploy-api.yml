@@ -11,6 +11,7 @@ on:
     paths:
       - 'services/**'
       - 'packages/**'
+      - 'infra/**'
       - 'serverless.ts'
       - 'package.json'
       - 'package-lock.json'
