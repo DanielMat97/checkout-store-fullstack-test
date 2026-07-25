@@ -5,7 +5,7 @@
 ## Pipeline (prod)
 
 1. **Quality (pre-deploy, fail-closed)**  
-   `validate → prettier → lint → audit → test → coverage` + **CodeQL** + **SonarCloud** (solo si `SONAR_TOKEN`).
+   `validate → prettier → lint → audit → test → coverage` + **CodeQL** + **SonarCloud** (si hay `SONAR_TOKEN`; el scan es **non-blocking** y no tumba `quality-ok`).
 2. **Baseline** — guarda el SHA del último `Deploy API (prod)` exitoso (`last-good`).
 3. **Deploy** — Serverless Framework stage `prod` (o `SERVERLESS_STAGE`).
 4. **Amplify build gate (FE)** — si cambian paths FE (`apps/web/**`, `amplify.yml`, shared…), workflow `amplify-build-gate.yml` espera job Amplify `SUCCEED` para el `GITHUB_SHA` (falla en `FAILED`/`CANCELLED`/timeout). ADR 0015.
