@@ -1,6 +1,7 @@
 name: Deploy API (prod)
 
 # Deploys only changed Lambdas on main/master. Full stack when shared/serverless change.
+# HARD REQUIREMENT: the reusable CI workflow (validate→…→coverage) must succeed first.
 # Frontend production is owned by AWS Amplify (configure the Amplify app separately).
 on:
   push:
@@ -38,8 +39,10 @@ env:
   AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
 
 jobs:
+  # REQUIRED: full CI must succeed before any deploy work.
+  # If validate/prettier/lint/audit/test/coverage fails, detect+deploy are skipped.
   quality:
-    name: Quality gate
+    name: Quality gate (required)
     uses: ./.github/workflows/ci.yml
     secrets: inherit
 
@@ -47,6 +50,7 @@ jobs:
     name: Detect changed services
     runs-on: ubuntu-latest
     needs: quality
+    if: ${{ needs.quality.result == 'success' }}
     outputs:
       mode: ${{ steps.detect.outputs.mode }}
       functions: ${{ steps.detect.outputs.functions }}
@@ -86,8 +90,8 @@ jobs:
   deploy:
     name: Deploy Serverless
     runs-on: ubuntu-latest
-    needs: detect
-    if: needs.detect.outputs.mode != 'none'
+    needs: [quality, detect]
+    if: ${{ needs.quality.result == 'success' && needs.detect.result == 'success' && needs.detect.outputs.mode != 'none' }}
     environment: production
     steps:
       - uses: actions/checkout@v4

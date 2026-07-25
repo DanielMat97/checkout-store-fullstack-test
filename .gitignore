@@ -14,6 +14,7 @@ skills-lock.json
 
 # Build / coverage / Serverless
 dist/
+*.tsbuildinfo
 coverage/
 .serverless/
 .webpack/

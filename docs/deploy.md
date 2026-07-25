@@ -31,16 +31,24 @@
 
 ## Workflows
 
-### 1. `CI` — quality stages
+### 1. `CI` — quality stages (required before deploy)
 
-Order: **validate → prettier → lint → audit → test → coverage**
+Order: **validate → prettier → lint → audit → test → coverage → quality-ok**
 
 Triggers: PR + push `main`/`master`.
+
+**Deploy is fail-closed:** `deploy-api.yml` and `deploy-feature.yml` call this workflow via `workflow_call` and only continue when `needs.quality.result == 'success'`. If any quality job fails, detect/deploy are **skipped** (no partial deploy).
+
+Local equivalent:
+
+```bash
+npm run ci
+```
 
 ### 2. `Deploy API (prod)`
 
 - Triggers on changes under `services/`, `packages/`, `serverless.ts`.
-- Runs the full CI gate first.
+- **Runs the full CI gate first** (required).
 - Detects changed services (`scripts/ci/detect-changed-services.cjs`):
   - **functions** mode → `serverless deploy function -f <name>` per Lambda
   - **full** mode → `serverless deploy` when shared/`serverless.ts`/≥3 services change

@@ -49,9 +49,9 @@ Deploy API: `npm run deploy:api` · Guide: [`docs/deploy.md`](docs/deploy.md)
 
 | Workflow | When | What |
 |---|---|---|
-| `CI` | PR / `main` | validate → prettier → lint → audit → test → coverage |
-| `Deploy API (prod)` | API changes on `main` | Deploys **only changed** Lambdas (or full stack); secrets from **Vault** |
-| `Deploy feature (fb-*)` | branch/tag `fb-*` | Isolated API stack + Amplify feature branch |
+| `CI` | PR / `main` | validate → prettier → lint → audit → test → coverage (**required before deploy**) |
+| `Deploy API (prod)` | API changes on `main` | **CI gate first**, then only changed Lambdas (or full stack); secrets from **Vault** |
+| `Deploy feature (fb-*)` | branch/tag `fb-*` | **CI gate first**, then isolated API stack + Amplify feature branch |
 
 Frontend production hosting: **AWS Amplify** (connect the repo; use root `amplify.yml`).  
 Secrets: [`docs/vault.md`](docs/vault.md) — `npm run vault:up` + AppRole in CI.
