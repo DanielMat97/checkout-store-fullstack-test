@@ -132,6 +132,11 @@ export function SuggestField({
           onFocus={() => setOpen(true)}
           onBlur={() => {
             if (transformOnBlur) onChange(transformOnBlur(value));
+            // Defer so option mousedown can pick before the list unmounts.
+            window.setTimeout(() => {
+              setOpen(false);
+              setActive(-1);
+            }, 0);
           }}
           onKeyDown={onKeyDown}
         />

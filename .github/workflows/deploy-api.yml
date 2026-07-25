@@ -352,7 +352,11 @@ jobs:
           set +e
           npx artillery run load/artillery-products.yml --output artillery-report.json
           CODE=$?
-          npx artillery report artillery-report.json --output artillery-report.html || true
+          if [ -f artillery-report.json ]; then
+            npx artillery report artillery-report.json --output artillery-report.html || true
+          else
+            echo "No artillery-report.json (run exited $CODE) — skipping HTML report"
+          fi
           echo "### Artillery stress (non-blocking)" >> "$GITHUB_STEP_SUMMARY"
           echo "Target: \`${{ needs.deploy.outputs.api_url }}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "Exit code: $CODE (job has continue-on-error — does **not** rollback)" >> "$GITHUB_STEP_SUMMARY"

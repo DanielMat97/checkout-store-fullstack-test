@@ -24,9 +24,13 @@ export function TextField({
   const errorId = error ? `${fieldId}-error` : undefined;
   const describedBy = [errorId, hintId].filter(Boolean).join(' ') || undefined;
 
+  // Label is a sibling of the control (not a wrapper) so trailing/hint text
+  // does not pollute the input's accessible name for Playwright / a11y.
   return (
-    <label className={`nora-field ${className}`.trim()} htmlFor={fieldId}>
-      <span className="nora-field__label">{label}</span>
+    <div className={`nora-field ${className}`.trim()}>
+      <label className="nora-field__label" htmlFor={fieldId}>
+        {label}
+      </label>
       <span
         className={`nora-field__control${error ? ' nora-field__control--error' : ''}`}
       >
@@ -49,6 +53,6 @@ export function TextField({
           {hint}
         </span>
       ) : null}
-    </label>
+    </div>
   );
 }

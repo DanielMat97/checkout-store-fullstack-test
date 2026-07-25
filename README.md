@@ -168,13 +168,13 @@ Abajo: mapa mental → detalle de cada workflow. La batería de tests está en [
 ```mermaid
 flowchart TD
   push["Push / workflow_dispatch"]
-  push --> path{¿Qué cambió?}
+  push --> path{"Que cambio en el repo?"}
 
-  path -->|"cualquier cosa en master"| CI["CI — quality gate"]
+  path -->|"cualquier cosa en master"| CI["CI - quality gate"]
   path -->|"services / packages / serverless / CI scripts"| DeployAPI["Deploy API prod"]
   path -->|"apps/web / amplify.yml / shared"| AmpGate["Amplify build gate"]
   path -->|"branch fb-*"| Feat["Deploy feature"]
-  path -->|"Actions → Destroy feature"| Destroy["Destroy feature stack"]
+  path -->|"Actions - Destroy feature"| Destroy["Destroy feature stack"]
 
   DeployAPI --> CIReuse["Reusa CI completo"]
   Feat --> CIReuse2["Reusa CI completo"]
@@ -189,14 +189,15 @@ flowchart LR
   V[Validate] --> P[Prettier]
   V --> L[Lint]
   V --> A[Audit]
-  V --> BE[Backend gate<br/>si cambió FE]
+  V --> BE["Backend gate si cambio FE"]
+
   V --> QL[CodeQL]
 
-  P --> T[Test Jest]
+  P --> T["Test Jest"]
   L --> T
   A --> T
-  T --> C[Coverage ≥80%]
-  C --> S[SonarCloud<br/>opcional / non-blocking]
+  T --> C["Coverage >=80%"]
+  C --> S["SonarCloud opcional / non-blocking"]
   C --> QOK[quality-ok]
   QL --> QOK
   S --> QOK
@@ -209,20 +210,20 @@ Sin `quality-ok` **verde**, ningún deploy toca AWS.
 
 ```mermaid
 flowchart TD
-  Q[Quality = CI completo] --> Base[Baseline last-good SHA]
-  Q --> Det[Detect: full | functions | none]
+  Q["Quality = CI completo"] --> Base["Baseline last-good SHA"]
+  Q --> Det["Detect: full / functions / none"]
 
-  Det -->|none| Skip[Skip deploy]
-  Det -->|full / functions| Dep[Serverless deploy]
-  Dep --> Sync[Sync Amplify VITE_API_BASE_URL]
-  Dep --> Seed[Seed catalog<br/>solo full]
-  Sync --> Pub[Comment URLs en el commit]
+  Det -->|none| Skip["Skip deploy"]
+  Det -->|full or functions| Dep["Serverless deploy"]
+  Dep --> Sync["Sync Amplify VITE_API_BASE_URL"]
+  Dep --> Seed["Seed catalog - solo full"]
+  Sync --> Pub["Comment URLs en el commit"]
   Seed --> Pub
 
-  Pub --> Smoke[Smoke: Playwright E2E + OWASP ZAP]
-  Smoke -->|OK| Stress[Artillery stress<br/>opcional, no bloquea]
-  Smoke -->|FAIL| RB[Rollback → last-good SHA]
-  Stress --> Done[Listo]
+  Pub --> Smoke["Smoke: Playwright E2E + OWASP ZAP"]
+  Smoke -->|OK| Stress["Artillery stress - opcional, no bloquea"]
+  Smoke -->|FAIL| RB["Rollback al last-good SHA"]
+  Stress --> Done["Listo"]
   RB --> Done
 ```
 
@@ -232,10 +233,10 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-  FE[Push con paths FE] --> Det2[detect-fe-amplify]
-  Det2 -->|sí| Wait[wait-amplify-job<br/>SUCCEED / FAIL / timeout]
-  Wait -->|SUCCEED| Comment[Comment FE URL]
-  Wait -->|FAILED / CANCELLED / timeout| Red[Workflow rojo]
+  FE["Push con paths FE"] --> Det2["detect-fe-amplify"]
+  Det2 -->|si| Wait["wait-amplify-job SUCCEED / FAIL / timeout"]
+  Wait -->|SUCCEED| Comment["Comment FE URL"]
+  Wait -->|FAILED or CANCELLED or timeout| Red["Workflow rojo"]
 ```
 
 Actions verde ≠ Amplify verde: este gate cierra esa mentira.
@@ -244,15 +245,15 @@ Actions verde ≠ Amplify verde: este gate cierra esa mentira.
 
 ```mermaid
 flowchart TD
-  FB[Push fb-*] --> QF[Quality = CI]
-  QF --> DF[Deploy stage aislado<br/>API + Dynamo + seed]
-  DF --> Amp[Amplify branch → esa API]
-  Amp --> Gate[Amplify SUCCEED]
-  Gate --> SmokeF[Smoke / stress / rollback]
-  SmokeF --> Sticky[Comment sticky: FE + API + Destroy link]
+  FB["Push fb-*"] --> QF["Quality = CI"]
+  QF --> DF["Deploy stage aislado: API + Dynamo + seed"]
+  DF --> Amp["Amplify branch a esa API"]
+  Amp --> Gate["Amplify SUCCEED"]
+  Gate --> SmokeF["Smoke / stress / rollback"]
+  SmokeF --> Sticky["Comment sticky: FE + API + Destroy link"]
 
-  Des[Destroy feature stack<br/>confirm=destroy] --> DelSF[serverless remove]
-  Des --> DelAmp[delete Amplify branch]
+  Des["Destroy feature stack confirm=destroy"] --> DelSF["serverless remove"]
+  Des --> DelAmp["delete Amplify branch"]
 ```
 
 ---

@@ -27,7 +27,7 @@ test.describe('NORA checkout smoke', () => {
       timeout: 15_000,
     });
     await expect(
-      page.getByRole('button', { name: /pay with credit card/i }),
+      page.getByRole('button', { name: /pay with credit card/i }).first(),
     ).toBeVisible();
   });
 
@@ -46,22 +46,35 @@ test.describe('NORA checkout smoke', () => {
       .locator('.nora-catalog__hero-hit, .nora-catalog__tile-hit')
       .first()
       .click();
-    await page.getByRole('button', { name: /pay with credit card/i }).click();
+    await page
+      .getByRole('button', { name: /pay with credit card/i })
+      .first()
+      .click();
+    await expect(page).toHaveURL(/\/checkout/, { timeout: 30_000 });
 
-    await page.getByLabel(/^card number$/i).fill('4242424242424242');
-    await page.getByLabel(/name on card/i).fill('Ada Lovelace');
-    await page.getByLabel(/^expiry$/i).fill('12/30');
-    await page.getByLabel(/^cvv$/i).fill('123');
+    // Prefer role+name: older builds nested trailing/hint inside <label>, so
+    // accessible names became "Card number Card" / "CVV Show CVV".
+    const cardNumber = page.getByRole('textbox', { name: /card number/i });
+    await expect(cardNumber).toBeVisible({ timeout: 30_000 });
+    await cardNumber.fill('4242424242424242');
+    await page.getByRole('textbox', { name: /name on card/i }).fill('Ada Lovelace');
+    await page.getByRole('textbox', { name: /^expiry$/i }).fill('12/30');
+    await page.getByRole('textbox', { name: /^cvv/i }).fill('123');
 
-    await page.getByLabel(/^full name$/i).fill('Ada Lovelace');
-    await page.getByLabel(/^email$/i).fill('ada.e2e@example.com');
-    await page.getByLabel(/^phone$/i).fill('3001112233');
-    await page.getByLabel(/street address/i).fill('Calle 100 #10-20');
-    await page.getByLabel(/^city$/i).fill('Bogotá');
-    await page.getByLabel(/^department$/i).fill('Cundinamarca');
+    await page.getByRole('textbox', { name: /^full name$/i }).fill('Ada Lovelace');
+    await page.getByRole('textbox', { name: /^email/i }).fill('ada.e2e@example.com');
+    await page.getByRole('textbox', { name: /^phone/i }).fill('3001112233');
+    await page.getByRole('textbox', { name: /street address/i }).fill('Calle 100 #10-20');
+    await page.getByRole('combobox', { name: /^city$/i }).fill('Bogotá');
+    await page.keyboard.press('Escape');
+    await page.getByRole('combobox', { name: /^department$/i }).fill('Cundinamarca');
+    await page.keyboard.press('Escape');
+    await page.getByRole('heading', { name: /^checkout$/i }).click();
 
     await page.getByRole('button', { name: /review order/i }).click();
+    await expect(page).toHaveURL(/\/summary/, { timeout: 30_000 });
     await page.getByRole('button', { name: /pay now/i }).click();
+    await expect(page).toHaveURL(/\/status/, { timeout: 30_000 });
 
     await expect(
       page.getByRole('heading', {
