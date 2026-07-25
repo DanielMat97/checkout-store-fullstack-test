@@ -175,15 +175,16 @@ jobs:
         id: scan
         if: steps.sonar.outputs.run == 'true'
         continue-on-error: true
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
+          # Quote projectName — spaces break sonar-scanner argv otherwise.
           args: >
             -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
             -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
-            -Dsonar.projectName=Checkout Store NORA
+            -Dsonar.projectName="Checkout Store NORA"
             -Dsonar.sources=apps,services,packages
             -Dsonar.exclusions=**/dist/**,**/coverage/**,**/node_modules/**,**/*.spec.ts,**/*.spec.tsx,**/e2e/**
       - name: Sonar optional outcome

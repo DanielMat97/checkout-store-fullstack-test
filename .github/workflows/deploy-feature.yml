@@ -305,6 +305,8 @@ jobs:
           fail_action: true
           allow_issue_writing: false
           cmd_options: '-a -I'
+          rules_file_name: '.zap/rules.tsv'
+          artifact_name: zap-scan-api-feature
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4

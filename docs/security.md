@@ -9,19 +9,27 @@
 | Header | Value |
 |---|---|
 | `strict-transport-security` | `max-age=31536000; includeSubDomains; preload` |
-| `content-security-policy` | `default-src 'none'; frame-ancestors 'none'; base-uri 'none'` |
+| `content-security-policy` | `default-src 'none'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'` |
 | `x-content-type-options` | `nosniff` |
 | `referrer-policy` | `no-referrer` |
 | `x-frame-options` | `DENY` |
 | `permissions-policy` | `geolocation=(), microphone=(), camera=()` |
 | `cache-control` | `no-store` |
+| `cross-origin-resource-policy` | `cross-origin` |
+| `cross-origin-opener-policy` | `same-origin` |
 | `x-powered-by` | **absent** (stripped) |
 
-Implementation: `applySecuritySurface` (`@app/shared`) on every Nest bootstrap + Amplify `customHeaders` for the SPA.
+Implementation: `applySecuritySurface` (`@app/shared`) on every Nest bootstrap. Catch-all HTTP API routes (`/`, `/{proxy+}`) ensure bare execute-api 404s still hit Nest so HSTS/CORP apply. Amplify SPA headers live in [`customHttp.yml`](../customHttp.yml).
 
 ## Frontend (Amplify)
 
-`https://master.dw2i8myh0xumx.amplifyapp.com` — CloudFront HTTPS; Amplify app custom headers mirror HSTS / CSP / frame / referrer policies (see Amplify Console / `aws amplify get-app`).
+`https://master.dw2i8myh0xumx.amplifyapp.com` — CloudFront HTTPS + `customHttp.yml` (CSP with fallbacks, COOP/COEP/CORP, `Cache-Control: no-store` on HTML, long-cache on `/assets/*`). `robots.txt` / `sitemap.xml` in `apps/web/public`. Vite build injects **SRI** (`scripts/web/inject-sri.cjs`).
+
+Cannot strip CloudFront `Server: AmazonS3` — ZAP rule ignored in [`.zap/rules.tsv`](../.zap/rules.tsv).
+
+## OWASP ZAP baseline
+
+Post-deploy smoke uses `zaproxy/action-baseline` with `.zap/rules.tsv` (ignore CDN/client FP only). Artifacts: `zap-scan-api-*` / `zap-scan-fe-*` (unique names to avoid 409).
 
 ## PCI-minded
 

@@ -11,6 +11,8 @@
 | IAM viewer (read-only) | `checkout-api-<stage>-cw-viewer` |
 | Alarms | HTTP API **4xx** / **5xx** / **latency spike**; Lambda **Errors** per function |
 
+HTTP API stage metrics (Count / Latency / 4xx / 5xx) are read from CloudWatch namespace **`AWS/ApiGateway`** with dimensions `ApiId` + `Stage=$default` (not `AWS/HttpApi` — that namespace stays empty in this account). Enable `provider.httpApi.metrics: true` so detailed metrics stay on across deploys.
+
 Optional email on alarms: set `OBSERVABILITY_ALERT_EMAIL` before deploy (confirm the SNS subscription in inbox).
 
 ## Enriched JSON logs (`@app/shared`)

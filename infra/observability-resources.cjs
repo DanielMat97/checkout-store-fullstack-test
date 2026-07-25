@@ -40,7 +40,7 @@ function observabilityResources({ stage }) {
           stat: 'Sum',
           metrics: [
             [
-              'AWS/HttpApi',
+              'AWS/ApiGateway',
               '4xx',
               'ApiId',
               '${ApiId}',
@@ -65,7 +65,7 @@ function observabilityResources({ stage }) {
           period: 60,
           metrics: [
             [
-              'AWS/HttpApi',
+              'AWS/ApiGateway',
               'Latency',
               'ApiId',
               '${ApiId}',
@@ -287,7 +287,7 @@ function observabilityResources({ stage }) {
       Properties: {
         AlarmName: `checkout-api-${stage}-httpapi-${metricName.toLowerCase()}`,
         AlarmDescription: description,
-        Namespace: 'AWS/HttpApi',
+        Namespace: 'AWS/ApiGateway',
         MetricName: metricName,
         Dimensions: [
           { Name: 'ApiId', Value: { Ref: 'HttpApi' } },
@@ -311,7 +311,7 @@ function observabilityResources({ stage }) {
       Properties: {
         AlarmName: `checkout-api-${stage}-httpapi-latency-spike`,
         AlarmDescription: 'HTTP API average latency spike (≥3s over 5m, 2 periods)',
-        Namespace: 'AWS/HttpApi',
+        Namespace: 'AWS/ApiGateway',
         MetricName: 'Latency',
         Dimensions: [
           { Name: 'ApiId', Value: { Ref: 'HttpApi' } },

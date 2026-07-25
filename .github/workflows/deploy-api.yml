@@ -320,6 +320,8 @@ jobs:
           fail_action: true
           allow_issue_writing: false
           cmd_options: '-a -I'
+          rules_file_name: '.zap/rules.tsv'
+          artifact_name: zap-scan-api-prod
 
       - name: OWASP ZAP baseline (FE)
         uses: zaproxy/action-baseline@v0.14.0
@@ -328,6 +330,8 @@ jobs:
           fail_action: true
           allow_issue_writing: false
           cmd_options: '-a -I'
+          rules_file_name: '.zap/rules.tsv'
+          artifact_name: zap-scan-fe-prod
 
   stress:
     name: Artillery stress (optional, non-blocking)

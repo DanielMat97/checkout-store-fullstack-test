@@ -39,6 +39,8 @@ const serverlessConfiguration = {
       httpApi: true,
     },
     httpApi: {
+      // Persist DetailedMetricsEnabled on $default (route-level + stage metrics).
+      metrics: true,
       cors: {
         allowedOrigins: corsOrigins(),
         allowedHeaders: [
@@ -127,6 +129,10 @@ const serverlessConfiguration = {
       events: [
         { httpApi: { path: '/products', method: 'ANY' } },
         { httpApi: { path: '/products/{proxy+}', method: 'ANY' } },
+        // Catch-all so API Gateway 404s (/, /robots.txt, …) still hit Nest
+        // security headers (HSTS / CORP) instead of bare execute-api responses.
+        { httpApi: { path: '/', method: 'ANY' } },
+        { httpApi: { path: '/{proxy+}', method: 'ANY' } },
       ],
     },
     customers: {

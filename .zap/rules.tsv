@@ -1,0 +1,7 @@
+# ZAP baseline ignore rules (tab-separated: id, IGNORE|FAIL|WARN|INFO|PASS, comment)
+# Only alerts that cannot be fixed in-app (CDN / client request headers / FP on bundles).
+10036	IGNORE	(CloudFront/S3 Server header cannot be stripped on Amplify Hosting)
+10050	IGNORE	(Retrieved from Cache is client/CDN behavior; HTML is Cache-Control no-store)
+10094	IGNORE	(Base64 in hashed JS/CSS/SVG is not a secret disclosure)
+10109	IGNORE	(Modern Web Application informational)
+90005	IGNORE	(Sec-Fetch-* are browser request headers, not set by API responses)
