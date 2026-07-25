@@ -54,4 +54,4 @@ curl -s -o /tmp/out -w "%{http_code}" -X POST "$BASE/customers" \
 cat /tmp/out
 ```
 
-OpenAPI: `docs/api/openapi.json` (Apidog-importable).
+OpenAPI (Apidog-importable, full success + error bodies per endpoint): [`docs/api/openapi.json`](openapi.json) · public copy served at Amplify `/openapi.json`.

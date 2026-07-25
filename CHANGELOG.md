@@ -7,6 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **OpenAPI complete responses (v1.0.0)**: every Nest HTTP route documented with success + error schemas/examples matching `domainErrorToHttp` + ValidationPipe; servers offline + prod; synced to `apps/web/public/openapi.json`. Spec: `specs/openapi-complete-responses/`.
 - **Amplify build gate (ADR 0015)**: when FE is deployed / FE paths change, Actions waits for Amplify job `SUCCEED` (`wait-amplify-job.cjs`); fails on `FAILED`/`CANCELLED`/timeout. Wired in `deploy-feature.yml` + workflow `amplify-build-gate.yml`. Spec: `specs/amplify-build-gate/`.
 - **Observability CloudWatch (ADR 0014)**: enriched JSON logger (`domain`/`layer`/`operation`, HTTP `route`/`statusClass`/`coldStart`, EMF `Checkout/API`); pay use-case `pay.outcome`/`pay.failed`; Serverless dashboard `checkout-api-<stage>-ops`, alarms 4xx/5xx/latency/Lambda errors, SNS + optional email, IAM read-only viewer; `docs/observability.md` + `npm run ops:observability`. Spec: `specs/observability-cloudwatch/`.
 - **FE hooks + coverage + BE-on-FE gate**: presentational pages; hooks (`useCatalog`, `useProductPage`, `useCheckoutForm`, `useSummaryPay`, `usePaymentStatus`, `useOrdersConsole`); Jest FE stmts/branch/funcs/lines ≥80%; `npm run ci:backend-on-fe` + CI job. Spec: `specs/frontend-hooks-coverage/`.

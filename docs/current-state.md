@@ -1,6 +1,6 @@
 # Current state
 
-> Last updated: **2026-07-25** (Amplify build gate fail-closed; observability CW; score **150/150**)
+> Last updated: **2026-07-25** (OpenAPI v1.0.0 complete responses; Amplify build gate; score **150/150**)
 
 ## Score (rúbrica brief — modo evaluador estricto)
 
@@ -37,6 +37,7 @@ Ver **`docs/scorecard.md`**.
 | `frontend-hooks-coverage` | **done** (hooks + FE cov ≥80% + `ci:backend-on-fe`) |
 | `observability-cloudwatch` | **done** (ADR 0014 — logs + CW dashboard/alarms/IAM viewer) |
 | `amplify-build-gate` | **done** (ADR 0015 — Amplify SUCCEED required in FE deploy) |
+| `openapi-complete-responses` | **done** (OpenAPI 1.0.0 — all endpoint success/error bodies) |
 
 ## Deploy (live)
 

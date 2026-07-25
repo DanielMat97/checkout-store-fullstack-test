@@ -2,64 +2,224 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Checkout Store API",
-    "version": "0.4.0",
-    "description": "Single Serverless Framework HTTP API Gateway. Import into Apidog. Pay endpoint returns HTTP 200 with paymentStatus APPROVED|DECLINED|ERROR (declined is not an HTTP error). Ops: list/restore transactions; PATCH delivery fulfill. Post-pay effects via SQS worker (sync fallback when ORDERS_EVENTS_QUEUE_URL empty)."
+    "version": "1.0.0",
+    "description": "Single Serverless Framework HTTP API Gateway (Nest microservices behind `/products|customers|deliveries|transactions`). Import into Apidog. Pay returns HTTP **200** with `paymentStatus` APPROVED|DECLINED|ERROR (DECLINED/ERROR are not HTTP errors). Domain errors use `domainErrorToHttp` bodies; DTO failures use ValidationPipe `{ error, message, details }`. Post-pay stock/delivery effects: SQS worker (sync fallback when queue URL empty)."
   },
   "servers": [
     {
       "url": "http://localhost:3000",
       "description": "serverless offline"
+    },
+    {
+      "url": "https://qo9kbfxew8.execute-api.us-east-1.amazonaws.com",
+      "description": "AWS prod (HTTP API)"
     }
   ],
   "tags": [
     {
-      "name": "products"
+      "name": "products",
+      "description": "Catalog + stock (seeded NORA products)"
     },
     {
-      "name": "customers"
+      "name": "customers",
+      "description": "Buyer profile (no card data)"
     },
     {
-      "name": "deliveries"
+      "name": "deliveries",
+      "description": "Shipment records + ops fulfill"
     },
     {
-      "name": "transactions"
+      "name": "transactions",
+      "description": "Checkout payment + ops list/restore"
+    },
+    {
+      "name": "health",
+      "description": "Per-service liveness"
     }
   ],
   "paths": {
     "/products/health": {
       "get": {
-        "tags": [
-          "products"
-        ],
-        "summary": "Health",
+        "tags": ["health", "products"],
+        "summary": "products health check",
+        "operationId": "productsHealth",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Service is up",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "example": {
+                  "status": "ok",
+                  "service": "products"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customers/health": {
+      "get": {
+        "tags": ["health", "customers"],
+        "summary": "customers health check",
+        "operationId": "customersHealth",
+        "responses": {
+          "200": {
+            "description": "Service is up",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "example": {
+                  "status": "ok",
+                  "service": "customers"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/deliveries/health": {
+      "get": {
+        "tags": ["health", "deliveries"],
+        "summary": "deliveries health check",
+        "operationId": "deliveriesHealth",
+        "responses": {
+          "200": {
+            "description": "Service is up",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "example": {
+                  "status": "ok",
+                  "service": "deliveries"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transactions/health": {
+      "get": {
+        "tags": ["health", "transactions"],
+        "summary": "transactions health check",
+        "operationId": "transactionsHealth",
+        "responses": {
+          "200": {
+            "description": "Service is up",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "example": {
+                  "status": "ok",
+                  "service": "transactions"
+                }
+              }
+            }
           }
         }
       }
     },
     "/products": {
       "get": {
-        "tags": [
-          "products"
-        ],
-        "summary": "List products (seed)",
+        "tags": ["products"],
+        "summary": "List seeded products",
+        "operationId": "listProducts",
         "responses": {
           "200": {
-            "description": "Product list",
+            "description": "Catalog items",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Product"
-                      }
+                  "$ref": "#/components/schemas/ProductListResponse"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": "prod_aura_quiet",
+                      "name": "Aura Quiet",
+                      "kicker": "Listening",
+                      "description": "Over-ear silence for rooms that never quite settle. Soft clamps, all-day charge, a matte shell that rests quietly on the desk.",
+                      "priceMinor": 45990000,
+                      "stock": 8,
+                      "imageUrl": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80",
+                      "imageAlt": "Black over-ear wireless headphones on a pale surface"
                     }
-                  }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Persistence failure listing products",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorPersistence"
                 }
               }
             }
@@ -69,10 +229,9 @@
     },
     "/products/{id}": {
       "get": {
-        "tags": [
-          "products"
-        ],
-        "summary": "Get product",
+        "tags": ["products"],
+        "summary": "Get product by id",
+        "operationId": "getProduct",
         "parameters": [
           {
             "name": "id",
@@ -87,223 +246,534 @@
         "responses": {
           "200": {
             "description": "Product",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Product"
+                },
+                "example": {
+                  "id": "prod_aura_quiet",
+                  "name": "Aura Quiet",
+                  "kicker": "Listening",
+                  "description": "Over-ear silence for rooms that never quite settle. Soft clamps, all-day charge, a matte shell that rests quietly on the desk.",
+                  "priceMinor": 45990000,
+                  "stock": 8,
+                  "imageUrl": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80",
+                  "imageAlt": "Black over-ear wireless headphones on a pale surface"
                 }
               }
             }
           },
           "404": {
-            "description": "Not found"
+            "description": "Product not found (empty id or missing)",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorNotFound"
+                },
+                "example": {
+                  "error": "NOT_FOUND",
+                  "entity": "resource",
+                  "id": "prod_missing"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Persistence failure",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorPersistence"
+                }
+              }
+            }
           }
         }
       }
     },
     "/products/{id}/stock": {
       "get": {
-        "tags": [
-          "products"
-        ],
-        "summary": "Get product stock",
+        "tags": ["products"],
+        "summary": "Get product stock only",
+        "operationId": "getProductStock",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "example": "prod_aura_quiet"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Stock",
+            "description": "Stock projection",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "productId": {
-                      "type": "string"
-                    },
-                    "stock": {
-                      "type": "integer"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ProductStockResponse"
+                },
+                "example": {
+                  "productId": "prod_aura_quiet",
+                  "stock": 8
                 }
               }
             }
           },
           "404": {
-            "description": "Not found"
-          }
-        }
-      }
-    },
-    "/customers/health": {
-      "get": {
-        "tags": [
-          "customers"
-        ],
-        "summary": "Health",
-        "responses": {
-          "200": {
-            "description": "OK"
+            "description": "Product not found",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorNotFound"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Persistence failure",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorPersistence"
+                }
+              }
+            }
           }
         }
       }
     },
     "/customers": {
       "post": {
-        "tags": [
-          "customers"
-        ],
-        "summary": "Create customer",
+        "tags": ["customers"],
+        "summary": "Create customer (no card data)",
+        "operationId": "createCustomer",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateCustomer"
+              },
+              "example": {
+                "fullName": "Ada Lovelace",
+                "email": "ada@example.com",
+                "phone": "+573001112233"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Created",
+            "description": "Customer created",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Customer"
+                },
+                "example": {
+                  "id": "cust_11111111-1111-1111-1111-111111111111",
+                  "fullName": "Ada Lovelace",
+                  "email": "ada@example.com",
+                  "phone": "+573001112233"
                 }
               }
             }
           },
           "400": {
-            "description": "Validation"
+            "description": "DTO ValidationPipe or domain VALIDATION",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorValidationPipe"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorValidationDomain"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Persistence failure on put",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorPersistence"
+                }
+              }
+            }
           }
         }
       }
     },
     "/customers/{id}": {
       "get": {
-        "tags": [
-          "customers"
-        ],
-        "summary": "Get customer",
+        "tags": ["customers"],
+        "summary": "Get customer by id",
+        "operationId": "getCustomer",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "example": "cust_…"
             }
           }
         ],
         "responses": {
           "200": {
             "description": "Customer",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Customer"
+                },
+                "example": {
+                  "id": "cust_11111111-1111-1111-1111-111111111111",
+                  "fullName": "Ada Lovelace",
+                  "email": "ada@example.com",
+                  "phone": "+573001112233"
                 }
               }
             }
           },
           "404": {
-            "description": "Not found"
-          }
-        }
-      }
-    },
-    "/deliveries/health": {
-      "get": {
-        "tags": [
-          "deliveries"
-        ],
-        "summary": "Health",
-        "responses": {
-          "200": {
-            "description": "OK"
+            "description": "Customer not found",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorNotFound"
+                },
+                "example": {
+                  "error": "NOT_FOUND",
+                  "entity": "resource",
+                  "id": "cust_missing"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Persistence failure",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorPersistence"
+                }
+              }
+            }
           }
         }
       }
     },
     "/deliveries": {
       "post": {
-        "tags": [
-          "deliveries"
-        ],
-        "summary": "Create delivery",
+        "tags": ["deliveries"],
+        "summary": "Create delivery (standalone; pay flow also creates one)",
+        "operationId": "createDelivery",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateDelivery"
+              },
+              "example": {
+                "transactionId": "tx_33333333-3333-3333-3333-333333333333",
+                "customerId": "cust_11111111-1111-1111-1111-111111111111",
+                "address": "Calle 100 #10-20",
+                "city": "Bogotá",
+                "region": "Cundinamarca",
+                "feeMinor": 5000
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Created",
+            "description": "Delivery created with status PENDING",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Delivery"
+                },
+                "example": {
+                  "id": "del_22222222-2222-2222-2222-222222222222",
+                  "transactionId": "tx_33333333-3333-3333-3333-333333333333",
+                  "customerId": "cust_11111111-1111-1111-1111-111111111111",
+                  "address": "Calle 100 #10-20",
+                  "city": "Bogotá",
+                  "region": "Cundinamarca",
+                  "feeMinor": 5000,
+                  "status": "PENDING"
                 }
               }
             }
           },
           "400": {
-            "description": "Validation"
+            "description": "DTO ValidationPipe or domain VALIDATION",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorValidationPipe"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorValidationDomain"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Persistence failure",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorPersistence"
+                }
+              }
+            }
           }
         }
       }
     },
     "/deliveries/{id}": {
       "get": {
-        "tags": [
-          "deliveries"
-        ],
-        "summary": "Get delivery",
+        "tags": ["deliveries"],
+        "summary": "Get delivery by id",
+        "operationId": "getDelivery",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "example": "del_…"
             }
           }
         ],
         "responses": {
           "200": {
             "description": "Delivery",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Delivery"
+                },
+                "example": {
+                  "id": "del_22222222-2222-2222-2222-222222222222",
+                  "transactionId": "tx_33333333-3333-3333-3333-333333333333",
+                  "customerId": "cust_11111111-1111-1111-1111-111111111111",
+                  "address": "Calle 100 #10-20",
+                  "city": "Bogotá",
+                  "region": "Cundinamarca",
+                  "feeMinor": 5000,
+                  "status": "PENDING"
                 }
               }
             }
           },
           "404": {
-            "description": "Not found"
+            "description": "Delivery not found",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorNotFound"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Persistence failure",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorPersistence"
+                }
+              }
+            }
           }
         }
       },
       "patch": {
-        "tags": [
-          "deliveries"
-        ],
-        "summary": "Update delivery status (FULFILLABLE → FULFILLED)",
+        "tags": ["deliveries"],
+        "summary": "Update delivery status (ops fulfill / cancel)",
+        "description": "Body status FULFILLED|CANCELLED. FULFILLED requires current status FULFILLABLE (else 422). CANCELLED does not require FULFILLABLE.",
+        "operationId": "patchDeliveryStatus",
         "parameters": [
           {
             "name": "id",
@@ -320,52 +790,147 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateDeliveryStatus"
+              },
+              "examples": {
+                "fulfill": {
+                  "value": {
+                    "status": "FULFILLED"
+                  }
+                },
+                "cancel": {
+                  "value": {
+                    "status": "CANCELLED"
+                  }
+                }
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Updated",
+            "description": "Updated delivery",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Delivery"
+                },
+                "example": {
+                  "id": "del_22222222-2222-2222-2222-222222222222",
+                  "transactionId": "tx_33333333-3333-3333-3333-333333333333",
+                  "customerId": "cust_11111111-1111-1111-1111-111111111111",
+                  "address": "Calle 100 #10-20",
+                  "city": "Bogotá",
+                  "region": "Cundinamarca",
+                  "feeMinor": 5000,
+                  "status": "FULFILLED"
                 }
               }
             }
           },
           "400": {
-            "description": "Validation"
+            "description": "DTO ValidationPipe or domain VALIDATION (invalid status)",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorValidationPipe"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorValidationDomain"
+                    }
+                  ]
+                }
+              }
+            }
           },
           "404": {
-            "description": "Not found"
+            "description": "Delivery not found",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorNotFound"
+                }
+              }
+            }
           },
           "422": {
-            "description": "Invalid state"
-          }
-        }
-      }
-    },
-    "/transactions/health": {
-      "get": {
-        "tags": [
-          "transactions"
-        ],
-        "summary": "Health",
-        "responses": {
-          "200": {
-            "description": "OK"
+            "description": "Cannot fulfill when not FULFILLABLE",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorInvalidState"
+                },
+                "example": {
+                  "error": "INVALID_STATE",
+                  "message": "Cannot fulfill delivery in status PENDING"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Persistence failure",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorPersistence"
+                }
+              }
+            }
           }
         }
       }
     },
     "/transactions": {
       "get": {
-        "tags": [
-          "transactions"
-        ],
+        "tags": ["transactions"],
         "summary": "List transactions (ops console)",
+        "operationId": "listTransactions",
         "parameters": [
           {
             "name": "status",
@@ -373,13 +938,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": [
-                "PENDING",
-                "APPROVED",
-                "DECLINED",
-                "ERROR",
-                "REFUNDED"
-              ]
+              "enum": ["PENDING", "APPROVED", "DECLINED", "ERROR", "REFUNDED"]
             }
           },
           {
@@ -389,16 +948,63 @@
             "schema": {
               "type": "integer",
               "default": 50
-            }
+            },
+            "description": "Defaults to 50 when omitted or non-finite"
           }
         ],
         "responses": {
           "200": {
             "description": "Transaction list",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TransactionList"
+                  "$ref": "#/components/schemas/TransactionListResponse"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": "tx_33333333-3333-3333-3333-333333333333",
+                      "status": "APPROVED",
+                      "productId": "prod_aura_quiet",
+                      "customerId": "cust_11111111-1111-1111-1111-111111111111",
+                      "productAmount": 45990000,
+                      "baseFee": 1500,
+                      "deliveryFee": 5000,
+                      "total": 45996500,
+                      "createdAt": "2026-07-25T12:00:00.000Z",
+                      "deliveryId": "del_22222222-2222-2222-2222-222222222222",
+                      "effectsApplied": true,
+                      "providerRef": "fake_approved_tx_33333333-3333-3333-3333-333333333333"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Persistence failure on list",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorPersistence"
                 }
               }
             }
@@ -406,82 +1012,272 @@
         }
       },
       "post": {
-        "tags": [
-          "transactions"
-        ],
+        "tags": ["transactions"],
         "summary": "Create PENDING transaction + delivery",
+        "operationId": "createTransaction",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateTransaction"
+              },
+              "example": {
+                "productId": "prod_aura_quiet",
+                "customerId": "cust_11111111-1111-1111-1111-111111111111",
+                "productAmount": 45990000,
+                "baseFee": 1500,
+                "deliveryFee": 5000,
+                "delivery": {
+                  "address": "Calle 100 #10-20",
+                  "city": "Bogotá",
+                  "region": "Cundinamarca"
+                }
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Created PENDING",
+            "description": "PENDING transaction + deliveryId",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CreateTransactionResponse"
+                },
+                "example": {
+                  "transaction": {
+                    "id": "tx_33333333-3333-3333-3333-333333333333",
+                    "status": "PENDING",
+                    "productId": "prod_aura_quiet",
+                    "customerId": "cust_11111111-1111-1111-1111-111111111111",
+                    "productAmount": 45990000,
+                    "baseFee": 1500,
+                    "deliveryFee": 5000,
+                    "total": 45996500,
+                    "createdAt": "2026-07-25T12:00:00.000Z",
+                    "deliveryId": "del_22222222-2222-2222-2222-222222222222",
+                    "effectsApplied": false
+                  },
+                  "deliveryId": "del_22222222-2222-2222-2222-222222222222"
                 }
               }
             }
           },
           "400": {
-            "description": "Validation"
+            "description": "DTO ValidationPipe or domain VALIDATION",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorValidationPipe"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorValidationDomain"
+                    }
+                  ]
+                }
+              }
+            }
           },
           "404": {
-            "description": "Product/customer not found"
+            "description": "Product or customer not found",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorNotFound"
+                }
+              }
+            }
           },
           "409": {
-            "description": "Insufficient stock"
+            "description": "Product stock < 1 at create time",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorInsufficientStock"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Persistence failure",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorPersistence"
+                }
+              }
+            }
           }
         }
       }
     },
     "/transactions/{id}": {
       "get": {
-        "tags": [
-          "transactions"
-        ],
-        "summary": "Get transaction",
+        "tags": ["transactions"],
+        "summary": "Get transaction by id",
+        "operationId": "getTransaction",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "example": "tx_…"
             }
           }
         ],
         "responses": {
           "200": {
             "description": "Transaction",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Transaction"
+                },
+                "example": {
+                  "id": "tx_33333333-3333-3333-3333-333333333333",
+                  "status": "PENDING",
+                  "productId": "prod_aura_quiet",
+                  "customerId": "cust_11111111-1111-1111-1111-111111111111",
+                  "productAmount": 45990000,
+                  "baseFee": 1500,
+                  "deliveryFee": 5000,
+                  "total": 45996500,
+                  "createdAt": "2026-07-25T12:00:00.000Z",
+                  "deliveryId": "del_22222222-2222-2222-2222-222222222222",
+                  "effectsApplied": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Empty id (domain VALIDATION)",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorValidationDomain"
+                },
+                "example": {
+                  "error": "VALIDATION",
+                  "message": "transaction id required"
                 }
               }
             }
           },
           "404": {
-            "description": "Not found"
+            "description": "Transaction not found",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorNotFound"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Persistence failure",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorPersistence"
+                }
+              }
+            }
           }
         }
       }
     },
     "/transactions/{id}/pay": {
       "post": {
-        "tags": [
-          "transactions"
-        ],
+        "tags": ["transactions"],
         "summary": "Pay PENDING transaction",
+        "description": "HTTP **200** always when the railway succeeds — inspect `paymentStatus`. DECLINED/ERROR update the transaction but are not HTTP 4xx/5xx. HTTP 502 only when the payment adapter returns Result err PAYMENT_FAILED (e.g. sandbox hard outage).",
+        "operationId": "payTransaction",
         "parameters": [
           {
             "name": "id",
@@ -503,7 +1299,7 @@
                 "approvedCard": {
                   "summary": "Sandbox/fake happy path",
                   "value": {
-                    "deliveryId": "del_...",
+                    "deliveryId": "del_22222222-2222-2222-2222-222222222222",
                     "card": {
                       "number": "4242424242424242",
                       "cvc": "123",
@@ -519,7 +1315,16 @@
         },
         "responses": {
           "200": {
-            "description": "Payment processed (check paymentStatus)",
+            "description": "Payment processed — check paymentStatus APPROVED|DECLINED|ERROR",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -527,18 +1332,60 @@
                 },
                 "examples": {
                   "approved": {
+                    "summary": "APPROVED",
                     "value": {
                       "paymentStatus": "APPROVED",
                       "transaction": {
-                        "status": "APPROVED"
+                        "id": "tx_33333333-3333-3333-3333-333333333333",
+                        "status": "APPROVED",
+                        "productId": "prod_aura_quiet",
+                        "customerId": "cust_11111111-1111-1111-1111-111111111111",
+                        "productAmount": 45990000,
+                        "baseFee": 1500,
+                        "deliveryFee": 5000,
+                        "total": 45996500,
+                        "createdAt": "2026-07-25T12:00:00.000Z",
+                        "deliveryId": "del_22222222-2222-2222-2222-222222222222",
+                        "effectsApplied": true,
+                        "providerRef": "fake_approved_tx_33333333-3333-3333-3333-333333333333"
                       }
                     }
                   },
                   "declined": {
+                    "summary": "DECLINED (still HTTP 200)",
                     "value": {
                       "paymentStatus": "DECLINED",
                       "transaction": {
-                        "status": "DECLINED"
+                        "id": "tx_33333333-3333-3333-3333-333333333333",
+                        "status": "DECLINED",
+                        "productId": "prod_aura_quiet",
+                        "customerId": "cust_11111111-1111-1111-1111-111111111111",
+                        "productAmount": 45990000,
+                        "baseFee": 1500,
+                        "deliveryFee": 5000,
+                        "total": 45996500,
+                        "createdAt": "2026-07-25T12:00:00.000Z",
+                        "deliveryId": "del_22222222-2222-2222-2222-222222222222",
+                        "effectsApplied": false
+                      }
+                    }
+                  },
+                  "error": {
+                    "summary": "ERROR outcome (still HTTP 200)",
+                    "value": {
+                      "paymentStatus": "ERROR",
+                      "transaction": {
+                        "id": "tx_33333333-3333-3333-3333-333333333333",
+                        "status": "ERROR",
+                        "productId": "prod_aura_quiet",
+                        "customerId": "cust_11111111-1111-1111-1111-111111111111",
+                        "productAmount": 45990000,
+                        "baseFee": 1500,
+                        "deliveryFee": 5000,
+                        "total": 45996500,
+                        "createdAt": "2026-07-25T12:00:00.000Z",
+                        "deliveryId": "del_22222222-2222-2222-2222-222222222222",
+                        "effectsApplied": false
                       }
                     }
                   }
@@ -547,26 +1394,116 @@
             }
           },
           "400": {
-            "description": "Validation"
+            "description": "DTO ValidationPipe or domain VALIDATION (missing card fields / ids)",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorValidationPipe"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorValidationDomain"
+                    }
+                  ]
+                }
+              }
+            }
           },
           "404": {
-            "description": "Not found"
+            "description": "Transaction or customer not found",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorNotFound"
+                }
+              }
+            }
           },
           "422": {
-            "description": "Invalid state (not PENDING)"
+            "description": "Transaction not PENDING",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorInvalidState"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Persistence failure",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorPersistence"
+                }
+              }
+            }
           },
           "502": {
-            "description": "Provider failure"
+            "description": "Payment provider hard failure (PAYMENT_FAILED)",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorPaymentFailed"
+                }
+              }
+            }
           }
         }
       }
     },
     "/transactions/{id}/restore": {
       "post": {
-        "tags": [
-          "transactions"
-        ],
+        "tags": ["transactions"],
         "summary": "Ops: restore stock, cancel delivery, mark REFUNDED",
+        "description": "Only APPROVED transactions without stockRestoredAt. Increments product stock +1, cancels delivery when present, sets transaction REFUNDED.",
+        "operationId": "restoreTransactionStock",
         "parameters": [
           {
             "name": "id",
@@ -579,7 +1516,16 @@
         ],
         "responses": {
           "200": {
-            "description": "Restored",
+            "description": "Stock restored",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -588,11 +1534,89 @@
               }
             }
           },
+          "400": {
+            "description": "Empty transactionId",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorValidationDomain"
+                },
+                "example": {
+                  "error": "VALIDATION",
+                  "message": "transactionId required"
+                }
+              }
+            }
+          },
           "404": {
-            "description": "Not found"
+            "description": "Transaction or product not found",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorNotFound"
+                }
+              }
+            }
           },
           "422": {
-            "description": "Invalid state"
+            "description": "Not APPROVED or already restored",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorInvalidState"
+                },
+                "example": {
+                  "error": "INVALID_STATE",
+                  "message": "Can only restore APPROVED transactions (got PENDING)"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Persistence failure",
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Echo / generated correlation id (AccessLogMiddleware)",
+                "schema": {
+                  "type": "string",
+                  "example": "corr_abc123"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorPersistence"
+                }
+              }
+            }
           }
         }
       }
@@ -605,14 +1629,17 @@
         "required": [
           "id",
           "name",
+          "kicker",
           "description",
           "priceMinor",
           "stock",
-          "imageUrl"
+          "imageUrl",
+          "imageAlt"
         ],
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "example": "prod_aura_quiet"
           },
           "name": {
             "type": "string"
@@ -624,27 +1651,117 @@
             "type": "string"
           },
           "priceMinor": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Minor currency units (e.g. COP cents)"
           },
           "stock": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 0
           },
           "imageUrl": {
-            "type": "string"
+            "type": "string",
+            "format": "uri"
           },
           "imageAlt": {
             "type": "string"
+          }
+        },
+        "example": {
+          "id": "prod_aura_quiet",
+          "name": "Aura Quiet",
+          "kicker": "Listening",
+          "description": "Over-ear silence for rooms that never quite settle. Soft clamps, all-day charge, a matte shell that rests quietly on the desk.",
+          "priceMinor": 45990000,
+          "stock": 8,
+          "imageUrl": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80",
+          "imageAlt": "Black over-ear wireless headphones on a pale surface"
+        }
+      },
+      "ProductListResponse": {
+        "type": "object",
+        "required": ["items"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          }
+        },
+        "example": {
+          "items": [
+            {
+              "id": "prod_aura_quiet",
+              "name": "Aura Quiet",
+              "kicker": "Listening",
+              "description": "Over-ear silence for rooms that never quite settle. Soft clamps, all-day charge, a matte shell that rests quietly on the desk.",
+              "priceMinor": 45990000,
+              "stock": 8,
+              "imageUrl": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80",
+              "imageAlt": "Black over-ear wireless headphones on a pale surface"
+            }
+          ]
+        }
+      },
+      "ProductStockResponse": {
+        "type": "object",
+        "required": ["productId", "stock"],
+        "properties": {
+          "productId": {
+            "type": "string"
+          },
+          "stock": {
+            "type": "integer"
+          }
+        },
+        "example": {
+          "productId": "prod_aura_quiet",
+          "stock": 8
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "required": ["status", "service"],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["ok"]
+          },
+          "service": {
+            "type": "string",
+            "enum": ["products", "customers", "deliveries", "transactions"]
           }
         }
       },
       "CreateCustomer": {
         "type": "object",
-        "required": [
-          "fullName",
-          "email",
-          "phone"
-        ],
+        "required": ["fullName", "email", "phone"],
         "properties": {
+          "fullName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 120
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 20,
+            "example": "+573001112233"
+          }
+        }
+      },
+      "Customer": {
+        "type": "object",
+        "required": ["id", "fullName", "email", "phone"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cust_…"
+          },
           "fullName": {
             "type": "string"
           },
@@ -655,25 +1772,13 @@
           "phone": {
             "type": "string"
           }
+        },
+        "example": {
+          "id": "cust_11111111-1111-1111-1111-111111111111",
+          "fullName": "Ada Lovelace",
+          "email": "ada@example.com",
+          "phone": "+573001112233"
         }
-      },
-      "Customer": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/CreateCustomer"
-          },
-          {
-            "type": "object",
-            "required": [
-              "id"
-            ],
-            "properties": {
-              "id": {
-                "type": "string"
-              }
-            }
-          }
-        ]
       },
       "CreateDelivery": {
         "type": "object",
@@ -693,21 +1798,35 @@
             "type": "string"
           },
           "address": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 200
           },
           "city": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 100
           },
           "region": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 100
           },
           "feeMinor": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 0
           }
         }
       },
       "Delivery": {
         "type": "object",
+        "required": [
+          "id",
+          "transactionId",
+          "customerId",
+          "address",
+          "city",
+          "region",
+          "feeMinor",
+          "status"
+        ],
         "properties": {
           "id": {
             "type": "string"
@@ -732,12 +1851,46 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "PENDING",
-              "FULFILLABLE",
-              "FULFILLED",
-              "CANCELLED"
-            ]
+            "enum": ["PENDING", "FULFILLABLE", "FULFILLED", "CANCELLED"]
+          }
+        },
+        "example": {
+          "id": "del_22222222-2222-2222-2222-222222222222",
+          "transactionId": "tx_33333333-3333-3333-3333-333333333333",
+          "customerId": "cust_11111111-1111-1111-1111-111111111111",
+          "address": "Calle 100 #10-20",
+          "city": "Bogotá",
+          "region": "Cundinamarca",
+          "feeMinor": 5000,
+          "status": "PENDING"
+        }
+      },
+      "UpdateDeliveryStatus": {
+        "type": "object",
+        "required": ["status"],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["FULFILLED", "CANCELLED"],
+            "description": "FULFILLED only allowed when current status is FULFILLABLE; CANCELLED allowed otherwise"
+          }
+        }
+      },
+      "DeliveryAddress": {
+        "type": "object",
+        "required": ["address", "city", "region"],
+        "properties": {
+          "address": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "region": {
+            "type": "string",
+            "maxLength": 100
           }
         }
       },
@@ -753,56 +1906,49 @@
         ],
         "properties": {
           "productId": {
-            "type": "string"
+            "type": "string",
+            "example": "prod_aura_quiet"
           },
           "customerId": {
             "type": "string"
           },
           "productAmount": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 1
           },
           "baseFee": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 0
           },
           "deliveryFee": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 0
           },
           "delivery": {
-            "type": "object",
-            "required": [
-              "address",
-              "city",
-              "region"
-            ],
-            "properties": {
-              "address": {
-                "type": "string"
-              },
-              "city": {
-                "type": "string"
-              },
-              "region": {
-                "type": "string"
-              }
-            }
+            "$ref": "#/components/schemas/DeliveryAddress"
           }
         }
       },
       "Transaction": {
         "type": "object",
+        "required": [
+          "id",
+          "status",
+          "productId",
+          "customerId",
+          "productAmount",
+          "baseFee",
+          "deliveryFee",
+          "total",
+          "createdAt"
+        ],
         "properties": {
           "id": {
             "type": "string"
           },
           "status": {
             "type": "string",
-            "enum": [
-              "PENDING",
-              "APPROVED",
-              "DECLINED",
-              "ERROR",
-              "REFUNDED"
-            ]
+            "enum": ["PENDING", "APPROVED", "DECLINED", "ERROR", "REFUNDED"]
           },
           "productId": {
             "type": "string"
@@ -839,10 +1985,24 @@
             "type": "string",
             "format": "date-time"
           }
+        },
+        "example": {
+          "id": "tx_33333333-3333-3333-3333-333333333333",
+          "status": "PENDING",
+          "productId": "prod_aura_quiet",
+          "customerId": "cust_11111111-1111-1111-1111-111111111111",
+          "productAmount": 45990000,
+          "baseFee": 1500,
+          "deliveryFee": 5000,
+          "total": 45996500,
+          "createdAt": "2026-07-25T12:00:00.000Z",
+          "deliveryId": "del_22222222-2222-2222-2222-222222222222",
+          "effectsApplied": false
         }
       },
       "CreateTransactionResponse": {
         "type": "object",
+        "required": ["transaction", "deliveryId"],
         "properties": {
           "transaction": {
             "$ref": "#/components/schemas/Transaction"
@@ -850,80 +2010,27 @@
           "deliveryId": {
             "type": "string"
           }
-        }
-      },
-      "PayTransaction": {
-        "type": "object",
-        "required": [
-          "deliveryId",
-          "card"
-        ],
-        "properties": {
-          "deliveryId": {
-            "type": "string"
-          },
-          "card": {
-            "type": "object",
-            "required": [
-              "number",
-              "cvc",
-              "expMonth",
-              "expYear",
-              "cardHolder"
-            ],
-            "properties": {
-              "number": {
-                "type": "string"
-              },
-              "cvc": {
-                "type": "string"
-              },
-              "expMonth": {
-                "type": "string"
-              },
-              "expYear": {
-                "type": "string"
-              },
-              "cardHolder": {
-                "type": "string"
-              }
-            }
-          }
-        }
-      },
-      "PayTransactionResponse": {
-        "type": "object",
-        "properties": {
-          "paymentStatus": {
-            "type": "string",
-            "enum": [
-              "APPROVED",
-              "DECLINED",
-              "ERROR"
-            ]
-          },
+        },
+        "example": {
           "transaction": {
-            "$ref": "#/components/schemas/Transaction"
-          }
+            "id": "tx_33333333-3333-3333-3333-333333333333",
+            "status": "PENDING",
+            "productId": "prod_aura_quiet",
+            "customerId": "cust_11111111-1111-1111-1111-111111111111",
+            "productAmount": 45990000,
+            "baseFee": 1500,
+            "deliveryFee": 5000,
+            "total": 45996500,
+            "createdAt": "2026-07-25T12:00:00.000Z",
+            "deliveryId": "del_22222222-2222-2222-2222-222222222222",
+            "effectsApplied": false
+          },
+          "deliveryId": "del_22222222-2222-2222-2222-222222222222"
         }
       },
-      "UpdateDeliveryStatus": {
+      "TransactionListResponse": {
         "type": "object",
-        "required": [
-          "status"
-        ],
-        "properties": {
-          "status": {
-            "type": "string",
-            "enum": [
-              "FULFILLED",
-              "CANCELLED"
-            ]
-          }
-        }
-      },
-      "TransactionList": {
-        "type": "object",
+        "required": ["items"],
         "properties": {
           "items": {
             "type": "array",
@@ -931,10 +2038,93 @@
               "$ref": "#/components/schemas/Transaction"
             }
           }
+        },
+        "example": {
+          "items": [
+            {
+              "id": "tx_33333333-3333-3333-3333-333333333333",
+              "status": "APPROVED",
+              "productId": "prod_aura_quiet",
+              "customerId": "cust_11111111-1111-1111-1111-111111111111",
+              "productAmount": 45990000,
+              "baseFee": 1500,
+              "deliveryFee": 5000,
+              "total": 45996500,
+              "createdAt": "2026-07-25T12:00:00.000Z",
+              "deliveryId": "del_22222222-2222-2222-2222-222222222222",
+              "effectsApplied": true,
+              "providerRef": "fake_approved_tx_33333333-3333-3333-3333-333333333333"
+            }
+          ]
+        }
+      },
+      "Card": {
+        "type": "object",
+        "required": ["number", "cvc", "expMonth", "expYear", "cardHolder"],
+        "properties": {
+          "number": {
+            "type": "string",
+            "pattern": "^\\d{13,19}$",
+            "description": "Test PAN only — never log/store in app logs",
+            "example": "4242424242424242"
+          },
+          "cvc": {
+            "type": "string",
+            "pattern": "^\\d{3,4}$",
+            "example": "123"
+          },
+          "expMonth": {
+            "type": "string",
+            "pattern": "^\\d{1,2}$",
+            "example": "12"
+          },
+          "expYear": {
+            "type": "string",
+            "pattern": "^\\d{2,4}$",
+            "example": "30"
+          },
+          "cardHolder": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80
+          }
+        }
+      },
+      "PayTransaction": {
+        "type": "object",
+        "required": ["deliveryId", "card"],
+        "properties": {
+          "deliveryId": {
+            "type": "string"
+          },
+          "card": {
+            "$ref": "#/components/schemas/Card"
+          }
+        }
+      },
+      "PayTransactionResponse": {
+        "type": "object",
+        "required": ["paymentStatus", "transaction"],
+        "properties": {
+          "paymentStatus": {
+            "type": "string",
+            "enum": ["APPROVED", "DECLINED", "ERROR"],
+            "description": "Always returned under HTTP 200 when the use-case succeeds"
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/Transaction"
+          }
         }
       },
       "RestoreTransactionResponse": {
         "type": "object",
+        "required": [
+          "transactionId",
+          "productId",
+          "stock",
+          "deliveryStatus",
+          "transactionStatus"
+        ],
         "properties": {
           "transactionId": {
             "type": "string"
@@ -943,14 +2133,190 @@
             "type": "string"
           },
           "stock": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Product stock after +1 restore"
           },
           "deliveryStatus": {
-            "type": "string"
+            "type": "string",
+            "example": "CANCELLED"
           },
           "transactionStatus": {
+            "type": "string",
+            "enum": ["REFUNDED"]
+          }
+        },
+        "example": {
+          "transactionId": "tx_33333333-3333-3333-3333-333333333333",
+          "productId": "prod_aura_quiet",
+          "stock": 9,
+          "deliveryStatus": "CANCELLED",
+          "transactionStatus": "REFUNDED"
+        }
+      },
+      "ValidationDetail": {
+        "type": "object",
+        "required": ["field", "constraints"],
+        "properties": {
+          "field": {
+            "type": "string",
+            "example": "email"
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": ["email must be an email"]
+          }
+        }
+      },
+      "ErrorValidationPipe": {
+        "type": "object",
+        "required": ["error", "message", "details"],
+        "description": "Global ValidationPipe (whitelist / class-validator) — HTTP 400",
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": ["VALIDATION"]
+          },
+          "message": {
+            "type": "string",
+            "example": "Request validation failed"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationDetail"
+            }
+          }
+        },
+        "example": {
+          "error": "VALIDATION",
+          "message": "Request validation failed",
+          "details": [
+            {
+              "field": "fullName",
+              "constraints": ["fullName should not be empty"]
+            }
+          ]
+        }
+      },
+      "ErrorValidationDomain": {
+        "type": "object",
+        "required": ["error", "message"],
+        "description": "Domain VALIDATION via domainErrorToHttp — HTTP 400",
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": ["VALIDATION"]
+          },
+          "message": {
             "type": "string"
           }
+        },
+        "example": {
+          "error": "VALIDATION",
+          "message": "transactionId and deliveryId required"
+        }
+      },
+      "ErrorNotFound": {
+        "type": "object",
+        "required": ["error", "entity", "id"],
+        "description": "domainErrorToHttp NOT_FOUND — HTTP 404",
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": ["NOT_FOUND"]
+          },
+          "entity": {
+            "type": "string",
+            "description": "Entity name or 'resource' when use-case omits it",
+            "example": "product"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "error": "NOT_FOUND",
+          "entity": "resource",
+          "id": "prod_missing"
+        }
+      },
+      "ErrorInsufficientStock": {
+        "type": "object",
+        "required": ["error", "productId", "stock"],
+        "description": "domainErrorToHttp INSUFFICIENT_STOCK — HTTP 409",
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": ["INSUFFICIENT_STOCK"]
+          },
+          "productId": {
+            "type": "string"
+          },
+          "stock": {
+            "type": "integer"
+          }
+        },
+        "example": {
+          "error": "INSUFFICIENT_STOCK",
+          "productId": "prod_aura_quiet",
+          "stock": 0
+        }
+      },
+      "ErrorInvalidState": {
+        "type": "object",
+        "required": ["error", "message"],
+        "description": "domainErrorToHttp INVALID_STATE — HTTP 422",
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": ["INVALID_STATE"]
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "error": "INVALID_STATE",
+          "message": "Transaction tx_… is APPROVED, expected PENDING"
+        }
+      },
+      "ErrorPaymentFailed": {
+        "type": "object",
+        "required": ["error", "message"],
+        "description": "Sandbox/provider hard failure (Result err PAYMENT_FAILED) — HTTP 502. Distinct from HTTP 200 paymentStatus=ERROR.",
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": ["PAYMENT_FAILED"]
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "error": "PAYMENT_FAILED",
+          "message": "Merchant lookup failed (503)"
+        }
+      },
+      "ErrorPersistence": {
+        "type": "object",
+        "required": ["error", "message"],
+        "description": "domainErrorToHttp PERSISTENCE_ERROR — HTTP 500",
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": ["PERSISTENCE_ERROR"]
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "error": "PERSISTENCE_ERROR",
+          "message": "DynamoDB ConditionalCheckFailed"
         }
       }
     }

@@ -27,11 +27,12 @@
 | Deploy smoke + rollback | `deploy-smoke-rollback/` | **done** | CI E2E/ZAP/SAST (ADR 0012) |
 | **Observability CW** | `observability-cloudwatch/` | **done** | Logs + dashboards + alarms + IAM (ADR 0014) |
 | **Amplify build gate** | `amplify-build-gate/` | **done** | FE Amplify SUCCEED fail-closed (ADR 0015) |
+| **OpenAPI complete** | `openapi-complete-responses/` | **done** | All endpoint responses + error schemas |
 
 ## Orden reciente
 
 ```
-… → observability-cloudwatch → amplify-build-gate
+… → amplify-build-gate → openapi-complete-responses
 ```
 
 ## Reglas
