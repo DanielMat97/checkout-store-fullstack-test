@@ -1,0 +1,105 @@
+name: Amplify build gate (prod FE)
+
+# When frontend (or Amplify build inputs) change on main/master, wait for Amplify
+# to compile SUCCEED for this commit. Fail the workflow if Amplify FAILED/CANCELLED/timeout.
+# refs specs/amplify-build-gate/spec.md · ADR 0015
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'apps/web/**'
+      - 'amplify.yml'
+      - 'packages/shared/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/amplify-build-gate.yml'
+      - 'scripts/ci/wait-amplify-job.cjs'
+      - 'scripts/ci/detect-fe-amplify.cjs'
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Amplify branch name (default master)'
+        required: false
+        default: 'master'
+
+concurrency:
+  group: amplify-build-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+  AMPLIFY_APP_ID: ${{ vars.AMPLIFY_APP_ID }}
+  AMPLIFY_BRANCH: ${{ inputs.branch || vars.AMPLIFY_PROD_BRANCH || 'master' }}
+
+jobs:
+  detect:
+    name: Detect FE Amplify paths
+    runs-on: ubuntu-latest
+    outputs:
+      fe_amplify: ${{ steps.d.outputs.fe_amplify }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - id: d
+        run: |
+          BEFORE="${{ github.event.before }}"
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            BEFORE="HEAD~1"
+          fi
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "fe_amplify=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          RESULT=$(node scripts/ci/detect-fe-amplify.cjs "$BEFORE" HEAD)
+          echo "detect=$RESULT"
+          FE=$(echo "$RESULT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).feAmplify?'true':'false'))")
+          echo "fe_amplify=$FE" >> "$GITHUB_OUTPUT"
+
+  amplify-build:
+    name: Amplify build (required)
+    runs-on: ubuntu-latest
+    needs: detect
+    if: ${{ needs.detect.outputs.fe_amplify == 'true' }}
+    timeout-minutes: 25
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Require AMPLIFY_APP_ID
+        run: |
+          if [ -z "$AMPLIFY_APP_ID" ]; then
+            echo "AMPLIFY_APP_ID is required for the Amplify build gate" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Wait for Amplify SUCCEED
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          node scripts/ci/wait-amplify-job.cjs \
+            --app-id "$AMPLIFY_APP_ID" \
+            --branch "$AMPLIFY_BRANCH" \
+            --commit "$GITHUB_SHA" \
+            --timeout-sec 1200 \
+            --interval-sec 20
+          echo "### Amplify build gate" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Branch: \`$AMPLIFY_BRANCH\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Commit: \`$GITHUB_SHA\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Result: **SUCCEED**" >> "$GITHUB_STEP_SUMMARY"

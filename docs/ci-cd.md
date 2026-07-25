@@ -8,18 +8,21 @@
    `validate → prettier → lint → audit → test → coverage` + **CodeQL** + **SonarCloud** (solo si `SONAR_TOKEN`).
 2. **Baseline** — guarda el SHA del último `Deploy API (prod)` exitoso (`last-good`).
 3. **Deploy** — Serverless Framework stage `prod` (o `SERVERLESS_STAGE`).
-4. **Smoke (post-deploy, bloqueante)**  
+4. **Amplify build gate (FE)** — si cambian paths FE (`apps/web/**`, `amplify.yml`, shared…), workflow `amplify-build-gate.yml` espera job Amplify `SUCCEED` para el `GITHUB_SHA` (falla en `FAILED`/`CANCELLED`/timeout). ADR 0015.
+5. **Smoke (post-deploy API, bloqueante)**  
    - Espera FE/API ready  
    - **Playwright** E2E  
    - **OWASP ZAP** baseline  
-5. **Stress (opcional, no bloqueante)** — **Artillery** load smoke sobre `GET /products` (`continue-on-error: true`; **no** rollback).
-6. **Rollback** — solo si smoke (Playwright/ZAP) falla → `serverless deploy` del SHA last-good.
+6. **Stress (opcional, no bloqueante)** — **Artillery** load smoke sobre `GET /products` (`continue-on-error: true`; **no** rollback).
+7. **Rollback** — solo si smoke (Playwright/ZAP) falla → `serverless deploy` del SHA last-good.
 
 ## Variables / secrets
 
 | Key | Tipo | Requerido |
 |---|---|---|
 | `FE_BASE_URL` | variable | Sí para smoke prod (ej. Amplify master URL) |
+| `AMPLIFY_APP_ID` | variable | Sí para gate Amplify FE |
+| `AMPLIFY_PROD_BRANCH` | variable | No (default `master`) |
 | `SONAR_TOKEN` | secret | No (omite Sonar) |
 | `SONAR_ORGANIZATION` | variable | Con Sonar |
 | `SONAR_PROJECT_KEY` | variable | Con Sonar |
@@ -53,4 +56,13 @@ Usa tarjeta de prueba del flujo NORA; no commits con PAN reales. Stress no llama
 
 ## Feature (`fb-*`)
 
-Tras deploy aislado + Amplify: smoke + Artillery opcional; rollback best-effort solo desde smoke.
+Tras deploy aislado + Amplify: job **Amplify build (required)** espera `SUCCEED` del RELEASE; luego smoke + Artillery opcional; rollback best-effort solo desde smoke.
+
+```bash
+# Local helpers
+npm run test:amplify-wait
+AMPLIFY_APP_ID=dxxx AMPLIFY_BRANCH=master GITHUB_SHA=<sha> npm run ci:amplify-wait
+```
+
+Spec: [`specs/amplify-build-gate/`](../specs/amplify-build-gate/spec.md) · ADR [`0015`](adr/0015-amplify-build-gate.md).
+

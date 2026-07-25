@@ -101,6 +101,15 @@ GitHub (`DanielMat97/wompi-test`) variables/secrets for Actions were configured 
 
 Feature branches are created/updated by `deploy-feature.yml` — you do **not** need to pre-create every `fb-*` branch in Amplify.
 
+### Amplify build gate (fail-closed)
+
+After kicking a RELEASE (feature) or on FE path pushes to `main`/`master`, GitHub Actions waits until Amplify reports **`SUCCEED`**. `FAILED` / `CANCELLED` / timeout fail the stage. See [`docs/ci-cd.md`](ci-cd.md) and ADR 0015.
+
+```bash
+npm run test:amplify-wait
+AMPLIFY_APP_ID="$AMPLIFY_APP_ID" AMPLIFY_BRANCH=master GITHUB_SHA="$(git rev-parse HEAD)" npm run ci:amplify-wait
+```
+
 ## GitHub configuration
 
 ### Secrets (prefer Vault)

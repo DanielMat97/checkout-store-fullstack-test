@@ -1,6 +1,6 @@
 # Current state
 
-> Last updated: **2026-07-25** (observability: enriched logs + CW dashboards/alarms/IAM viewer; score **150/150**)
+> Last updated: **2026-07-25** (Amplify build gate fail-closed; observability CW; score **150/150**)
 
 ## Score (rúbrica brief — modo evaluador estricto)
 
@@ -36,6 +36,7 @@ Ver **`docs/scorecard.md`**.
 | `ux-quality-bar` | **done** (matriz B2–B4 + `docs/ux-evidence.md`) |
 | `frontend-hooks-coverage` | **done** (hooks + FE cov ≥80% + `ci:backend-on-fe`) |
 | `observability-cloudwatch` | **done** (ADR 0014 — logs + CW dashboard/alarms/IAM viewer) |
+| `amplify-build-gate` | **done** (ADR 0015 — Amplify SUCCEED required in FE deploy) |
 
 ## Deploy (live)
 
@@ -48,6 +49,6 @@ Ver **`docs/scorecard.md`**.
 | Security | [`docs/security.md`](security.md) |
 | Observability | [`docs/observability.md`](observability.md) — dashboard `checkout-api-<stage>-ops` |
 | UX evidence | [`docs/ux-evidence.md`](ux-evidence.md) |
-| CI/CD | [`docs/ci-cd.md`](ci-cd.md) — pre: CodeQL (+Sonar opc.); **BE gate on FE changes**; post: Playwright + ZAP; Artillery opcional |
+| CI/CD | [`docs/ci-cd.md`](ci-cd.md) — pre: CodeQL (+Sonar opc.); **BE gate on FE**; **Amplify SUCCEED gate**; post: Playwright + ZAP; Artillery opcional |
 | Gap analysis | [`docs/brief-gap-analysis.md`](brief-gap-analysis.md) |
 | Post-pay | SQS `checkout-orders-events-{stage}` + worker; local sync fallback |

@@ -26,11 +26,12 @@
 | Orders console | `orders-console/` | **done** | Ops + brief §5–6 stock |
 | Deploy smoke + rollback | `deploy-smoke-rollback/` | **done** | CI E2E/ZAP/SAST (ADR 0012) |
 | **Observability CW** | `observability-cloudwatch/` | **done** | Logs + dashboards + alarms + IAM (ADR 0014) |
+| **Amplify build gate** | `amplify-build-gate/` | **done** | FE Amplify SUCCEED fail-closed (ADR 0015) |
 
 ## Orden reciente
 
 ```
-… → frontend-hooks-coverage → observability-cloudwatch
+… → observability-cloudwatch → amplify-build-gate
 ```
 
 ## Reglas

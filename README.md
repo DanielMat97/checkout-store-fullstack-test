@@ -77,6 +77,7 @@ Import [`docs/api/openapi.json`](docs/api/openapi.json) in Apidog/Postman, or op
 
 - Amplify app: `dw2i8myh0xumx` (branch `master`) · build: root `amplify.yml`
 - Runbook: [`docs/deploy.md`](docs/deploy.md) · CI/CD: [`docs/ci-cd.md`](docs/ci-cd.md) · Vault: [`docs/vault.md`](docs/vault.md) · Observability: [`docs/observability.md`](docs/observability.md)
+- Amplify FE gate: workflow `amplify-build-gate.yml` (SUCCEED required — ADR 0015)
 - Local E2E: `FE_BASE_URL=http://localhost:5173 API_BASE_URL=http://localhost:3000 npm run test:e2e`
 - Local stress: `API_BASE_URL=http://localhost:3000 npm run test:stress`
 - Optional: `FE_BASE_URL`, `SONAR_*`, `STRESS_ENABLED=false` (ADR 0012 / 0013)

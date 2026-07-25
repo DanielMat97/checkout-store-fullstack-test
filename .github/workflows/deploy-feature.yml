@@ -53,6 +53,9 @@ jobs:
       stage: ${{ steps.meta.outputs.stage }}
       api_url: ${{ steps.api.outputs.api_url }}
       amplify_url: ${{ steps.amplify.outputs.amplify_url || steps.cors.outputs.amplify_url }}
+      amplify_branch: ${{ steps.meta.outputs.amplify_branch }}
+      amplify_job_id: ${{ steps.amplify.outputs.amplify_job_id }}
+      amplify_gated: ${{ steps.amplify.outputs.amplify_gated }}
     steps:
       - uses: actions/checkout@v4
 
@@ -181,9 +184,10 @@ jobs:
                 "VITE_MOCK_MODE=false,VITE_API_BASE_URL=${API_URL},VITE_BASE_FEE=1500,VITE_DELIVERY_FEE=5000"
           fi
 
-          # Kick a build (Amplify may also auto-build on push if connected to GitHub)
-          JOB=$(aws amplify start-job --app-id "$APP" --branch-name "$BRANCH" --job-type RELEASE --query 'jobSummary.jobId' --output text || true)
-          echo "Started Amplify job: ${JOB:-n/a}"
+          JOB=$(aws amplify start-job --app-id "$APP" --branch-name "$BRANCH" --job-type RELEASE --query 'jobSummary.jobId' --output text)
+          echo "Started Amplify job: $JOB"
+          echo "amplify_job_id=$JOB" >> "$GITHUB_OUTPUT"
+          echo "amplify_gated=true" >> "$GITHUB_OUTPUT"
 
           DOMAIN=$(aws amplify get-app --app-id "$APP" --query 'app.defaultDomain' --output text)
           HOST=$(echo "$BRANCH" | sed 's|/|-|g')
@@ -197,6 +201,7 @@ jobs:
             echo "- Stage: \`${{ steps.meta.outputs.stage }}\`"
             echo "- API: \`${{ steps.api.outputs.api_url }}\`"
             echo "- Amplify branch: \`${{ steps.meta.outputs.amplify_branch }}\`"
+            echo "- Amplify job: \`${{ steps.amplify.outputs.amplify_job_id || 'n/a' }}\`"
             echo "- FE: \`${{ steps.amplify.outputs.amplify_url || steps.cors.outputs.amplify_url || 'configure AMPLIFY_APP_ID' }}\`"
             echo ""
             echo "Tear down API later:"
@@ -205,11 +210,46 @@ jobs:
             echo "\`\`\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
+  amplify-build:
+    name: Amplify build (required)
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: ${{ always() && needs.deploy.result == 'success' && needs.deploy.outputs.amplify_gated == 'true' }}
+    timeout-minutes: 25
+    environment: feature
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Wait for Amplify SUCCEED
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          node scripts/ci/wait-amplify-job.cjs \
+            --app-id "$AMPLIFY_APP_ID" \
+            --branch "${{ needs.deploy.outputs.amplify_branch }}" \
+            --job-id "${{ needs.deploy.outputs.amplify_job_id }}" \
+            --commit "$GITHUB_SHA" \
+            --timeout-sec 1200 \
+            --interval-sec 15
+          echo "### Amplify build gate (feature)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Job: \`${{ needs.deploy.outputs.amplify_job_id }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Result: **SUCCEED**" >> "$GITHUB_STEP_SUMMARY"
+
   smoke:
     name: Feature post-deploy smoke
     runs-on: ubuntu-latest
-    needs: deploy
-    if: ${{ always() && needs.deploy.result == 'success' && (needs.deploy.outputs.amplify_url != '' || needs.deploy.outputs.api_url != '') }}
+    needs: [deploy, amplify-build]
+    if: ${{ always() && needs.deploy.result == 'success' && (needs.amplify-build.result == 'success' || needs.amplify-build.result == 'skipped') && (needs.deploy.outputs.amplify_url != '' || needs.deploy.outputs.api_url != '') }}
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
