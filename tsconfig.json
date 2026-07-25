@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "noEmit": true,
+    "rootDir": ".",
+    "moduleResolution": "node16",
+    "module": "node16",
+    "ignoreDeprecations": "5.0"
+  },
+  "include": ["serverless.ts"]
+}

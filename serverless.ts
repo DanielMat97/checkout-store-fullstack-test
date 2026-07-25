@@ -14,19 +14,20 @@ function corsOrigins(): string[] {
   const raw = process.env.CORS_ORIGIN ?? 'http://localhost:5173';
   const list = raw
     .split(',')
-    .map((s) => s.trim())
+    .map((s: string) => s.trim())
     .filter(Boolean);
   return list.length > 0 ? list : ['http://localhost:5173'];
 }
 
-const serverlessConfiguration: AWS = {
+// @serverless/typescript types lag Lambda runtimes / CFN ${} placeholders.
+const serverlessConfiguration = {
   service: 'checkout-api',
   frameworkVersion: '4',
   useDotenv: true,
   plugins: ['serverless-offline'],
   provider: {
-    name: 'aws',
-    runtime: 'nodejs20.x',
+    name: 'aws' as const,
+    runtime: 'nodejs24.x',
     region: '${env:AWS_REGION, "us-east-1"}',
     stage: '${opt:stage, "dev"}',
     memorySize: 512,
@@ -200,6 +201,6 @@ const serverlessConfiguration: AWS = {
       },
     },
   },
-};
+} as unknown as AWS;
 
 module.exports = serverlessConfiguration;
