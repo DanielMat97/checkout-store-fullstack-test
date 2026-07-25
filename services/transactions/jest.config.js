@@ -18,7 +18,7 @@ module.exports = {
     '!src/domain/**/*.ts',
     '!src/ports/**/*.ts',
     '!src/application/test-fakes.ts',
-    // Covered by dedicated unit specs; polling/network branches skew global %.
+    // Dedicated unit specs in sandbox-payment.gateway.spec.ts (network/poll branches).
     '!src/adapters/outbound/payment/sandbox-payment.gateway.ts',
   ],
   coverageThreshold: {

@@ -88,7 +88,8 @@ Enforced per workspace at **>80% lines**. Snapshot **2026-07-24** (`npm run test
 | Backend | `@app/products` / `customers` / `deliveries` / `transactions` | **84.97–100%** |
 | Shared | `@app/shared` / `@app/persistence` | **96.9–97.5%** |
 
-Full table and caveats: [`docs/coverage.md`](docs/coverage.md).
+Full table and caveats: [`docs/coverage.md`](docs/coverage.md).  
+`SandboxPaymentGateway` has dedicated unit specs (`sandbox-payment.gateway.spec.ts`); polling/network branches stay out of the transactions **global** threshold so domain/use-case lines stay measurable — live sandbox charges are proven in cloud (see [`docs/security.md`](docs/security.md)).
 
 ## Docs
 
@@ -96,5 +97,6 @@ Full table and caveats: [`docs/coverage.md`](docs/coverage.md).
 - Scorecard (hiring bar): [`docs/scorecard.md`](docs/scorecard.md)
 - Data model: [`docs/data-model.md`](docs/data-model.md)
 - Payment adapter: [`docs/payment-adapter.md`](docs/payment-adapter.md)
+- Security evidence: [`docs/security.md`](docs/security.md)
 - API smoke: [`docs/api/smoke.md`](docs/api/smoke.md)
 - Changelog: [`CHANGELOG.md`](CHANGELOG.md)
