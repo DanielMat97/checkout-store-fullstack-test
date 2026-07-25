@@ -116,7 +116,29 @@ Portal: [https://7j6npb6n4w.apidog.io](https://7j6npb6n4w.apidog.io) · fuente [
 
 Modelo de datos: [`docs/data-model.md`](docs/data-model.md). Seguridad/headers: [`docs/security.md`](docs/security.md).
 
-Cobertura Jest **≥80%** FE y BE → [`docs/coverage.md`](docs/coverage.md).
+---
+
+## 🧪 Calidad, seguridad y carga (sí, lo corrimos de verdad)
+
+No es “tenemos tests en la carpeta”: el pipeline **exige** la batería antes y después de AWS. Detalle operativo: [`docs/ci-cd.md`](docs/ci-cd.md) · cobertura: [`docs/coverage.md`](docs/coverage.md) · seguridad: [`docs/security.md`](docs/security.md).
+
+**Unitarios (Jest)** — FE (`apps/web`) y BE (cada Nest service + packages). Hooks, use-cases y mappers se testean sin Dynamo/AWS de verdad. Gate de cobertura **≥80%** en statements/branches/functions/lines para frontend **y** backend (el brief lo pide; CI lo hace cumplir).
+
+**E2E (Playwright)** — journey real post-deploy: catálogo → checkout → pay → status (y smoke de API). También la matriz responsive multi-browser (Chromium / Firefox / WebKit + iPhone SE) contra Amplify → [`docs/ux-evidence.md`](docs/ux-evidence.md). Local: `FE_BASE_URL=… API_BASE_URL=… npm run test:e2e`.
+
+**OWASP** — dos capas: (1) **superficie HTTP** — HTTPS + headers (CSP-minded, `X-Content-Type-Options`, etc.), sin `X-Powered-By`, en FE (Amplify `customHeaders`) y API (`applySecuritySurface`); (2) **OWASP ZAP baseline** en el smoke post-deploy, bloqueante. Si ZAP se queja fuerte, no hay “deploy feliz”.
+
+**Análisis estático (SAST)** — **CodeQL** obligatorio en el quality gate (no es decoración). **SonarCloud** está cableado pero **opcional** (solo si hay `SONAR_TOKEN`): misma idea que Vault — listo, sin forzar un SaaS de pago para la prueba. Además: Prettier, ESLint y `npm audit` en CI.
+
+**Stress / carga (Artillery)** — escenario liviano sobre `GET /products` después del deploy (`load/artillery-products.yml`). Da señal de latencia/errores bajo concurrencia suave. Es **opcional y no bloqueante** (`continue-on-error`): no dispara rollback falso (ADR [0013](docs/adr/0013-artillery-stress-optional.md)). Local: `API_BASE_URL=… npm run test:stress`.
+
+**Cómo se encaja en el flujo**
+
+1. **Antes de AWS:** unitarios + coverage + lint/audit + CodeQL (+ Sonar si hay token).  
+2. **Después del deploy:** Playwright E2E + ZAP (bloquean; si fallan → rollback al last-good).  
+3. **Al costado:** Artillery stress (informativo).  
+
+En una frase para el evaluador: *probamos la lógica, el journey, la superficie OWASP, el código estático y un poco de carga — no solo “compiló”.*
 
 ---
 
@@ -159,7 +181,7 @@ Verificar: `npm run ops:observability -- --stage=prod` · guía [`docs/observabi
 
 ## 🔁 Pipelines — cada stage y su razón de ser
 
-Runbooks largos: [`docs/ci-cd.md`](docs/ci-cd.md) · [`docs/deploy.md`](docs/deploy.md). Acá va el “por qué existe cada casillero”.
+Runbooks largos: [`docs/ci-cd.md`](docs/ci-cd.md) · [`docs/deploy.md`](docs/deploy.md). La batería (Jest, Playwright, ZAP, CodeQL, Artillery) está contada arriba en [Calidad…](#-calidad-seguridad-y-carga-sí-lo-corrimos-de-verdad). Acá va el “por qué existe cada casillero”.
 
 ### CI (calidad, fail-closed)
 
@@ -215,7 +237,7 @@ Pusheás `fb-42/lo-que-sea` → nace un mundito: API propia, Dynamo propia, FE A
 ## 📎 Dónde profundizar (si querés)
 
 - Estado + score: [`docs/current-state.md`](docs/current-state.md), [`docs/scorecard.md`](docs/scorecard.md)  
-- Deploy / CI: [`docs/deploy.md`](docs/deploy.md), [`docs/ci-cd.md`](docs/ci-cd.md)  
+- Deploy / CI / calidad: [`docs/deploy.md`](docs/deploy.md), [`docs/ci-cd.md`](docs/ci-cd.md), [`docs/coverage.md`](docs/coverage.md), [`docs/security.md`](docs/security.md)  
 - Observabilidad: [`docs/observability.md`](docs/observability.md)  
 - Vault: [`docs/vault.md`](docs/vault.md)  
 - Specs: [`specs/INDEX.md`](specs/INDEX.md) · ADRs: [`docs/adr/`](docs/adr/)  
@@ -229,7 +251,8 @@ Logger compartido + headers: `@app/shared`. Env de ejemplo: [`.env.example`](.en
 
 1. Abrí el FE y pagá (sandbox).  
 2. Pegale a `/products` desde [Apidog](https://7j6npb6n4w.apidog.io).  
-3. Mirá el dashboard CloudWatch (y ojalá los pantallazos de arriba).  
-4. Ojeá el scorecard — **PASS**.
+3. En Actions: mirá CI (Jest/coverage/CodeQL) y el smoke post-deploy (Playwright + ZAP; Artillery si está on).  
+4. Mirá el dashboard CloudWatch (y ojalá los pantallazos de arriba).  
+5. Ojeá el scorecard — **PASS**.
 
 Si algo no cierra, escribime… o abrí el ADR correspondiente: casi siempre ya pelearon esa decisión por vos. 😄🛍️

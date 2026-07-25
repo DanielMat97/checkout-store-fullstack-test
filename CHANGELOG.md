@@ -7,7 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- **README principal**: tono conversacional para el evaluador (menos tablas); Vault cableado pero **opcional por costo**; slots para pantallazos CloudWatch; cada stage de cada pipeline con su razón de ser.
+- **README principal**: tono conversacional para el evaluador (menos tablas); Vault cableado pero **opcional por costo**; slots para pantallazos CloudWatch; cada stage de cada pipeline con su razón de ser; sección explícita de unitarios / E2E / OWASP+ZAP / SAST (CodeQL+Sonar opc.) / stress Artillery.
 
 ### Added
 
