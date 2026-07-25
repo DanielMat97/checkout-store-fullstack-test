@@ -126,6 +126,7 @@ Prod API deploy also **re-syncs** Amplify prod branch `VITE_API_BASE_URL` to the
 |---|---|
 | `VAULT_ADDR` / `VAULT_ROLE_ID` / `VAULT_SECRET_ID` | **Preferred** — load `PAYMENT_*` from Vault (see [`vault.md`](vault.md)) |
 | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | Deploy credentials (or OIDC later) |
+| `SERVERLESS_ACCESS_KEY` | **Required for SF v4 in CI** — Dashboard → [Access Keys](https://app.serverless.com/settings/accessKeys) (free accounts OK). Alt: `SERVERLESS_LICENSE_KEY` |
 | `PAYMENT_*` | **Legacy fallback** if Vault is not configured |
 
 ### Variables
@@ -152,11 +153,22 @@ Create GitHub Environments:
 ```bash
 export AWS_REGION=us-east-1
 export CORS_ORIGIN=https://your-amplify-url
+# SF v4: serverless login  OR  export SERVERLESS_ACCESS_KEY=…
 # payment secrets…
 npm run build:api
 npx serverless deploy --stage prod
 DYNAMODB_TABLE_NAME=checkout-store-prod DYNAMODB_ENDPOINT= npm run seed
 ```
+
+### Serverless Framework v4 auth (CI)
+
+Desde v4 el CLI **exige** login / access key / license key. En GitHub Actions no hay browser, así que:
+
+1. Creá un Access Key en [app.serverless.com → Settings → Access Keys](https://app.serverless.com/settings/accessKeys) (cuenta free alcanza bajo el umbral de revenue de SF).
+2. Repo → Settings → Secrets → Actions → New: `SERVERLESS_ACCESS_KEY` = ese valor.
+3. Re-corré **Deploy API (prod)** con `mode=full`.
+
+Sin ese secret, el job falla temprano con un mensaje claro (en vez del error críptico de `serverless login`).
 
 ## Scorecard note
 

@@ -36,6 +36,8 @@ permissions:
 env:
   AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
   AMPLIFY_APP_ID: ${{ vars.AMPLIFY_APP_ID }}
+  SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+  SERVERLESS_LICENSE_KEY: ${{ secrets.SERVERLESS_LICENSE_KEY }}
 
 jobs:
   # REQUIRED: full CI must succeed before any feature deploy.
@@ -67,6 +69,14 @@ jobs:
 
       - run: npm ci
       - run: npm run build:api
+
+      - name: Require Serverless Framework v4 auth
+        run: |
+          if [ -z "${SERVERLESS_ACCESS_KEY:-}" ] && [ -z "${SERVERLESS_LICENSE_KEY:-}" ]; then
+            echo "### Missing Serverless auth" >> "$GITHUB_STEP_SUMMARY"
+            echo "Add GitHub secret \`SERVERLESS_ACCESS_KEY\` (Dashboard → Settings → Access Keys) or \`SERVERLESS_LICENSE_KEY\`." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
 
       - name: Resolve stage from ref
         id: meta

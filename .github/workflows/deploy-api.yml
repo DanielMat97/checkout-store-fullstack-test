@@ -57,6 +57,9 @@ env:
   STAGE: ${{ vars.SERVERLESS_STAGE || 'prod' }}
   AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
   FE_BASE_URL: ${{ vars.FE_BASE_URL || 'https://master.dw2i8myh0xumx.amplifyapp.com' }}
+  # Serverless Framework v4 requires auth in CI (no interactive login).
+  SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+  SERVERLESS_LICENSE_KEY: ${{ secrets.SERVERLESS_LICENSE_KEY }}
 
 jobs:
   quality:
@@ -144,6 +147,16 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build:api
+
+      - name: Require Serverless Framework v4 auth
+        run: |
+          if [ -z "${SERVERLESS_ACCESS_KEY:-}" ] && [ -z "${SERVERLESS_LICENSE_KEY:-}" ]; then
+            echo "### Missing Serverless auth" >> "$GITHUB_STEP_SUMMARY"
+            echo "SF v4 needs \`SERVERLESS_ACCESS_KEY\` (Dashboard → Settings → Access Keys) or \`SERVERLESS_LICENSE_KEY\` as a GitHub Actions secret." >> "$GITHUB_STEP_SUMMARY"
+            echo "Docs: https://www.serverless.com/framework/docs/guides/upgrading-v4" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "Serverless auth env present (accessKey=$([ -n "${SERVERLESS_ACCESS_KEY:-}" ] && echo yes || echo no), licenseKey=$([ -n "${SERVERLESS_LICENSE_KEY:-}" ] && echo yes || echo no))"
 
       - name: Load secrets from Vault
         uses: ./.github/actions/load-vault-secrets
