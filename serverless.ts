@@ -179,15 +179,6 @@ const serverlessConfiguration = {
       },
     },
     Outputs: {
-      HttpApiUrl: {
-        Description: 'Single API Gateway URL (Serverless HTTP API)',
-        Value: {
-          'Fn::Sub': 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com',
-        },
-        Export: {
-          Name: 'checkout-api-${sls:stage}-HttpApiUrl',
-        },
-      },
       CheckoutTableName: {
         Description: 'Single-table DynamoDB name',
         Value: { Ref: 'CheckoutTable' },

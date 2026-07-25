@@ -88,6 +88,17 @@ aws amplify delete-branch --app-id "$AMPLIFY_APP_ID" --branch-name 'fb-123/check
 5. Copy the Amplify **App ID** into GitHub Actions variable `AMPLIFY_APP_ID`.
 6. Set GitHub variable `CORS_ORIGIN` to the Amplify production URL (comma-separated OK).
 
+### Live (account `stonestore` / Amplify app `dw2i8myh0xumx`)
+
+| | URL |
+|---|---|
+| FE | https://master.dw2i8myh0xumx.amplifyapp.com |
+| API | https://qo9kbfxew8.execute-api.us-east-1.amazonaws.com |
+
+Smoke: `GET /products` returns seeded catalog (200).
+
+GitHub (`DanielMat97/wompi-test`) variables/secrets for Actions were configured with AWS profile **`stonestore`** (`AWS_*` secrets + `AMPLIFY_APP_ID`, `CORS_ORIGIN`, `AWS_REGION`, `SERVERLESS_STAGE`, `PAYMENT_GATEWAY_MODE=fake`).
+
 Feature branches are created/updated by `deploy-feature.yml` — you do **not** need to pre-create every `fb-*` branch in Amplify.
 
 ## GitHub configuration

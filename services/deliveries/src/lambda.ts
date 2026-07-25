@@ -1,14 +1,19 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import serverlessExpress from '@codegenie/serverless-express';
-import { Callback, Context, Handler } from 'aws-lambda';
+import { Context } from 'aws-lambda';
 import { AppModule } from './app.module';
 import { NestStandardLogger, createLogger, applyGlobalValidation } from '@app/shared';
 
-const serviceName = process.env.SERVICE_NAME ?? 'deliveries';
-let cachedServer: Handler | undefined;
+type AsyncHandler = (
+  event: unknown,
+  context: Context,
+) => Promise<unknown>;
 
-async function bootstrap(): Promise<Handler> {
+const serviceName = process.env.SERVICE_NAME ?? 'deliveries';
+let cachedServer: AsyncHandler | undefined;
+
+async function bootstrap(): Promise<AsyncHandler> {
   const app = await NestFactory.create(AppModule, {
     logger: new NestStandardLogger(serviceName),
   });
@@ -20,18 +25,14 @@ async function bootstrap(): Promise<Handler> {
   });
   await app.init();
   const expressApp = app.getHttpAdapter().getInstance();
-  return serverlessExpress({ app: expressApp });
+  return serverlessExpress({ app: expressApp }) as unknown as AsyncHandler;
 }
 
-export const handler: Handler = async (
-  event: unknown,
-  context: Context,
-  callback: Callback,
-) => {
+export const handler: AsyncHandler = async (event, context) => {
   const logger = createLogger(serviceName);
   if (!cachedServer) {
     logger.info('lambda.cold_start');
     cachedServer = await bootstrap();
   }
-  return cachedServer(event, context, callback);
+  return cachedServer(event, context);
 };

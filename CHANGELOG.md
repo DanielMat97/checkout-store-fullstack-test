@@ -7,6 +7,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Prod live (AWS profile `stonestore`)**: Amplify FE https://master.dw2i8myh0xumx.amplifyapp.com · API https://qo9kbfxew8.execute-api.us-east-1.amazonaws.com. GitHub Actions secrets/vars (`AWS_*`, `AMPLIFY_APP_ID`, `CORS_ORIGIN`, …) configurados vía `gh` + profile `stonestore`.
+
+### Fixed
+
+- Amplify build: removed `AMPLIFY_MONOREPO_APP_ROOT` (error “Monorepo spec without applications”).
+- Lambda Node 24: upgraded `@codegenie/serverless-express@5` + async-only handlers (callback handlers rejected by runtime).
+- Serverless Outputs: dropped custom `HttpApiUrl` that collided with Framework-generated output (invalid CFN Value map).
+
+### Added
+
 - Spec-Driven Development scaffolding: `AGENTS.md`, ADRs 0001–0006, `specs/checkout-payment/` (spec/plan/tasks), `docs/current-state.md`.
 - Cursor rules and skills for locked stack (NestJS, Hexagonal, ROP, DynamoDB/ElectroDB, SF4, Jest >80%).
 - SDD workflow + **living-docs** Cursor rules (CHANGELOG / current-state / OpenAPI must stay in sync with code).

@@ -35,8 +35,10 @@ npm run dev
 
 | Proceso | URL |
 |---|---|
-| **Web (NORA mock UI)** | `http://localhost:5173` |
-| **API Gateway** (`serverless offline`) | `http://localhost:3000` |
+| **Web (local)** | `http://localhost:5173` |
+| **API (local)** | `http://localhost:3000` |
+| **Web (Amplify prod)** | https://master.dw2i8myh0xumx.amplifyapp.com |
+| **API (AWS prod)** | https://qo9kbfxew8.execute-api.us-east-1.amazonaws.com |
 
 Mock checkout: Product → **Pay with credit card** → card/delivery modal → Order summary (backdrop) → Pay → Status → Product (stock updates if approved).  
 Test card: `4111 1111 1111 1111`, future `MM/YY`, CVV `123`. Toggle “Simulate declined payment” on summary.
@@ -53,8 +55,8 @@ Deploy API: `npm run deploy:api` · Guide: [`docs/deploy.md`](docs/deploy.md)
 | `Deploy API (prod)` | API changes on `main` | **CI gate first**, then only changed Lambdas (or full stack); secrets from **Vault** |
 | `Deploy feature (fb-*)` | branch/tag `fb-*` | **CI gate first**, then isolated API stack + Amplify feature branch |
 
-Frontend production hosting: **AWS Amplify** (connect the repo; use root `amplify.yml`).  
-Secrets: [`docs/vault.md`](docs/vault.md) — `npm run vault:up` + AppRole in CI.
+Frontend production hosting: **AWS Amplify** (`AMPLIFY_APP_ID=dw2i8myh0xumx`, branch `master`).  
+Secrets/vars for Actions are set via `gh` from AWS profile `stonestore` — see [`docs/deploy.md`](docs/deploy.md) + [`docs/vault.md`](docs/vault.md).
 
 ## Coverage
 

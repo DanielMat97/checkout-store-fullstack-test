@@ -1,6 +1,6 @@
 # Current state
 
-> Last updated: 2026-07-24 (post `cloud-deploy` automation)
+> Last updated: 2026-07-24 (prod Amplify + API live on AWS `stonestore`)
 
 ## Score (rúbrica brief — modo evaluador estricto)
 
@@ -8,10 +8,10 @@ Ver **`docs/scorecard.md`**.
 
 | | Estricto |
 |---|---|
-| Base | **60 / 100** |
-| Bonus | **31 / 50** |
-| **Total** | **91 / 150** |
-| Aprueba (≥100 base) | **No — REJECT** (#6 deploy URL = 0) |
+| Base | **84 / 100** |
+| Bonus | **32 / 50** |
+| **Total** | **116 / 150** |
+| Aprueba (≥100 base) | **No** (84&lt;100) — URLs públicas OK; falta E2E pago live |
 
 ## Specs (path to 100%)
 
@@ -24,27 +24,29 @@ Ver **`docs/scorecard.md`**.
 | `api-domains` | **done** |
 | `frontend-live-wiring` | **done** |
 | `testing-coverage` | **done** |
-| `cloud-deploy` | **in_progress** (Actions+Amplify; falta URL pública verificada) |
+| `cloud-deploy` | **done** (FE+API URLs públicas) |
 | `secrets-vault` | **done** |
-| `checkout-payment` | ready (cerrar smoke E2E live) |
-| `readme-deliverables` | ready (**next** para URLs/runbook completo) |
+| `checkout-payment` | ready (cerrar smoke E2E live pago) |
+| `readme-deliverables` | **in_progress** (URLs en README) |
 | `security-hardening` | ready |
 | `ux-quality-bar` | ready |
 
-## Deploy automation
+## Deploy (live)
+
+| | |
+|---|---|
+| FE | https://master.dw2i8myh0xumx.amplifyapp.com |
+| API | https://qo9kbfxew8.execute-api.us-east-1.amazonaws.com |
+| Amplify app | `dw2i8myh0xumx` (branch `master`) |
+| AWS profile used | `stonestore` |
+| Stage | `prod` · table `checkout-store` |
 
 - CI: `.github/workflows/ci.yml`
-- Prod API (changed services): `.github/workflows/deploy-api.yml`
-- Feature `fb-*`: `.github/workflows/deploy-feature.yml` + Amplify branch
-- Secrets: HashiCorp Vault — [`docs/vault.md`](vault.md) (`npm run vault:up`)
+- Prod API: `.github/workflows/deploy-api.yml`
+- Feature `fb-*`: `.github/workflows/deploy-feature.yml`
+- Secrets: Vault optional; GH Secrets `AWS_*` from profile `stonestore`
 - Guide: [`docs/deploy.md`](deploy.md) · FE build: `amplify.yml`
 
-## Coverage
+## Runtime note (Node 24)
 
-`npm run test:cov` verde. Detalle: [`docs/coverage.md`](coverage.md).
-
-## Next
-
-1. Configurar secrets/vars GH + Amplify App ID → primer deploy prod → pegar URLs.
-2. `readme-deliverables` + smoke live.
-3. `security-hardening` / `ux-quality-bar`.
+Lambda handlers use `@codegenie/serverless-express@5` **async-only** (Node 24 dropped callback handlers).
