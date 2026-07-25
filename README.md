@@ -1,6 +1,18 @@
-# Checkout Store
+# Checkout Store (NORA)
 
 Mobile-first SPA to purchase a product with card checkout, delivery data, payment result, and stock update.
+
+## Live URLs
+
+| | URL |
+|---|---|
+| **Web (Amplify)** | https://master.dw2i8myh0xumx.amplifyapp.com |
+| **API (AWS HTTP API)** | https://qo9kbfxew8.execute-api.us-east-1.amazonaws.com |
+| **OpenAPI (public)** | https://master.dw2i8myh0xumx.amplifyapp.com/openapi.json |
+| Web (local) | `http://localhost:5173` |
+| API (local) | `http://localhost:3000` |
+
+Smoke: `GET /products` · full pay path: customer → PENDING transaction → pay → stock update.
 
 ## Stack
 
@@ -9,9 +21,10 @@ Mobile-first SPA to purchase a product with card checkout, delivery data, paymen
 | Frontend | React SPA + Redux Toolkit (`apps/web`) |
 | Backend | NestJS microservices (`services/*`) |
 | HTTP entry | **Serverless Framework 4** HTTP API (one API Gateway) |
-| Architecture | Hexagonal + Railway Oriented Programming |
-| DB | DynamoDB + ElectroDB |
+| Architecture | Hexagonal + Railway Oriented Programming (`neverthrow`) |
+| DB | DynamoDB + ElectroDB — [data model](docs/data-model.md) |
 | Tests | Jest (>80% FE and BE) — see [Coverage](#coverage) |
+| Secrets | HashiCorp Vault (CI) / env locally — [vault.md](docs/vault.md) |
 
 ## Monorepo
 
@@ -22,7 +35,9 @@ services/products        # /products/**
 services/customers       # /customers/**
 services/deliveries      # /deliveries/**
 services/transactions    # /transactions/**
-packages/shared          # logger, access-log middleware, headers
+packages/shared          # logger, validation, OWASP headers
+packages/persistence     # ElectroDB single-table
+docs/api/openapi.json    # Apidog / OpenAPI 3 (also served at /openapi.json)
 ```
 
 ## Quick start
@@ -30,33 +45,38 @@ packages/shared          # logger, access-log middleware, headers
 ```bash
 cp .env.example .env
 npm install
-npm run dev
+npm run dynamodb:up    # optional local DynamoDB
+npm run ensure-table && npm run seed
+npm run dev            # API :3000 + web :5173
 ```
 
-| Proceso | URL |
+Checkout: Product → **Pay with credit card** → card/delivery modal → Order summary (backdrop) → Pay → Status → Product (stock updates if approved).  
+Test card (fake mode): `4111 1111 1111 1111`, future `MM/YY`, CVV `123`.  
+Live API: set `VITE_MOCK_MODE=false` and `VITE_API_BASE_URL` to the API URL. Sandbox keys never go in git — see [payment adapter](docs/payment-adapter.md).
+
+Design system: [`docs/design-system.md`](docs/design-system.md)
+
+## API domains
+
+| Prefix | Responsibility |
 |---|---|
-| **Web (local)** | `http://localhost:5173` |
-| **API (local)** | `http://localhost:3000` |
-| **Web (Amplify prod)** | https://master.dw2i8myh0xumx.amplifyapp.com |
-| **API (AWS prod)** | https://qo9kbfxew8.execute-api.us-east-1.amazonaws.com |
+| `/products` | Catalog + stock |
+| `/customers` | Buyer profile |
+| `/deliveries` | Shipping address / fulfillment |
+| `/transactions` | PENDING create + pay |
 
-Mock checkout: Product → **Pay with credit card** → card/delivery modal → Order summary (backdrop) → Pay → Status → Product (stock updates if approved).  
-Test card: `4111 1111 1111 1111`, future `MM/YY`, CVV `123`. Toggle “Simulate declined payment” on summary.
+Import [`docs/api/openapi.json`](docs/api/openapi.json) in Apidog/Postman, or open the [public OpenAPI](https://master.dw2i8myh0xumx.amplifyapp.com/openapi.json).
 
-Design system: [`docs/design-system.md`](docs/design-system.md) · Spec: [`specs/checkout-ui-mock/spec.md`](specs/checkout-ui-mock/spec.md)
-
-Deploy API: `npm run deploy:api` · Guide: [`docs/deploy.md`](docs/deploy.md)
-
-### GitHub Actions
+## Deploy
 
 | Workflow | When | What |
 |---|---|---|
-| `CI` | PR / `main` | validate → prettier → lint → audit → test → coverage (**required before deploy**) |
-| `Deploy API (prod)` | API changes on `main` | **CI gate first**, then only changed Lambdas (or full stack); secrets from **Vault** |
-| `Deploy feature (fb-*)` | branch/tag `fb-*` | **CI gate first**, then isolated API stack + Amplify feature branch |
+| `CI` | PR / `main`/`master` | validate → prettier → lint → audit → test → coverage (**required before deploy**) |
+| `Deploy API (prod)` | API changes | CI gate → Serverless (changed Lambdas or full) |
+| `Deploy feature (fb-*)` | `fb-*` branches | Isolated API stack + Amplify branch |
 
-Frontend production hosting: **AWS Amplify** (`AMPLIFY_APP_ID=dw2i8myh0xumx`, branch `master`).  
-Secrets/vars for Actions are set via `gh` from AWS profile `stonestore` — see [`docs/deploy.md`](docs/deploy.md) + [`docs/vault.md`](docs/vault.md).
+- Amplify app: `dw2i8myh0xumx` (branch `master`) · build: root `amplify.yml`
+- Runbook: [`docs/deploy.md`](docs/deploy.md) · Vault: [`docs/vault.md`](docs/vault.md)
 
 ## Coverage
 
@@ -72,9 +92,9 @@ Full table and caveats: [`docs/coverage.md`](docs/coverage.md).
 
 ## Docs
 
-- Agent workflow: `AGENTS.md`
-- Current status: `docs/current-state.md` (keep in sync while building)
-- Deploy runbook: `docs/deploy.md`
-- Vault secrets: `docs/vault.md`
-- Changelog: `CHANGELOG.md` (update every meaningful change)
-- OpenAPI: `docs/api/openapi.json` (Apidog)
+- Current status: [`docs/current-state.md`](docs/current-state.md)
+- Scorecard (hiring bar): [`docs/scorecard.md`](docs/scorecard.md)
+- Data model: [`docs/data-model.md`](docs/data-model.md)
+- Payment adapter: [`docs/payment-adapter.md`](docs/payment-adapter.md)
+- API smoke: [`docs/api/smoke.md`](docs/api/smoke.md)
+- Changelog: [`CHANGELOG.md`](CHANGELOG.md)

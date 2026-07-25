@@ -1,0 +1,499 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Checkout Store API",
+    "version": "0.3.0",
+    "description": "Single Serverless Framework HTTP API Gateway. Import into Apidog. Pay endpoint returns HTTP 200 with paymentStatus APPROVED|DECLINED|ERROR (declined is not an HTTP error)."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "serverless offline"
+    }
+  ],
+  "tags": [
+    { "name": "products" },
+    { "name": "customers" },
+    { "name": "deliveries" },
+    { "name": "transactions" }
+  ],
+  "paths": {
+    "/products/health": {
+      "get": {
+        "tags": ["products"],
+        "summary": "Health",
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/products": {
+      "get": {
+        "tags": ["products"],
+        "summary": "List products (seed)",
+        "responses": {
+          "200": {
+            "description": "Product list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Product" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{id}": {
+      "get": {
+        "tags": ["products"],
+        "summary": "Get product",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "example": "prod_aura_quiet" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Product" }
+              }
+            }
+          },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/products/{id}/stock": {
+      "get": {
+        "tags": ["products"],
+        "summary": "Get product stock",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stock",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "productId": { "type": "string" },
+                    "stock": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/customers/health": {
+      "get": {
+        "tags": ["customers"],
+        "summary": "Health",
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/customers": {
+      "post": {
+        "tags": ["customers"],
+        "summary": "Create customer",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateCustomer" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Customer" }
+              }
+            }
+          },
+          "400": { "description": "Validation" }
+        }
+      }
+    },
+    "/customers/{id}": {
+      "get": {
+        "tags": ["customers"],
+        "summary": "Get customer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Customer" }
+              }
+            }
+          },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/deliveries/health": {
+      "get": {
+        "tags": ["deliveries"],
+        "summary": "Health",
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/deliveries": {
+      "post": {
+        "tags": ["deliveries"],
+        "summary": "Create delivery",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateDelivery" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Delivery" }
+              }
+            }
+          },
+          "400": { "description": "Validation" }
+        }
+      }
+    },
+    "/deliveries/{id}": {
+      "get": {
+        "tags": ["deliveries"],
+        "summary": "Get delivery",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delivery",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Delivery" }
+              }
+            }
+          },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/transactions/health": {
+      "get": {
+        "tags": ["transactions"],
+        "summary": "Health",
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/transactions": {
+      "post": {
+        "tags": ["transactions"],
+        "summary": "Create PENDING transaction + delivery",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateTransaction" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created PENDING",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CreateTransactionResponse" }
+              }
+            }
+          },
+          "400": { "description": "Validation" },
+          "404": { "description": "Product/customer not found" },
+          "409": { "description": "Insufficient stock" }
+        }
+      }
+    },
+    "/transactions/{id}": {
+      "get": {
+        "tags": ["transactions"],
+        "summary": "Get transaction",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transaction",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Transaction" }
+              }
+            }
+          },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/transactions/{id}/pay": {
+      "post": {
+        "tags": ["transactions"],
+        "summary": "Pay PENDING transaction",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PayTransaction" },
+              "examples": {
+                "approvedCard": {
+                  "summary": "Sandbox/fake happy path",
+                  "value": {
+                    "deliveryId": "del_...",
+                    "card": {
+                      "number": "4242424242424242",
+                      "cvc": "123",
+                      "expMonth": "12",
+                      "expYear": "30",
+                      "cardHolder": "Ada Lovelace"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payment processed (check paymentStatus)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PayTransactionResponse" },
+                "examples": {
+                  "approved": {
+                    "value": {
+                      "paymentStatus": "APPROVED",
+                      "transaction": { "status": "APPROVED" }
+                    }
+                  },
+                  "declined": {
+                    "value": {
+                      "paymentStatus": "DECLINED",
+                      "transaction": { "status": "DECLINED" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Validation" },
+          "404": { "description": "Not found" },
+          "422": { "description": "Invalid state (not PENDING)" },
+          "502": { "description": "Provider failure" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Product": {
+        "type": "object",
+        "required": ["id", "name", "description", "priceMinor", "stock", "imageUrl"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "kicker": { "type": "string" },
+          "description": { "type": "string" },
+          "priceMinor": { "type": "integer" },
+          "stock": { "type": "integer" },
+          "imageUrl": { "type": "string" },
+          "imageAlt": { "type": "string" }
+        }
+      },
+      "CreateCustomer": {
+        "type": "object",
+        "required": ["fullName", "email", "phone"],
+        "properties": {
+          "fullName": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "phone": { "type": "string" }
+        }
+      },
+      "Customer": {
+        "allOf": [
+          { "$ref": "#/components/schemas/CreateCustomer" },
+          {
+            "type": "object",
+            "required": ["id"],
+            "properties": { "id": { "type": "string" } }
+          }
+        ]
+      },
+      "CreateDelivery": {
+        "type": "object",
+        "required": [
+          "transactionId",
+          "customerId",
+          "address",
+          "city",
+          "region",
+          "feeMinor"
+        ],
+        "properties": {
+          "transactionId": { "type": "string" },
+          "customerId": { "type": "string" },
+          "address": { "type": "string" },
+          "city": { "type": "string" },
+          "region": { "type": "string" },
+          "feeMinor": { "type": "integer" }
+        }
+      },
+      "Delivery": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "transactionId": { "type": "string" },
+          "customerId": { "type": "string" },
+          "address": { "type": "string" },
+          "city": { "type": "string" },
+          "region": { "type": "string" },
+          "feeMinor": { "type": "integer" },
+          "status": {
+            "type": "string",
+            "enum": ["PENDING", "FULFILLABLE", "FULFILLED"]
+          }
+        }
+      },
+      "CreateTransaction": {
+        "type": "object",
+        "required": [
+          "productId",
+          "customerId",
+          "productAmount",
+          "baseFee",
+          "deliveryFee",
+          "delivery"
+        ],
+        "properties": {
+          "productId": { "type": "string" },
+          "customerId": { "type": "string" },
+          "productAmount": { "type": "integer" },
+          "baseFee": { "type": "integer" },
+          "deliveryFee": { "type": "integer" },
+          "delivery": {
+            "type": "object",
+            "required": ["address", "city", "region"],
+            "properties": {
+              "address": { "type": "string" },
+              "city": { "type": "string" },
+              "region": { "type": "string" }
+            }
+          }
+        }
+      },
+      "Transaction": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["PENDING", "APPROVED", "DECLINED", "ERROR"]
+          },
+          "productId": { "type": "string" },
+          "customerId": { "type": "string" },
+          "productAmount": { "type": "integer" },
+          "baseFee": { "type": "integer" },
+          "deliveryFee": { "type": "integer" },
+          "total": { "type": "integer" },
+          "providerRef": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CreateTransactionResponse": {
+        "type": "object",
+        "properties": {
+          "transaction": { "$ref": "#/components/schemas/Transaction" },
+          "deliveryId": { "type": "string" }
+        }
+      },
+      "PayTransaction": {
+        "type": "object",
+        "required": ["deliveryId", "card"],
+        "properties": {
+          "deliveryId": { "type": "string" },
+          "card": {
+            "type": "object",
+            "required": ["number", "cvc", "expMonth", "expYear", "cardHolder"],
+            "properties": {
+              "number": { "type": "string" },
+              "cvc": { "type": "string" },
+              "expMonth": { "type": "string" },
+              "expYear": { "type": "string" },
+              "cardHolder": { "type": "string" }
+            }
+          }
+        }
+      },
+      "PayTransactionResponse": {
+        "type": "object",
+        "properties": {
+          "paymentStatus": {
+            "type": "string",
+            "enum": ["APPROVED", "DECLINED", "ERROR"]
+          },
+          "transaction": { "$ref": "#/components/schemas/Transaction" }
+        }
+      }
+    }
+  }
+}

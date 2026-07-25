@@ -3,5 +3,7 @@ export * from './logging/http-request';
 export * from './logging/nest-logger';
 export * from './http/access-log.middleware';
 export * from './http/validation';
+export * from './http/security-surface';
 export * from './security/headers';
 export * from './types/domain';
+

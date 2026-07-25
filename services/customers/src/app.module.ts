@@ -12,6 +12,6 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
     consumer
       .apply(SecurityHeadersMiddleware, AccessLogMiddleware('customers'))
-      .forRoutes('*');
+      .forRoutes('{*path}');
   }
 }

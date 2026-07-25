@@ -3,7 +3,12 @@ import { NestFactory } from '@nestjs/core';
 import serverlessExpress from '@codegenie/serverless-express';
 import { Context } from 'aws-lambda';
 import { AppModule } from './app.module';
-import { NestStandardLogger, createLogger, applyGlobalValidation } from '@app/shared';
+import {
+  NestStandardLogger,
+  createLogger,
+  applyGlobalValidation,
+  applySecuritySurface,
+} from '@app/shared';
 
 type AsyncHandler = (
   event: unknown,
@@ -19,6 +24,7 @@ async function bootstrap(): Promise<AsyncHandler> {
   });
   const prefix = process.env.SERVICE_PREFIX ?? 'transactions';
   app.setGlobalPrefix(prefix);
+  applySecuritySurface(app);
   applyGlobalValidation(app);
   app.enableCors({
     origin: process.env.CORS_ORIGIN?.split(',') ?? true,
