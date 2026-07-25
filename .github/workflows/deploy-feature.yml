@@ -299,7 +299,7 @@ jobs:
           CI: true
         run: npx playwright test e2e/api.smoke.spec.ts
       - name: OWASP ZAP baseline (API)
-        uses: zaproxy/action-baseline@v0.14.0
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: ${{ needs.deploy.outputs.api_url }}/products
           fail_action: true

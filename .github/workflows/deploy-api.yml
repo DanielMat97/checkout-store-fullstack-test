@@ -314,7 +314,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: OWASP ZAP baseline (API)
-        uses: zaproxy/action-baseline@v0.14.0
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: ${{ needs.deploy.outputs.api_url }}/products
           fail_action: true
@@ -324,7 +324,7 @@ jobs:
           artifact_name: zap-scan-api-prod
 
       - name: OWASP ZAP baseline (FE)
-        uses: zaproxy/action-baseline@v0.14.0
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: ${{ env.FE_BASE_URL }}
           fail_action: true
