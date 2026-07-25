@@ -1,6 +1,6 @@
 # Coverage report
 
-> Generated: **2026-07-25**. Metric gate: **statements, branches, functions, lines ≥80%** on every Nest service **and** `@app/web`.  
+> Generated: **2026-07-24**. Metric gate: **statements, branches, functions, lines ≥80%** on every Nest service, `@app/web`, `@app/shared`, and `@app/persistence`.  
 > Command: `npm run test:cov` (all workspaces).
 
 ## Snapshot (frontend)
@@ -22,12 +22,12 @@ FE collects API, checkout/orders hooks + pure modules, mocks, store, format. Pag
 
 ## Snapshot (shared packages)
 
-| Workspace | Lines | Statements | Branches | Functions |
+| Workspace | Statements | Branches | Functions | Lines |
 |---|---:|---:|---:|---:|
-| `@app/shared` | **97.5** | 96.59 | 84.84 | 100 |
-| `@app/persistence` | **96.91** | 96.93 | 84.61 | 100 |
+| `@app/shared` | **100** | **96.55** | **100** | **100** |
+| `@app/persistence` | **100** | **95.74** | **100** | **100** |
 
-**Gates:** Nest + web enforce `{ branches: 80, functions: 80, lines: 80, statements: 80 }`.
+**Gates:** Nest + web + shared packages enforce `{ branches: 80, functions: 80, lines: 80, statements: 80 }`.
 
 ## Notes
 
@@ -39,6 +39,7 @@ FE collects API, checkout/orders hooks + pure modules, mocks, store, format. Pag
 
 ```bash
 npm run test:cov -w @app/web
+npm run test:cov -w @app/shared -w @app/persistence
 npm run test:cov -w @app/products -w @app/customers -w @app/deliveries -w @app/transactions
 npm run ci:backend-on-fe
 ```
