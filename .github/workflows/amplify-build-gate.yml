@@ -27,13 +27,15 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
+  pull-requests: write
 
 env:
   AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
   AMPLIFY_APP_ID: ${{ vars.AMPLIFY_APP_ID }}
   AMPLIFY_BRANCH: ${{ inputs.branch || vars.AMPLIFY_PROD_BRANCH || 'master' }}
+  FE_BASE_URL: ${{ vars.FE_BASE_URL || 'https://master.dw2i8myh0xumx.amplifyapp.com' }}
 
 jobs:
   detect:
@@ -70,6 +72,8 @@ jobs:
     if: ${{ needs.detect.outputs.fe_amplify == 'true' }}
     timeout-minutes: 25
     environment: production
+    outputs:
+      amplify_url: ${{ steps.fe.outputs.amplify_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -103,3 +107,35 @@ jobs:
           echo "- Branch: \`$AMPLIFY_BRANCH\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Commit: \`$GITHUB_SHA\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Result: **SUCCEED**" >> "$GITHUB_STEP_SUMMARY"
+      - name: Resolve FE URL
+        id: fe
+        run: |
+          DOMAIN=$(aws amplify get-app --app-id "$AMPLIFY_APP_ID" --query 'app.defaultDomain' --output text)
+          HOST=$(echo "$AMPLIFY_BRANCH" | sed 's|/|-|g')
+          echo "amplify_url=https://${HOST}.${DOMAIN}" >> "$GITHUB_OUTPUT"
+          echo "FE: https://${HOST}.${DOMAIN}" >> "$GITHUB_STEP_SUMMARY"
+
+  publish-urls:
+    name: Comment prod FE URL
+    runs-on: ubuntu-latest
+    needs: amplify-build
+    if: ${{ always() && needs.amplify-build.result == 'success' }}
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Post commit comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          COMMENT_KIND: prod
+          FE_URL: ${{ needs.amplify-build.outputs.amplify_url || env.FE_BASE_URL }}
+          AMPLIFY_BRANCH: ${{ env.AMPLIFY_BRANCH }}
+          GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: node scripts/ci/post-env-urls-comment.cjs

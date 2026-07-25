@@ -1,6 +1,6 @@
 # Current state
 
-> Last updated: **2026-07-25** (OpenAPI v1.0.0 complete responses; Amplify build gate; score **150/150**)
+> Last updated: **2026-07-25** (feature URL comments + Amplify env sync + destroy button; OpenAPI 1.0.0; score **150/150**)
 
 ## Score (rúbrica brief — modo evaluador estricto)
 
@@ -38,6 +38,7 @@ Ver **`docs/scorecard.md`**.
 | `observability-cloudwatch` | **done** (ADR 0014 — logs + CW dashboard/alarms/IAM viewer) |
 | `amplify-build-gate` | **done** (ADR 0015 — Amplify SUCCEED required in FE deploy) |
 | `openapi-complete-responses` | **done** (OpenAPI 1.0.0 — all endpoint success/error bodies) |
+| `feature-env-urls-teardown` | **done** (ADR 0016 — URL comments, Amplify VITE sync, Destroy workflow) |
 
 ## Deploy (live)
 

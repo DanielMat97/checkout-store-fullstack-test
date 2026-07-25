@@ -44,7 +44,8 @@
     "seed": "npm run seed -w @app/persistence",
     "ops:observability": "node scripts/ops/describe-observability.cjs",
     "ci:amplify-wait": "node scripts/ci/wait-amplify-job.cjs",
-    "test:amplify-wait": "node scripts/ci/wait-amplify-job.spec.cjs"
+    "test:amplify-wait": "node scripts/ci/wait-amplify-job.spec.cjs",
+    "test:feature-env": "node scripts/ci/feature-env-urls.spec.cjs"
   },
   "devDependencies": {
     "@serverless/typescript": "^3.38.0",

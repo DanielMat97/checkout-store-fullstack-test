@@ -66,10 +66,19 @@ Creates a **fully isolated** environment:
 1. Serverless stage slug from ref (`fb-123-checkout-fees`)
 2. DynamoDB table `checkout-store-<stage>`
 3. Fresh API URL + seed
-4. Amplify branch with `VITE_MOCK_MODE=false` and `VITE_API_BASE_URL=<feature API>`
+4. Amplify branch with merged env (`VITE_MOCK_MODE=false`, `VITE_API_BASE_URL=<feature API>`, fees) via `amplify-sync-branch-env.cjs`
 5. Starts an Amplify RELEASE job
+6. Sticky **PR/commit comment** with FE + API URLs + link to **Destroy feature stack**
 
-Tear down later:
+### Tear down (Actions button)
+
+1. GitHub → **Actions** → **Destroy feature stack** → **Run workflow**
+2. `ref_name`: e.g. `fb-123/checkout-fees`
+3. `confirm`: exactly `destroy`
+
+This runs `serverless remove --stage <slug>` and `aws amplify delete-branch`. Refuses non-`fb-*` and protected stage names.
+
+Manual CLI (equivalent):
 
 ```bash
 npx serverless remove --stage fb-123-checkout-fees
@@ -103,12 +112,9 @@ Feature branches are created/updated by `deploy-feature.yml` — you do **not** 
 
 ### Amplify build gate (fail-closed)
 
-After kicking a RELEASE (feature) or on FE path pushes to `main`/`master`, GitHub Actions waits until Amplify reports **`SUCCEED`**. `FAILED` / `CANCELLED` / timeout fail the stage. See [`docs/ci-cd.md`](ci-cd.md) and ADR 0015.
+After kicking a RELEASE (feature) or on FE path pushes to `main`/`master`, GitHub Actions waits until Amplify reports **`SUCCEED`**. `FAILED` / `CANCELLED` / timeout fail the stage. See [`docs/ci-cd.md`](ci-cd.md) and ADR 0015 / **0016** (URL comments + destroy).
 
-```bash
-npm run test:amplify-wait
-AMPLIFY_APP_ID="$AMPLIFY_APP_ID" AMPLIFY_BRANCH=master GITHUB_SHA="$(git rev-parse HEAD)" npm run ci:amplify-wait
-```
+Prod API deploy also **re-syncs** Amplify prod branch `VITE_API_BASE_URL` to the live HttpApi URL and comments the FE URL on the commit.
 
 ## GitHub configuration
 

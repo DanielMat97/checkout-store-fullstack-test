@@ -1,0 +1,107 @@
+name: Destroy feature stack
+
+# Manual button (Actions → Run workflow) to tear down an fb-* environment:
+# Serverless stage (API + DynamoDB + SQS) + Amplify branch.
+# refs specs/feature-env-urls-teardown/spec.md · ADR 0016
+on:
+  workflow_dispatch:
+    inputs:
+      ref_name:
+        description: 'Feature ref / Amplify branch (e.g. fb-42/checkout-fees)'
+        required: true
+        type: string
+      confirm:
+        description: 'Type destroy to confirm irreversible teardown'
+        required: true
+        type: string
+
+concurrency:
+  group: destroy-feature-${{ inputs.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+  AMPLIFY_APP_ID: ${{ vars.AMPLIFY_APP_ID }}
+
+jobs:
+  destroy:
+    name: Remove SF stage + Amplify branch
+    runs-on: ubuntu-latest
+    environment: feature
+    steps:
+      - name: Confirm destroy
+        run: |
+          if [ "${{ inputs.confirm }}" != "destroy" ]; then
+            echo "Refusing: confirm must be exactly 'destroy' (got '${{ inputs.confirm }}')"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+
+      - name: Resolve stage from ref
+        id: meta
+        run: |
+          REF='${{ inputs.ref_name }}'
+          META=$(node scripts/ci/stage-from-ref.cjs "$REF")
+          echo "meta=$META"
+          STAGE=$(echo "$META" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).stage))")
+          BRANCH=$(echo "$META" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).amplifyBranch))")
+          IS_FB=$(echo "$META" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).isFeature))")
+          if [ "$IS_FB" != "true" ]; then
+            echo "Ref '$REF' is not an fb-* feature ref — refusing to destroy"
+            exit 1
+          fi
+          case "$STAGE" in
+            prod|production|dev|master|main)
+              echo "Refusing to destroy protected stage '$STAGE'"
+              exit 1
+              ;;
+          esac
+          echo "stage=$STAGE" >> "$GITHUB_OUTPUT"
+          echo "amplify_branch=$BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Serverless remove
+        run: |
+          set -euo pipefail
+          STAGE='${{ steps.meta.outputs.stage }}'
+          echo "Removing checkout-api-$STAGE …"
+          npx serverless remove --stage "$STAGE" --verbose || {
+            echo "serverless remove returned non-zero — stack may already be gone"
+          }
+
+      - name: Delete Amplify branch
+        if: env.AMPLIFY_APP_ID != ''
+        run: |
+          set -euo pipefail
+          BRANCH='${{ steps.meta.outputs.amplify_branch }}'
+          APP="$AMPLIFY_APP_ID"
+          if aws amplify get-branch --app-id "$APP" --branch-name "$BRANCH" >/dev/null 2>&1; then
+            aws amplify delete-branch --app-id "$APP" --branch-name "$BRANCH"
+            echo "Deleted Amplify branch $BRANCH"
+          else
+            echo "Amplify branch $BRANCH not found — skip"
+          fi
+
+      - name: Summary
+        run: |
+          {
+            echo "### Destroyed feature environment"
+            echo "- Stage: \`${{ steps.meta.outputs.stage }}\`"
+            echo "- Amplify branch: \`${{ steps.meta.outputs.amplify_branch }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -47,10 +47,11 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
   actions: read
   security-events: write
+  pull-requests: write
 
 env:
   STAGE: ${{ vars.SERVERLESS_STAGE || 'prod' }}
@@ -133,6 +134,7 @@ jobs:
     environment: production
     outputs:
       api_url: ${{ steps.url.outputs.api_url }}
+      amplify_url: ${{ steps.amplify_sync.outputs.amplify_url }}
       deployed: ${{ steps.mark.outputs.deployed }}
     steps:
       - uses: actions/checkout@v4
@@ -200,6 +202,24 @@ jobs:
           echo "- URL: \`$URL\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Mode: \`${{ needs.detect.outputs.mode }}\`" >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Sync Amplify prod branch env → this API
+        id: amplify_sync
+        if: ${{ vars.AMPLIFY_APP_ID != '' }}
+        env:
+          AMPLIFY_APP_ID: ${{ vars.AMPLIFY_APP_ID }}
+          AMPLIFY_BRANCH: ${{ vars.AMPLIFY_PROD_BRANCH || 'master' }}
+        run: |
+          set -euo pipefail
+          RESULT=$(node scripts/ci/amplify-sync-branch-env.cjs \
+            --app-id "$AMPLIFY_APP_ID" \
+            --branch "$AMPLIFY_BRANCH" \
+            --api-url "${{ steps.url.outputs.api_url }}" \
+            --start-job | tail -n1)
+          echo "amplify_sync=$RESULT"
+          FE=$(echo "$RESULT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).amplifyUrl||''))")
+          echo "amplify_url=$FE" >> "$GITHUB_OUTPUT"
+          echo "FE: $FE" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Seed catalog (full deploy only)
         if: needs.detect.outputs.mode == 'full'
         env:
@@ -211,6 +231,33 @@ jobs:
 
       - id: mark
         run: echo "deployed=true" >> "$GITHUB_OUTPUT"
+
+  publish-urls:
+    name: Comment prod FE/API URLs
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: ${{ always() && needs.deploy.result == 'success' && needs.deploy.outputs.deployed == 'true' }}
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Post commit comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          COMMENT_KIND: prod
+          FE_URL: ${{ needs.deploy.outputs.amplify_url || vars.FE_BASE_URL || 'https://master.dw2i8myh0xumx.amplifyapp.com' }}
+          API_URL: ${{ needs.deploy.outputs.api_url }}
+          STAGE: ${{ env.STAGE }}
+          AMPLIFY_BRANCH: ${{ vars.AMPLIFY_PROD_BRANCH || 'master' }}
+          GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: node scripts/ci/post-env-urls-comment.cjs
 
   smoke:
     name: Post-deploy E2E + ZAP

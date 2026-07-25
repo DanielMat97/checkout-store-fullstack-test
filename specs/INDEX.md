@@ -28,11 +28,12 @@
 | **Observability CW** | `observability-cloudwatch/` | **done** | Logs + dashboards + alarms + IAM (ADR 0014) |
 | **Amplify build gate** | `amplify-build-gate/` | **done** | FE Amplify SUCCEED fail-closed (ADR 0015) |
 | **OpenAPI complete** | `openapi-complete-responses/` | **done** | All endpoint responses + error schemas |
+| **Feature URLs + teardown** | `feature-env-urls-teardown/` | **done** | PR/commit URLs + Amplify VITE sync + Destroy button (ADR 0016) |
 
 ## Orden reciente
 
 ```
-… → amplify-build-gate → openapi-complete-responses
+… → openapi-complete-responses → feature-env-urls-teardown
 ```
 
 ## Reglas

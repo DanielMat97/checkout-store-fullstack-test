@@ -56,13 +56,13 @@ Usa tarjeta de prueba del flujo NORA; no commits con PAN reales. Stress no llama
 
 ## Feature (`fb-*`)
 
-Tras deploy aislado + Amplify: job **Amplify build (required)** espera `SUCCEED` del RELEASE; luego smoke + Artillery opcional; rollback best-effort solo desde smoke.
+Tras deploy aislado: Amplify env apunta al API del stage; comentario sticky en PR/commit con URLs; job Amplify SUCCEED; smoke. Teardown: workflow **Destroy feature stack** (`confirm=destroy`). ADR 0016.
 
 ```bash
-# Local helpers
 npm run test:amplify-wait
+npm run test:feature-env
 AMPLIFY_APP_ID=dxxx AMPLIFY_BRANCH=master GITHUB_SHA=<sha> npm run ci:amplify-wait
 ```
 
-Spec: [`specs/amplify-build-gate/`](../specs/amplify-build-gate/spec.md) · ADR [`0015`](adr/0015-amplify-build-gate.md).
+Spec: [`specs/amplify-build-gate/`](../specs/amplify-build-gate/spec.md), [`specs/feature-env-urls-teardown/`](../specs/feature-env-urls-teardown/spec.md).
 

@@ -27,10 +27,11 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
   pull-requests: write
   actions: read
+  deployments: write
 
 env:
   AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
@@ -155,44 +156,24 @@ jobs:
           AWS_REGION: ${{ env.AWS_REGION }}
         run: npm run seed
 
-      - name: Ensure Amplify feature branch + env
+      - name: Ensure Amplify feature branch + env (point FE at this API)
         id: amplify
         if: env.AMPLIFY_APP_ID != ''
         run: |
           set -euo pipefail
           BRANCH='${{ steps.meta.outputs.amplify_branch }}'
-          APP="$AMPLIFY_APP_ID"
           API_URL='${{ steps.api.outputs.api_url }}'
-
-          if aws amplify get-branch --app-id "$APP" --branch-name "$BRANCH" >/dev/null 2>&1; then
-            echo "Branch exists — updating env vars"
-            aws amplify update-branch \
-              --app-id "$APP" \
-              --branch-name "$BRANCH" \
-              --environment-variables \
-                "VITE_MOCK_MODE=false,VITE_API_BASE_URL=${API_URL},VITE_BASE_FEE=1500,VITE_DELIVERY_FEE=5000" \
-              --enable-auto-build
-          else
-            echo "Creating Amplify branch $BRANCH"
-            aws amplify create-branch \
-              --app-id "$APP" \
-              --branch-name "$BRANCH" \
-              --framework 'Web' \
-              --stage 'DEVELOPMENT' \
-              --enable-auto-build \
-              --environment-variables \
-                "VITE_MOCK_MODE=false,VITE_API_BASE_URL=${API_URL},VITE_BASE_FEE=1500,VITE_DELIVERY_FEE=5000"
-          fi
-
-          JOB=$(aws amplify start-job --app-id "$APP" --branch-name "$BRANCH" --job-type RELEASE --query 'jobSummary.jobId' --output text)
-          echo "Started Amplify job: $JOB"
+          RESULT=$(node scripts/ci/amplify-sync-branch-env.cjs \
+            --app-id "$AMPLIFY_APP_ID" \
+            --branch "$BRANCH" \
+            --api-url "$API_URL" \
+            --start-job | tail -n1)
+          echo "amplify_sync=$RESULT"
+          FE_URL=$(echo "$RESULT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).amplifyUrl||''))")
+          JOB=$(echo "$RESULT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).jobId||''))")
+          echo "amplify_url=$FE_URL" >> "$GITHUB_OUTPUT"
           echo "amplify_job_id=$JOB" >> "$GITHUB_OUTPUT"
           echo "amplify_gated=true" >> "$GITHUB_OUTPUT"
-
-          DOMAIN=$(aws amplify get-app --app-id "$APP" --query 'app.defaultDomain' --output text)
-          HOST=$(echo "$BRANCH" | sed 's|/|-|g')
-          FE_URL="https://${HOST}.${DOMAIN}"
-          echo "amplify_url=$FE_URL" >> "$GITHUB_OUTPUT"
 
       - name: Summary
         run: |
@@ -204,11 +185,35 @@ jobs:
             echo "- Amplify job: \`${{ steps.amplify.outputs.amplify_job_id || 'n/a' }}\`"
             echo "- FE: \`${{ steps.amplify.outputs.amplify_url || steps.cors.outputs.amplify_url || 'configure AMPLIFY_APP_ID' }}\`"
             echo ""
-            echo "Tear down API later:"
-            echo "\`\`\`"
-            echo "npx serverless remove --stage ${{ steps.meta.outputs.stage }}"
-            echo "\`\`\`"
+            echo "Tear down: Actions → **Destroy feature stack** (confirm \`destroy\`)."
           } >> "$GITHUB_STEP_SUMMARY"
+
+  publish-urls:
+    name: Comment FE/API URLs
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: ${{ always() && needs.deploy.result == 'success' }}
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Post sticky PR / commit comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          COMMENT_KIND: feature
+          FE_URL: ${{ needs.deploy.outputs.amplify_url }}
+          API_URL: ${{ needs.deploy.outputs.api_url }}
+          STAGE: ${{ needs.deploy.outputs.stage }}
+          AMPLIFY_BRANCH: ${{ needs.deploy.outputs.amplify_branch }}
+          GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: node scripts/ci/post-env-urls-comment.cjs
 
   amplify-build:
     name: Amplify build (required)
