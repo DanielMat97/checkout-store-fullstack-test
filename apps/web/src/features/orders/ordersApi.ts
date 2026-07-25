@@ -1,4 +1,9 @@
-import { fetchDelivery, listTransactions, markDeliveryFulfilled, restoreTransaction } from '../../api/checkout';
+import {
+  fetchDelivery,
+  listTransactions,
+  markDeliveryFulfilled,
+  restoreTransaction,
+} from '../../api/checkout';
 import { fetchProduct } from '../../api/products';
 import type { Delivery, Transaction } from '../../api/types';
 import { isMockMode } from '../../mocks/checkoutService';

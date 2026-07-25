@@ -1,4 +1,7 @@
-import type { OrderEventsPublisher, PaymentApprovedEvent } from '../../../ports/order-events.port';
+import type {
+  OrderEventsPublisher,
+  PaymentApprovedEvent,
+} from '../../../ports/order-events.port';
 import { SqsOrderEventsPublisher } from './sqs-order-events.publisher';
 
 describe('SqsOrderEventsPublisher', () => {

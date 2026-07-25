@@ -4,7 +4,10 @@ import type { TransactionRepositoryPort } from '@app/persistence';
 import type { DomainError } from '../domain/errors';
 import type { DeliveryWriterPort } from '../ports/cross-domain.ports';
 import type { ProductReaderPort } from '../ports/product-reader.port';
-import type { PaymentApprovedEvent, PaymentApprovedEffects } from '../ports/order-events.port';
+import type {
+  PaymentApprovedEvent,
+  PaymentApprovedEffects,
+} from '../ports/order-events.port';
 import {
   DELIVERY_WRITER,
   PRODUCT_READER,

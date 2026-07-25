@@ -22,9 +22,7 @@ describe('ops checkout API clients', () => {
     await expect(listTransactions({ status: 'APPROVED', limit: 10 })).resolves.toEqual([
       { id: 'tx_1', status: 'APPROVED' },
     ]);
-    expect(String((fetch as jest.Mock).mock.calls[0][0])).toContain(
-      'status=APPROVED',
-    );
+    expect(String((fetch as jest.Mock).mock.calls[0][0])).toContain('status=APPROVED');
   });
 
   it('restores transaction stock', async () => {

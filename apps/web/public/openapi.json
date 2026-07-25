@@ -28,9 +28,7 @@
   "paths": {
     "/products/health": {
       "get": {
-        "tags": [
-          "products"
-        ],
+        "tags": ["products"],
         "summary": "Health",
         "responses": {
           "200": {
@@ -41,9 +39,7 @@
     },
     "/products": {
       "get": {
-        "tags": [
-          "products"
-        ],
+        "tags": ["products"],
         "summary": "List products (seed)",
         "responses": {
           "200": {
@@ -69,9 +65,7 @@
     },
     "/products/{id}": {
       "get": {
-        "tags": [
-          "products"
-        ],
+        "tags": ["products"],
         "summary": "Get product",
         "parameters": [
           {
@@ -103,9 +97,7 @@
     },
     "/products/{id}/stock": {
       "get": {
-        "tags": [
-          "products"
-        ],
+        "tags": ["products"],
         "summary": "Get product stock",
         "parameters": [
           {
@@ -144,9 +136,7 @@
     },
     "/customers/health": {
       "get": {
-        "tags": [
-          "customers"
-        ],
+        "tags": ["customers"],
         "summary": "Health",
         "responses": {
           "200": {
@@ -157,9 +147,7 @@
     },
     "/customers": {
       "post": {
-        "tags": [
-          "customers"
-        ],
+        "tags": ["customers"],
         "summary": "Create customer",
         "requestBody": {
           "required": true,
@@ -190,9 +178,7 @@
     },
     "/customers/{id}": {
       "get": {
-        "tags": [
-          "customers"
-        ],
+        "tags": ["customers"],
         "summary": "Get customer",
         "parameters": [
           {
@@ -223,9 +209,7 @@
     },
     "/deliveries/health": {
       "get": {
-        "tags": [
-          "deliveries"
-        ],
+        "tags": ["deliveries"],
         "summary": "Health",
         "responses": {
           "200": {
@@ -236,9 +220,7 @@
     },
     "/deliveries": {
       "post": {
-        "tags": [
-          "deliveries"
-        ],
+        "tags": ["deliveries"],
         "summary": "Create delivery",
         "requestBody": {
           "required": true,
@@ -269,9 +251,7 @@
     },
     "/deliveries/{id}": {
       "get": {
-        "tags": [
-          "deliveries"
-        ],
+        "tags": ["deliveries"],
         "summary": "Get delivery",
         "parameters": [
           {
@@ -300,9 +280,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "deliveries"
-        ],
+        "tags": ["deliveries"],
         "summary": "Update delivery status (FULFILLABLE → FULFILLED)",
         "parameters": [
           {
@@ -349,9 +327,7 @@
     },
     "/transactions/health": {
       "get": {
-        "tags": [
-          "transactions"
-        ],
+        "tags": ["transactions"],
         "summary": "Health",
         "responses": {
           "200": {
@@ -362,9 +338,7 @@
     },
     "/transactions": {
       "get": {
-        "tags": [
-          "transactions"
-        ],
+        "tags": ["transactions"],
         "summary": "List transactions (ops console)",
         "parameters": [
           {
@@ -373,13 +347,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": [
-                "PENDING",
-                "APPROVED",
-                "DECLINED",
-                "ERROR",
-                "REFUNDED"
-              ]
+              "enum": ["PENDING", "APPROVED", "DECLINED", "ERROR", "REFUNDED"]
             }
           },
           {
@@ -406,9 +374,7 @@
         }
       },
       "post": {
-        "tags": [
-          "transactions"
-        ],
+        "tags": ["transactions"],
         "summary": "Create PENDING transaction + delivery",
         "requestBody": {
           "required": true,
@@ -445,9 +411,7 @@
     },
     "/transactions/{id}": {
       "get": {
-        "tags": [
-          "transactions"
-        ],
+        "tags": ["transactions"],
         "summary": "Get transaction",
         "parameters": [
           {
@@ -478,9 +442,7 @@
     },
     "/transactions/{id}/pay": {
       "post": {
-        "tags": [
-          "transactions"
-        ],
+        "tags": ["transactions"],
         "summary": "Pay PENDING transaction",
         "parameters": [
           {
@@ -563,9 +525,7 @@
     },
     "/transactions/{id}/restore": {
       "post": {
-        "tags": [
-          "transactions"
-        ],
+        "tags": ["transactions"],
         "summary": "Ops: restore stock, cancel delivery, mark REFUNDED",
         "parameters": [
           {
@@ -602,14 +562,7 @@
     "schemas": {
       "Product": {
         "type": "object",
-        "required": [
-          "id",
-          "name",
-          "description",
-          "priceMinor",
-          "stock",
-          "imageUrl"
-        ],
+        "required": ["id", "name", "description", "priceMinor", "stock", "imageUrl"],
         "properties": {
           "id": {
             "type": "string"
@@ -639,11 +592,7 @@
       },
       "CreateCustomer": {
         "type": "object",
-        "required": [
-          "fullName",
-          "email",
-          "phone"
-        ],
+        "required": ["fullName", "email", "phone"],
         "properties": {
           "fullName": {
             "type": "string"
@@ -664,9 +613,7 @@
           },
           {
             "type": "object",
-            "required": [
-              "id"
-            ],
+            "required": ["id"],
             "properties": {
               "id": {
                 "type": "string"
@@ -732,12 +679,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "PENDING",
-              "FULFILLABLE",
-              "FULFILLED",
-              "CANCELLED"
-            ]
+            "enum": ["PENDING", "FULFILLABLE", "FULFILLED", "CANCELLED"]
           }
         }
       },
@@ -769,11 +711,7 @@
           },
           "delivery": {
             "type": "object",
-            "required": [
-              "address",
-              "city",
-              "region"
-            ],
+            "required": ["address", "city", "region"],
             "properties": {
               "address": {
                 "type": "string"
@@ -796,13 +734,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "PENDING",
-              "APPROVED",
-              "DECLINED",
-              "ERROR",
-              "REFUNDED"
-            ]
+            "enum": ["PENDING", "APPROVED", "DECLINED", "ERROR", "REFUNDED"]
           },
           "productId": {
             "type": "string"
@@ -854,23 +786,14 @@
       },
       "PayTransaction": {
         "type": "object",
-        "required": [
-          "deliveryId",
-          "card"
-        ],
+        "required": ["deliveryId", "card"],
         "properties": {
           "deliveryId": {
             "type": "string"
           },
           "card": {
             "type": "object",
-            "required": [
-              "number",
-              "cvc",
-              "expMonth",
-              "expYear",
-              "cardHolder"
-            ],
+            "required": ["number", "cvc", "expMonth", "expYear", "cardHolder"],
             "properties": {
               "number": {
                 "type": "string"
@@ -896,11 +819,7 @@
         "properties": {
           "paymentStatus": {
             "type": "string",
-            "enum": [
-              "APPROVED",
-              "DECLINED",
-              "ERROR"
-            ]
+            "enum": ["APPROVED", "DECLINED", "ERROR"]
           },
           "transaction": {
             "$ref": "#/components/schemas/Transaction"
@@ -909,16 +828,11 @@
       },
       "UpdateDeliveryStatus": {
         "type": "object",
-        "required": [
-          "status"
-        ],
+        "required": ["status"],
         "properties": {
           "status": {
             "type": "string",
-            "enum": [
-              "FULFILLED",
-              "CANCELLED"
-            ]
+            "enum": ["FULFILLED", "CANCELLED"]
           }
         }
       },

@@ -40,9 +40,7 @@ export function OrdersPage() {
     setBusyId(row.transaction.id);
     try {
       const result = await restoreOrderStock(row.transaction.id);
-      dispatch(
-        setProductStock({ productId: result.productId, stock: result.stock }),
-      );
+      dispatch(setProductStock({ productId: result.productId, stock: result.stock }));
       await refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Restore failed.');

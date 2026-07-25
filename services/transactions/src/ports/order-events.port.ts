@@ -1,8 +1,4 @@
-import type {
-  DeliveryRecord,
-  ProductRecord,
-  TransactionRecord,
-} from '@app/persistence';
+import type { DeliveryRecord, ProductRecord, TransactionRecord } from '@app/persistence';
 
 /** Event published after tx is persisted as APPROVED. */
 export type PaymentApprovedEvent = {
@@ -14,9 +10,7 @@ export type PaymentApprovedEvent = {
 };
 
 export type OrderEventsPublisher = {
-  publishPaymentApproved(
-    event: PaymentApprovedEvent,
-  ): Promise<void>;
+  publishPaymentApproved(event: PaymentApprovedEvent): Promise<void>;
 };
 
 export type PaymentApprovedEffects = {

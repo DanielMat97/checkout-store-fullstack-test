@@ -11,7 +11,12 @@ import {
 import { isMockMode } from '../../mocks/checkoutService';
 import { loadProduct, type Product } from './checkoutApi';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { selectProduct, setPaymentStatus, setProductStock, setStep } from '../../store/checkoutSlice';
+import {
+  selectProduct,
+  setPaymentStatus,
+  setProductStock,
+  setStep,
+} from '../../store/checkoutSlice';
 import './product.css';
 
 export function ProductPage({ embed = false }: { embed?: boolean }) {

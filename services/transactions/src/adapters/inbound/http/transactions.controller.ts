@@ -56,9 +56,10 @@ export class TransactionsController {
     if (result.isErr()) {
       throw domainErrorToHttp({
         type: 'PERSISTENCE_ERROR',
-        message: result.error.type === 'PERSISTENCE_ERROR'
-          ? result.error.message
-          : result.error.type,
+        message:
+          result.error.type === 'PERSISTENCE_ERROR'
+            ? result.error.message
+            : result.error.type,
       });
     }
     return { items: result.value };

@@ -137,10 +137,7 @@ export async function executePay(input: LivePayInput): Promise<PayResult> {
   let stock = input.product.stock;
   if (paid.paymentStatus === 'APPROVED') {
     try {
-      stock = await pollProductStockUntilChanged(
-        input.product.id,
-        input.product.stock,
-      );
+      stock = await pollProductStockUntilChanged(input.product.id, input.product.stock);
     } catch {
       stock = Math.max(0, input.product.stock - 1);
     }

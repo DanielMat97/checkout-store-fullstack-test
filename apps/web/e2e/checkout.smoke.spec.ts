@@ -16,12 +16,19 @@ test.describe('NORA checkout smoke', () => {
 
   test('product page shows stock and pay CTA', async ({ page }) => {
     await page.goto('/');
-    await page.locator('.nora-catalog__hero-hit, .nora-catalog__tile-hit').first().click();
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 30_000 });
+    await page
+      .locator('.nora-catalog__hero-hit, .nora-catalog__tile-hit')
+      .first()
+      .click();
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible({
+      timeout: 30_000,
+    });
     await expect(page.getByText(/\d+\s+(in stock|left)/i).first()).toBeVisible({
       timeout: 15_000,
     });
-    await expect(page.getByRole('button', { name: /pay with credit card/i })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: /pay with credit card/i }),
+    ).toBeVisible();
   });
 
   test('orders console is reachable', async ({ page }) => {
@@ -35,7 +42,11 @@ test.describe('NORA checkout smoke', () => {
   test('checkout happy path reaches status', async ({ page }) => {
     test.setTimeout(180_000);
     await page.goto('/');
-    await page.locator('.nora-catalog__hero-hit, .nora-catalog__tile-hit').first().click();    await page.getByRole('button', { name: /pay with credit card/i }).click();
+    await page
+      .locator('.nora-catalog__hero-hit, .nora-catalog__tile-hit')
+      .first()
+      .click();
+    await page.getByRole('button', { name: /pay with credit card/i }).click();
 
     await page.getByLabel(/^card number$/i).fill('4242424242424242');
     await page.getByLabel(/name on card/i).fill('Ada Lovelace');
@@ -53,7 +64,9 @@ test.describe('NORA checkout smoke', () => {
     await page.getByRole('button', { name: /pay now/i }).click();
 
     await expect(
-      page.getByRole('heading', { name: /approved|declined|confirming|something went wrong/i }),
+      page.getByRole('heading', {
+        name: /approved|declined|confirming|something went wrong/i,
+      }),
     ).toBeVisible({ timeout: 120_000 });
   });
 });

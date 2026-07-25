@@ -126,8 +126,6 @@ describe('RestoreTransactionStockUseCase', () => {
       expect(result.value.transactionStatus).toBe('REFUNDED');
       expect(result.value.deliveryStatus).toBe('CANCELLED');
     }
-    expect((await deliveries.getById('del_1'))._unsafeUnwrap().status).toBe(
-      'CANCELLED',
-    );
+    expect((await deliveries.getById('del_1'))._unsafeUnwrap().status).toBe('CANCELLED');
   });
 });

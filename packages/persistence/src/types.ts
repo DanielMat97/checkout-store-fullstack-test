@@ -1,9 +1,5 @@
 export type TransactionStatus =
-  | 'PENDING'
-  | 'APPROVED'
-  | 'DECLINED'
-  | 'ERROR'
-  | 'REFUNDED';
+  'PENDING' | 'APPROVED' | 'DECLINED' | 'ERROR' | 'REFUNDED';
 export type DeliveryStatus = 'PENDING' | 'FULFILLABLE' | 'FULFILLED' | 'CANCELLED';
 
 export interface ProductRecord {

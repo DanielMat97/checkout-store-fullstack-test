@@ -77,9 +77,7 @@ if (hitFull || functions.length >= 3) {
 
 const result = {
   mode: hitFull ? 'full' : mode,
-  functions: hitFull
-    ? [...Object.keys(SERVICE_DIRS), 'ordersWorker']
-    : expanded,
+  functions: hitFull ? [...Object.keys(SERVICE_DIRS), 'ordersWorker'] : expanded,
   files,
 };
 process.stdout.write(`${JSON.stringify(result)}\n`);

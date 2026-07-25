@@ -31,12 +31,7 @@ describe('PayTransactionUseCase', () => {
       deliveries,
     );
     const publisher = new InProcessOrderEventsPublisher(applyEffects);
-    return new PayTransactionUseCase(
-      transactions,
-      customers,
-      gateway,
-      publisher,
-    );
+    return new PayTransactionUseCase(transactions, customers, gateway, publisher);
   }
 
   async function seedPending() {

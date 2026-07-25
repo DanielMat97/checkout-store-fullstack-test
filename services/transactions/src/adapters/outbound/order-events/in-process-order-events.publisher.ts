@@ -13,9 +13,7 @@ export class InProcessOrderEventsPublisher implements OrderEventsPublisher {
     if (result.isErr()) {
       const e = result.error;
       const message =
-        'message' in e && typeof e.message === 'string'
-          ? e.message
-          : e.type;
+        'message' in e && typeof e.message === 'string' ? e.message : e.type;
       throw new Error(`InProcess order effects failed: ${message}`);
     }
   }
