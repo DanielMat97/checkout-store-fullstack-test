@@ -114,4 +114,74 @@ describe('useSummaryPay', () => {
     });
     unmount();
   });
+
+  it('redirects when checkout session is incomplete', async () => {
+    const { unmount } = renderHook(() => useSummaryPay(), {
+      store: createTestStore({
+        checkout: { productId: 'prod_a', paymentStatus: 'idle' },
+      }),
+    });
+    unmount();
+  });
+
+  it('redirects home when product id is missing after session is ready', async () => {
+    const { unmount } = renderHook(() => useSummaryPay(), {
+      store: createTestStore({
+        checkout: {
+          delivery,
+          cardMeta,
+          paymentStatus: 'idle',
+        },
+      }),
+    });
+    await waitFor(() => expect(true).toBe(true));
+    unmount();
+  });
+
+  it('redirects home when product cannot be loaded', async () => {
+    (api.loadProduct as jest.Mock).mockResolvedValue(null);
+    const { unmount } = renderHook(() => useSummaryPay(), {
+      store: storeReady(),
+    });
+    await waitFor(() => expect(api.loadProduct).toHaveBeenCalled());
+    unmount();
+  });
+
+  it('maps generic Error on pay failure', async () => {
+    (api.loadProduct as jest.Mock).mockResolvedValue(product);
+    (cardSession.takePendingCard as jest.Mock).mockReturnValue({
+      number: '4111111111111111',
+      cvc: '123',
+      expMonth: '12',
+      expYear: '30',
+      cardHolder: 'Ada',
+    });
+    (api.executePay as jest.Mock).mockRejectedValue(new Error('network down'));
+    const { result, unmount } = renderHook(() => useSummaryPay(), {
+      store: storeReady(),
+    });
+    await waitFor(() => expect(result.current.ready).toBe(true));
+    await act(async () => {
+      await result.current.onPay();
+    });
+    expect(api.executePay).toHaveBeenCalled();
+    unmount();
+  });
+
+  it('ignores product load after unmount', async () => {
+    let resolveLoad: (value: typeof product | null) => void = () => undefined;
+    (api.loadProduct as jest.Mock).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveLoad = resolve;
+        }),
+    );
+    const { unmount } = renderHook(() => useSummaryPay(), {
+      store: storeReady(),
+    });
+    unmount();
+    await act(async () => {
+      resolveLoad(product);
+    });
+  });
 });

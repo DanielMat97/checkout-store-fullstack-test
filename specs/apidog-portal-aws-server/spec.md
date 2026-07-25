@@ -13,7 +13,7 @@ Como evaluador, abro el **portal público Apidog** y veo la documentación HTTP 
 
 ## Problema
 
-En [Apidog wompi-test](https://7j6npb6n4w.apidog.io) los ejemplos salían sin base URL / no usaban el HttpApi de AWS. En `openapi.json` el primer `servers[]` era `http://localhost:3000`, y Apidog usa ese como default.
+En el [portal Apidog](https://7j6npb6n4w.apidog.io) los ejemplos salían sin base URL / no usaban el HttpApi de AWS. En `openapi.json` el primer `servers[]` era `http://localhost:3000`, y Apidog usa ese como default.
 
 ## Alcance
 

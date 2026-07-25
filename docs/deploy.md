@@ -106,7 +106,7 @@ aws amplify delete-branch --app-id "$AMPLIFY_APP_ID" --branch-name 'fb-123/check
 
 Smoke: `GET /products` returns seeded catalog (200).
 
-GitHub (`DanielMat97/wompi-test`) variables/secrets for Actions were configured with AWS profile **`stonestore`** (`AWS_*` secrets + `AMPLIFY_APP_ID`, `CORS_ORIGIN`, `AWS_REGION`, `SERVERLESS_STAGE`, `PAYMENT_GATEWAY_MODE=fake`).
+GitHub (`DanielMat97/checkout-store-fullstack-test`) variables/secrets for Actions were configured with AWS profile **`stonestore`** (`AWS_*` secrets + `AMPLIFY_APP_ID`, `CORS_ORIGIN`, `AWS_REGION`, `SERVERLESS_STAGE`, `PAYMENT_GATEWAY_MODE=fake`).
 
 Feature branches are created/updated by `deploy-feature.yml` — you do **not** need to pre-create every `fb-*` branch in Amplify.
 

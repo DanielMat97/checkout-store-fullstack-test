@@ -37,4 +37,17 @@ describe('filterSuggestions', () => {
     const result = filterSuggestions(BOGOTA_AREA_CITIES, 'bog');
     expect(result[0]).toBe('Bogotá');
   });
+
+  it('returns leading options for empty query and includes mid-string hits', () => {
+    expect(filterSuggestions(BOGOTA_AREA_CITIES, '', 3)).toEqual(
+      BOGOTA_AREA_CITIES.slice(0, 3),
+    );
+    const mid = filterSuggestions(BOGOTA_AREA_CITIES, 'candela');
+    expect(mid).toContain('La Candelaria');
+  });
+
+  it('formats short phone prefixes without spaces', () => {
+    expect(formatColombiaPhone('30')).toBe('30');
+    expect(formatColombiaPhone('300')).toBe('300');
+  });
 });

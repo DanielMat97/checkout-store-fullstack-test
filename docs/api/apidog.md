@@ -7,7 +7,7 @@
 **URL del portal (UI Try it / navegación):**  
 [https://7j6npb6n4w.apidog.io](https://7j6npb6n4w.apidog.io)
 
-Ahí está publicada la documentación interactiva (**wompi-test**): products, customers, deliveries, transactions, schemas. Es la cara “Swagger-like” para evaluadores y QA; no sustituye el archivo OpenAPI del repo.
+Ahí está publicada la documentación interactiva del proyecto (**Checkout Store / NORA**): products, customers, deliveries, transactions, schemas. Es la cara “Swagger-like” para evaluadores y QA; no sustituye el archivo OpenAPI del repo.
 
 ## Actualización automática
 

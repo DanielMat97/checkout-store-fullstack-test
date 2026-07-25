@@ -7,7 +7,7 @@
 
 | Workspace | Statements | Branches | Functions | Lines |
 |---|---:|---:|---:|---:|
-| `@app/web` | **94.57** | **82.55** | **97.84** | **95.54** |
+| `@app/web` | **98.36** | **87.58** | **99.46** | **99.13** |
 
 FE collects API, checkout/orders hooks + pure modules, mocks, store, format. Pages (`.tsx`) stay presentational.
 
@@ -18,7 +18,7 @@ FE collects API, checkout/orders hooks + pure modules, mocks, store, format. Pag
 | `@app/products` | **98.48** | **100** | **100** | **98.21** |
 | `@app/customers` | **100** | **84.61** | **100** | **100** |
 | `@app/deliveries` | **100** | **90** | **100** | **100** |
-| `@app/transactions` | **100** | **92.85** | **100** | **100** |
+| `@app/transactions` | **100** | **98.5** | **100** | **100** |
 
 ## Snapshot (shared packages)
 
@@ -34,6 +34,7 @@ FE collects API, checkout/orders hooks + pure modules, mocks, store, format. Pag
 - FE hooks live under `features/*/hooks/` with unit specs via `@testing-library/react` + `src/test/renderHook.tsx`.
 - When `apps/web/` changes, `npm run ci:backend-on-fe` runs Nest test + cov + audit (see `docs/ci-cd.md`).
 - `SandboxPaymentGateway` remains excluded from the transactions **global** threshold.
+- Public GitHub repo: [`DanielMat97/checkout-store-fullstack-test`](https://github.com/DanielMat97/checkout-store-fullstack-test).
 
 ## Reproduce
 

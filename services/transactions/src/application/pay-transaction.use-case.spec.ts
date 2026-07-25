@@ -192,6 +192,32 @@ describe('PayTransactionUseCase', () => {
     ).toBe('NOT_FOUND');
   });
 
+  it('propagates gateway Result errors (charge.isErr)', async () => {
+    const pending = await seedPending();
+    const gateway = {
+      charge: jest
+        .fn()
+        .mockResolvedValue(err({ type: 'PAYMENT_FAILED', message: 'provider down' })),
+    };
+    const pay = new PayTransactionUseCase(
+      transactions,
+      customers,
+      gateway as never,
+      new InProcessOrderEventsPublisher(
+        new ApplyPaymentApprovedEffectsUseCase(transactions, products, deliveries),
+      ),
+    );
+    const result = await pay.execute({
+      transactionId: pending.transaction.id,
+      deliveryId: pending.deliveryId,
+      card,
+    });
+    expect(result.isErr() && result.error).toEqual({
+      type: 'PAYMENT_FAILED',
+      message: 'provider down',
+    });
+  });
+
   it('falls back to saved tx when reload after publish fails', async () => {
     const pending = await seedPending();
     const publisher = {

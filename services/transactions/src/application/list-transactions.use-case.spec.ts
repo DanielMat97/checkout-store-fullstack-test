@@ -17,6 +17,22 @@ describe('ListTransactionsUseCase', () => {
         .mockResolvedValue(err({ type: 'PERSISTENCE_ERROR', message: 'down' })),
     } as never);
     const result = await uc.execute();
-    expect(result.isErr() && result.error.type).toBe('PERSISTENCE_ERROR');
+    expect(result.isErr() && result.error).toEqual({
+      type: 'PERSISTENCE_ERROR',
+      message: 'down',
+    });
+  });
+
+  it('uses error type as message when repo error is not PERSISTENCE_ERROR', async () => {
+    const uc = new ListTransactionsUseCase({
+      listByCreatedAt: jest
+        .fn()
+        .mockResolvedValue(err({ type: 'NOT_FOUND', entity: 'transaction', id: 'x' })),
+    } as never);
+    const result = await uc.execute();
+    expect(result.isErr() && result.error).toEqual({
+      type: 'PERSISTENCE_ERROR',
+      message: 'NOT_FOUND',
+    });
   });
 });

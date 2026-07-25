@@ -1,6 +1,6 @@
 # Current state
 
-> Last updated: **2026-07-25** (README didáctico completo; Apidog + OpenAPI AWS default; score **150/150**)
+> Last updated: **2026-07-24** (auditoría aplicada: repo `checkout-store-fullstack-test`; coverage FE/BE reforzada; Apidog + OpenAPI AWS; score **150/150**)
 
 ## Score (rúbrica brief — modo evaluador estricto)
 

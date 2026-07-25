@@ -1,7 +1,7 @@
 # 🛒 NORA — Checkout Store
 
 Hola 👋 Si llegaste hasta acá a evaluar la prueba: **gracias**. Este README es la charla rápida (sin novelas de tablas).  
-Rúbrica hiring bar: **150/150** → [`docs/scorecard.md`](docs/scorecard.md) · foto del estado → [`docs/current-state.md`](docs/current-state.md).
+Repo público: [`DanielMat97/checkout-store-fullstack-test`](https://github.com/DanielMat97/checkout-store-fullstack-test) · Rúbrica hiring bar: **150/150** → [`docs/scorecard.md`](docs/scorecard.md) · foto del estado → [`docs/current-state.md`](docs/current-state.md).
 
 ---
 

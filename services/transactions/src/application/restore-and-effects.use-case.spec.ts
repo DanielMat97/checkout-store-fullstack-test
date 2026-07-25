@@ -275,6 +275,35 @@ describe('RestoreTransactionStockUseCase', () => {
       )._unsafeUnwrapErr().type,
     ).toBe('NOT_FOUND');
 
+    const bareNotFound = {
+      ...products,
+      getById: products.getById.bind(products),
+      incrementStock: async () => err({ type: 'NOT_FOUND' as const }),
+    };
+    expect(
+      (
+        await new RestoreTransactionStockUseCase(
+          transactions,
+          bareNotFound as never,
+          deliveries,
+        ).execute('tx_1')
+      )._unsafeUnwrapErr(),
+    ).toEqual({ type: 'NOT_FOUND', entity: 'unknown', id: '' });
+
+    const barePersistence = {
+      getById: deliveries.getById.bind(deliveries),
+      put: async () => err({ type: 'PERSISTENCE_ERROR' as const }),
+    };
+    expect(
+      (
+        await new RestoreTransactionStockUseCase(
+          transactions,
+          products,
+          barePersistence as never,
+        ).execute('tx_1')
+      )._unsafeUnwrapErr(),
+    ).toEqual({ type: 'PERSISTENCE_ERROR', message: 'Persistence error' });
+
     const { products: p2, deliveries: d2, transactions: t2 } = await seedApproved();
     const failingPut = {
       getById: d2.getById.bind(d2),
