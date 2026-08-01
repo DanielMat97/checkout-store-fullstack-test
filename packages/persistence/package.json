@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.787.0",
-    "@aws-sdk/lib-dynamodb": "^3.787.0",
+    "@aws-sdk/lib-dynamodb": "^3.1097.0",
     "electrodb": "^3.4.1",
     "neverthrow": "^8.2.0"
   },
